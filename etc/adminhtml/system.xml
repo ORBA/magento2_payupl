@@ -16,6 +16,10 @@
                 <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Title</label>
                 </field>
+                <field id="allowed_carriers" translate="label" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Allowed Shipping Methods</label>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
+                </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Sort Order</label>
                     <frontend_class>validate-number</frontend_class>

@@ -37,14 +37,29 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
     
     public function testIsAvailableNotActive()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn(0);
+        $this->_expectConfigActive(false);
         $this->assertFalse($this->_model->isAvailable($this->_getQuoteMock()));
     }
     
-    public function testIsAvailableActive()
+    public function testIsAvailableActiveAllowedCarrier()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn(1);
-        $this->assertTrue($this->_model->isAvailable($this->_getQuoteMock()));
+        $this->_expectConfigActive(true);
+        $shippingMethod = 'flatrate_flatrate';
+        $this->_expectShippingMethodConfig($shippingMethod);
+        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethod);
+        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
+        $this->assertTrue($this->_model->isAvailable($quote));
+    }
+
+    public function testIsAvailableActiveNotAllowedCarrier()
+    {
+        $this->_expectConfigActive(true);
+        $shippingMethodConfig = 'flatrate_flatrate';
+        $shippingMethodAddress = 'tablerate_tablerate';
+        $this->_expectShippingMethodConfig($shippingMethodConfig);
+        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethodAddress);
+        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
+        $this->assertFalse($this->_model->isAvailable($quote));
     }
 
     /**
@@ -55,5 +70,53 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         return $this->getMockBuilder(\Magento\Quote\Api\Data\CartInterface::class)
             ->setMethods(['getStoreId'])
             ->getMockForAbstractClass();
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getShippingAddressMock()
+    {
+        return $this->getMockBuilder(\Magento\Quote\Api\Data\AddressInterface::class)
+            ->setMethods(['getShippingMethod'])
+            ->getMockForAbstractClass();
+    }
+
+    /**
+     * @param bool $isActive
+     */
+    protected function _expectConfigActive($isActive)
+    {
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn((int) $isActive);
+    }
+
+    /**
+     * @param string $shippingMethod
+     */
+    protected function _expectShippingMethodConfig($shippingMethod)
+    {
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->willReturn($shippingMethod);
+    }
+
+    /**
+     * @param $shippingMethod
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getShippingAddressMockWithShippingMethod($shippingMethod)
+    {
+        $shippingAddress = $this->_getShippingAddressMock();
+        $shippingAddress->expects($this->any())->method('getShippingMethod')->willReturn($shippingMethod);
+        return $shippingAddress;
+    }
+
+    /**
+     * @param $shippingAddress
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getQuoteMockWithShippingAddress($shippingAddress)
+    {
+        $quote = $this->_getQuoteMock();
+        $quote->expects($this->any())->method('getShippingAddress')->willReturn($shippingAddress);
+        return $quote;
     }
 }

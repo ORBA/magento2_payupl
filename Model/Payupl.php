@@ -13,11 +13,27 @@ class Payupl extends AbstractMethod
 
     protected $_isOffline = true;
 
+    /**
+     * Check whether payment method can be used
+     *
+     * @param \Magento\Quote\Api\Data\CartInterface|null $quote
+     * @return bool
+     */
     public function isAvailable($quote = null)
     {
         if (is_null($quote)) {
             return false;
         }
-        return parent::isAvailable($quote);
+        return parent::isAvailable($quote) && $this->_isCarrierAllowed($quote->getShippingAddress()->getShippingMethod());
+    }
+
+    /**
+     * @param string $shippingMethod
+     * @return bool
+     */
+    protected function _isCarrierAllowed($shippingMethod)
+    {
+        $allowedCarriers = explode(',', $this->getConfigData('allowed_carriers'));
+        return in_array($shippingMethod, $allowedCarriers);
     }
 }
