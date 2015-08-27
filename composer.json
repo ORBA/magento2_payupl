@@ -1,0 +1,32 @@
+{
+    "name": "orba/magento2-payupl",
+    "description": "Payu.pl integration for Magento 2",
+    "require": {
+        "php": "~5.5.0|~5.6.0",
+        "magento/module-checkout": "1.0.0-beta",
+        "magento/module-payment": "1.0.0-beta",
+        "magento/framework": "1.0.0-beta",
+        "magento/magento-composer-installer": "*",
+        "openpayu/openpayu": "2.1.*"
+    },
+    "type": "magento2-module",
+    "version": "master",
+    "dist": {
+        "url": "git@git.assembla.com:orba-magento-plugins.magento2-payupl.git",
+        "type": "git"
+    },
+    "extra": {
+        "map": [
+            [
+                "*",
+                "Orba/Payupl"
+            ]
+        ]
+    },
+    "authors": [
+        {
+            "name": "Orba Sp. z o.o.",
+            "homepage": "http://orba.pl/"
+        }
+    ]
+}
