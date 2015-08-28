@@ -74,4 +74,29 @@ class Client
             'signature_key' => \OpenPayU_Configuration::getSignatureKey()
         ];
     }
+
+    public function order(array $data = [])
+    {
+        if (!isset($data) || empty($data)) {
+            throw new Exception('Order request data array is empty.');
+        }
+        foreach ($this->_getRequiredOrderDataArrayKeys() as $key) {
+            if (!isset($data[$key]) || empty($data[$key])) {
+                throw new Exception('Order request data array basic element "' . $key . '" is missing.');
+            }
+        }
+        $this->setConfig();
+    }
+
+    protected function _getRequiredOrderDataArrayKeys()
+    {
+        return [
+            'continueUrl',
+            'notifyUrl',
+            'description',
+            'currencyCode',
+            'totalAmount',
+            'extOrderId'
+        ];
+    }
 }
