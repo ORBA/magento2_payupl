@@ -13,10 +13,18 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Title</label>
                 </field>
-                <field id="allowed_carriers" translate="label" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="merchant_pos_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Merchant POS ID</label>
+                    <comment>Copy the value of POS ID (pos_id) parameter from your POS configuration in Payu.pl panel</comment>
+                </field>
+                <field id="signature_key" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Signature Key</label>
+                    <comment>Copy the value of Second key (MD5) parameter from your POS configuration in Payu.pl panel</comment>
+                </field>
+                <field id="allowed_carriers" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Allowed Shipping Methods</label>
                     <source_model>Magento\Shipping\Model\Config\Source\Allmethods</source_model>
                 </field>

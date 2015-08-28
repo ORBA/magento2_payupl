@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Model;
 
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+
 class PayuplTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -19,8 +21,8 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $objectManagerHelper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_scopeConfig = $this->getMock('Magento\Framework\App\Config\ScopeConfigInterface', [], [], '', false);
+        $objectManagerHelper = new ObjectManager($this);
+        $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
         $this->_model = $objectManagerHelper->getObject(
             \Orba\Payupl\Model\Payupl::class,
             [
