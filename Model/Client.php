@@ -23,13 +23,21 @@ class Client
     protected $_scopeConfig;
 
     /**
+     * @var Client\Order $orderDataHelper
+     */
+    protected $_orderDataHelper;
+
+    /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param Client\Order $orderDataHelper
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        \Orba\Payupl\Model\Client\Order $orderDataHelper
     )
     {
         $this->_scopeConfig = $scopeConfig;
+        $this->_orderDataHelper = $orderDataHelper;
     }
 
     /**
@@ -77,26 +85,22 @@ class Client
 
     public function order(array $data = [])
     {
-        if (!isset($data) || empty($data)) {
-            throw new Exception('Order request data array is empty.');
-        }
-        foreach ($this->_getRequiredOrderDataArrayKeys() as $key) {
-            if (!isset($data[$key]) || empty($data[$key])) {
-                throw new Exception('Order request data array basic element "' . $key . '" is missing.');
-            }
+        if (!$this->_orderDataHelper->validate($data)) {
+            throw new Exception('Order request data array is invalid.');
         }
         $this->setConfig();
+        $data = $this->_orderDataHelper->addSpecialData($data);
     }
 
-    protected function _getRequiredOrderDataArrayKeys()
+
+
+    protected function _extendOrderData(array $data)
     {
-        return [
-            'continueUrl',
-            'notifyUrl',
-            'description',
-            'currencyCode',
-            'totalAmount',
-            'extOrderId'
-        ];
+        return array_merge($data, [
+            'continueUrl' => $this->_orderDataHelper->getContinueUrl(),
+            'notifyUrl' => '',
+            'customerIp' => '',
+            'merchantPosId' => ''
+        ]);
     }
 }

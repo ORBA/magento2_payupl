@@ -6,21 +6,12 @@
 namespace Orba\Payupl\Model;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Zend\Server\Reflection\ReflectionClass;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
     const EXEMPLARY_MERCHANT_POS_ID = '145227';
     const EXEMPLARY_SIGNATURE_KEY = '13a980d4f851f3d9a1cfc792fb1f5e50';
 
-    protected $_exemplaryOrderBasicData = [
-        'continueUrl' => 'http://localhost/',
-        'notifyUrl' => 'http://localhost/',
-        'description' => 'New order',
-        'currencyCode' => 'PLN',
-        'totalAmount' => 999,
-        'extOrderId' => '10000001'
-    ];
     /**
      * @var \Orba\Payupl\Model\Client
      */
@@ -31,14 +22,21 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      */
     protected $_scopeConfig;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_orderDataHelper;
+
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
+        $this->_orderDataHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Order::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
             \Orba\Payupl\Model\Client::class,
             [
-                'scopeConfig' => $this->_scopeConfig
+                'scopeConfig' => $this->_scopeConfig,
+                'orderDataHelper' => $this->_orderDataHelper
             ]
         );
     }
@@ -80,33 +78,24 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->_model->setConfig();
     }
 
-    public function testOrderNoData()
+    public function testOrderInvalidData()
     {
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Order request data array is empty.');
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Order request data array is invalid.');
+        $this->_orderDataHelper->expects($this->once())->method('validate')->willReturn(false);
+        $this->_model->order();
+    }
+
+    public function testOrderValidData()
+    {
+        $this->_orderDataHelper->expects($this->once())->method('validate')->willReturn(true);
+        $this->_orderDataHelper->expects($this->once())->method('addSpecialData');
+        $this->_expectCorrectConfig();
         $this->_model->order();
     }
     
-    public function testOrderBasicDataMissing()
-    {
-        $data = $this->_exemplaryOrderBasicData;
-        $exceptionCount = 0;
-        foreach ($data as $key => $value) {
-            try {
-                $missingData = array_diff_key($data, [$key => $value]);
-                $this->_model->order($missingData);
-            } catch (\Orba\Payupl\Model\Client\Exception $e) {
-                if ($e->getMessage() === 'Order request data array basic element "' . $key . '" is missing.') {
-                    $exceptionCount++;
-                }
-            }
-        }
-        $this->assertEquals($exceptionCount, count($data));
-    }
-
     protected function _expectCorrectConfig()
     {
         $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
         $this->_scopeConfig->expects($this->at(1))->method('getValue')->willReturn(self::EXEMPLARY_SIGNATURE_KEY);
     }
-
 }
