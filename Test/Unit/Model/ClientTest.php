@@ -9,9 +9,6 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
-    const EXEMPLARY_MERCHANT_POS_ID = '145227';
-    const EXEMPLARY_SIGNATURE_KEY = '13a980d4f851f3d9a1cfc792fb1f5e50';
-
     /**
      * @var \Orba\Payupl\Model\Client
      */
@@ -25,57 +22,31 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
+    protected $_configSetter;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $_orderDataHelper;
+
+    /**
+     * @var ObjectManager
+     */
+    protected $_objectManagerHelper;
 
     public function setUp()
     {
-        $objectManagerHelper = new ObjectManager($this);
-        $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
+        $this->_objectManagerHelper = new ObjectManager($this);
+        $this->_configSetter = $this->getMockBuilder(\Orba\Payupl\Model\Client\Config::class)->disableOriginalConstructor()->getMock();
         $this->_orderDataHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_model = $objectManagerHelper->getObject(
-            \Orba\Payupl\Model\Client::class,
-            [
-                'scopeConfig' => $this->_scopeConfig,
-                'orderDataHelper' => $this->_orderDataHelper
-            ]
-        );
+        $this->_model = $this->_getModel();
     }
 
-    public function testSetConfigUnset()
+    public function testSetConfigInConstructor()
     {
-        $this->_expectCorrectConfig();
-        $this->assertFalse($this->_model->isConfigSet());
-        $this->assertTrue($this->_model->setConfig());
-        $this->assertTrue($this->_model->isConfigSet());
-        $this->assertEquals($this->_model->getCurrentConfigFromSDK(), [
-            'merchant_pos_id' => self::EXEMPLARY_MERCHANT_POS_ID,
-            'signature_key' => self::EXEMPLARY_SIGNATURE_KEY
-        ]);
-    }
-
-    public function testSetConfigAlreadySet()
-    {
-        $this->_scopeConfig->expects($this->exactly(0))->method('getValue');
-        $reflection = new \ReflectionClass($this->_model);
-        $reflectionProperty = $reflection->getProperty('_isConfigSet');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($this->_model, true);
-        $this->assertTrue($this->_model->setConfig());
-    }
-
-    public function testSetConfigMerchantPosIdEmpty()
-    {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn('');
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Merchant POS ID is empty.');
-        $this->_model->setConfig();
-    }
-
-    public function testSetConfigSignatureKeyEmpty()
-    {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->willReturn('');
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Signature key is empty.');
-        $this->_model->setConfig();
+        $this->_configSetter->expects($this->once())->method('setConfig')->willReturn(true);
+        // This will run constructor.
+        $this->_getModel();
     }
 
     public function testOrderInvalidData()
@@ -89,13 +60,20 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $this->_orderDataHelper->expects($this->once())->method('validate')->willReturn(true);
         $this->_orderDataHelper->expects($this->once())->method('addSpecialData');
-        $this->_expectCorrectConfig();
         $this->_model->order();
     }
     
-    protected function _expectCorrectConfig()
+    /**
+     * @return object
+     */
+    protected function _getModel()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->willReturn(self::EXEMPLARY_SIGNATURE_KEY);
+        return $this->_objectManagerHelper->getObject(
+            \Orba\Payupl\Model\Client::class,
+            [
+                'configSetter' => $this->_configSetter,
+                'orderDataHelper' => $this->_orderDataHelper
+            ]
+        );
     }
 }
