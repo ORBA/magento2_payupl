@@ -38,8 +38,12 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateEmpty()
     {
-        $this->assertFalse($this->_model->validateEmpty());
+        $this->assertFalse($this->_model->validateEmpty(null));
+        $this->assertFalse($this->_model->validateEmpty(false));
+        $this->assertFalse($this->_model->validateEmpty(''));
         $this->assertFalse($this->_model->validateEmpty([]));
+        $this->assertTrue($this->_model->validateEmpty(true));
+        $this->assertTrue($this->_model->validateEmpty('notempty'));
         $this->assertTrue($this->_model->validateEmpty(['notempty' => true]));
     }
 

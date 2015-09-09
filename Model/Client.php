@@ -42,11 +42,28 @@ class Client
      */
     public function orderCreate(array $data = [])
     {
-        if (!$this->_orderHelper->validate($data)) {
+        if (!$this->_orderHelper->validateCreate($data)) {
             throw new Exception('Order request data array is invalid.');
         }
         $data = $this->_orderHelper->addSpecialData($data);
         $result = $this->_orderHelper->create($data);
+        if (!$result) {
+            throw new Exception('There was a problem while processing order request.');
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $id
+     * @return bool|\OpenPayU_Result
+     * @throws Exception
+     */
+    public function orderRetrieve($id)
+    {
+        if (!$this->_orderHelper->validateRetrieve($id)) {
+            throw new Exception('Order ID is empty.');
+        }
+        $result = $this->_orderHelper->retrieve($id);
         if (!$result) {
             throw new Exception('There was a problem while processing order request.');
         }

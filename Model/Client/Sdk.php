@@ -16,4 +16,14 @@ class Sdk
     {
         return \OpenPayU_Order::create($data);
     }
+
+    /**
+     * @param string $id
+     * @return \OpenPayU_Result
+     * @throws \OpenPayU_Exception
+     */
+    public function orderRetrieve($id)
+    {
+        return \OpenPayU_Order::retrieve($id);
+    }
 }

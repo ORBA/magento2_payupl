@@ -25,10 +25,10 @@ class DataValidator
     ];
 
     /**
-     * @param array $data
+     * @param mixed $data
      * @return bool
      */
-    public function validateEmpty(array $data = [])
+    public function validateEmpty($data)
     {
         return !empty($data);
     }

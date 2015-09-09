@@ -52,34 +52,34 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testValidationFailedEmpty()
+    public function testValidateCreateFailedEmpty()
     {
         $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
-        $this->assertFalse($this->_model->validate());
+        $this->assertFalse($this->_model->validateCreate());
     }
 
-    public function testValidationFailedInvalidBasicData()
+    public function testValidateCreateFailedInvalidBasicData()
     {
         $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
         $this->_dataValidator->expects($this->once())->method('validateBasicData')->willReturn(false);
-        $this->assertFalse($this->_model->validate());
+        $this->assertFalse($this->_model->validateCreate());
     }
 
-    public function testValidationFailedInvalidProductsData()
+    public function testValidateCreateFailedInvalidProductsData()
     {
         $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
         $this->_dataValidator->expects($this->once())->method('validateBasicData')->willReturn(true);
         $this->_dataValidator->expects($this->once())->method('validateProductsData')->willReturn(false);
-        $this->assertFalse($this->_model->validate());
+        $this->assertFalse($this->_model->validateCreate());
     }
 
-    public function testValidationSuccess()
+    public function testValidateCreateSuccess()
     {
         $data = ['data'];
         $this->_dataValidator->expects($this->once())->method('validateEmpty')->with($this->equalTo($data))->willReturn(true);
         $this->_dataValidator->expects($this->once())->method('validateBasicData')->with($this->equalTo($data))->willReturn(true);
         $this->_dataValidator->expects($this->once())->method('validateProductsData')->with($this->equalTo($data))->willReturn(true);
-        $this->assertTrue($this->_model->validate($data));
+        $this->assertTrue($this->_model->validateCreate($data));
     }
 
     public function testDataAdder()
@@ -98,7 +98,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('customerIp', $extendedData);
         $this->assertArrayHasKey('merchantPosId', $extendedData);
     }
-    
+
     public function testCreateSuccess()
     {
         $data = ['data'];
@@ -114,6 +114,29 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_sdk->expects($this->once())->method('orderCreate')->will($this->throwException($exception));
         $this->_logger->expects($this->once())->method('critical')->with($exception);
         $this->assertFalse($this->_model->create($data));
+    }
+
+    public function testValidateRetrieveFailedEmpty()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
+        $this->assertFalse($this->_model->validateRetrieve(''));
+    }
+
+    public function testRetrieveSuccess()
+    {
+        $id = '123456';
+        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+        $this->_sdk->expects($this->once())->method('orderRetrieve')->with($this->equalTo($id))->willReturn($result);
+        $this->assertEquals($result, $this->_model->retrieve($id));
+    }
+
+    public function testRetrieveFail()
+    {
+        $id = '123456';
+        $exception = new \Exception();
+        $this->_sdk->expects($this->once())->method('orderRetrieve')->will($this->throwException($exception));
+        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->assertFalse($this->_model->retrieve($id));
     }
 
 }

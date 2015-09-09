@@ -50,12 +50,17 @@ class Order
      * @param array $data
      * @return bool
      */
-    public function validate(array $data = [])
+    public function validateCreate(array $data = [])
     {
         return
             $this->_dataValidator->validateEmpty($data) &&
             $this->_dataValidator->validateBasicData($data) &&
             $this->_dataValidator->validateProductsData($data);
+    }
+
+    public function validateRetrieve($id)
+    {
+        return $this->_dataValidator->validateEmpty($id);
     }
 
     /**
@@ -78,8 +83,27 @@ class Order
      */
     public function create(array $data)
     {
+        return $this->_callSdkMethod('orderCreate', $data);
+    }
+
+    /**
+     * @param string $id
+     * @return bool|\OpenPayU_Result
+     */
+    public function retrieve($id)
+    {
+        return $this->_callSdkMethod('orderRetrieve', $id);
+    }
+
+    /**
+     * @param $method
+     * @param mixed $data
+     * @return bool|\OpenPayU_Result
+     */
+    protected function _callSdkMethod($method, $data)
+    {
         try {
-            return $this->_sdk->orderCreate($data);
+            return $this->_sdk->{$method}($data);
         } catch (\Exception $e) {
             $this->_logger->critical($e);
             return false;
