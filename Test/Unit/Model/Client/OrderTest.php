@@ -139,4 +139,27 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->retrieve($id));
     }
 
+    public function testValidateCancelFailedEmpty()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
+        $this->assertFalse($this->_model->validateCancel(''));
+    }
+
+    public function testCancelSuccess()
+    {
+        $id = '123456';
+        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+        $this->_sdk->expects($this->once())->method('orderCancel')->with($this->equalTo($id))->willReturn($result);
+        $this->assertEquals($result, $this->_model->cancel($id));
+    }
+
+    public function testCancelFail()
+    {
+        $id = '123456';
+        $exception = new \Exception();
+        $this->_sdk->expects($this->once())->method('orderCancel')->will($this->throwException($exception));
+        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->assertFalse($this->_model->cancel($id));
+    }
+
 }

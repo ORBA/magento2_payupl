@@ -48,7 +48,7 @@ class Client
         $data = $this->_orderHelper->addSpecialData($data);
         $result = $this->_orderHelper->create($data);
         if (!$result) {
-            throw new Exception('There was a problem while processing order request.');
+            throw new Exception('There was a problem while processing order create request.');
         }
         return $result;
     }
@@ -61,11 +61,28 @@ class Client
     public function orderRetrieve($id)
     {
         if (!$this->_orderHelper->validateRetrieve($id)) {
-            throw new Exception('Order ID is empty.');
+            throw new Exception('ID of order to retrieve is empty.');
         }
         $result = $this->_orderHelper->retrieve($id);
         if (!$result) {
-            throw new Exception('There was a problem while processing order request.');
+            throw new Exception('There was a problem while processing order retrieve request.');
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $id
+     * @return bool|\OpenPayU_Result
+     * @throws Exception
+     */
+    public function orderCancel($id)
+    {
+        if (!$this->_orderHelper->validateCancel($id)) {
+            throw new Exception('ID of order to cancel is empty.');
+        }
+        $result = $this->_orderHelper->cancel($id);
+        if (!$result) {
+            throw new Exception('There was a problem while processing order cancel request.');
         }
         return $result;
     }

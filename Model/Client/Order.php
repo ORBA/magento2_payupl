@@ -58,7 +58,20 @@ class Order
             $this->_dataValidator->validateProductsData($data);
     }
 
+    /**
+     * @param string $id
+     * @return bool
+     */
     public function validateRetrieve($id)
+    {
+        return $this->_dataValidator->validateEmpty($id);
+    }
+
+    /**
+     * @param string $id
+     * @return bool
+     */
+    public function validateCancel($id)
     {
         return $this->_dataValidator->validateEmpty($id);
     }
@@ -93,6 +106,15 @@ class Order
     public function retrieve($id)
     {
         return $this->_callSdkMethod('orderRetrieve', $id);
+    }
+
+    /**
+     * @param string $id
+     * @return bool|\OpenPayU_Result
+     */
+    public function cancel($id)
+    {
+        return $this->_callSdkMethod('orderCancel', $id);
     }
 
     /**

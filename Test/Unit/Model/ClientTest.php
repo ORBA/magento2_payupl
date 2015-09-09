@@ -60,7 +60,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $data = ['data'];
         $dataExtended = ['data_extended'];
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order request.');
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order create request.');
         $this->_orderHelper->expects($this->once())->method('validateCreate')->willReturn(true);
         $this->_orderHelper->expects($this->once())->method('addSpecialData')->with($this->equalTo($data))->willReturn($dataExtended);
         $this->_orderHelper->expects($this->once())->method('create')->with($this->equalTo($dataExtended))->willReturn(false);
@@ -80,7 +80,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     
     public function testOrderRetrieveEmptyId()
     {
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Order ID is empty.');
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'ID of order to retrieve is empty.');
         $this->_orderHelper->expects($this->once())->method('validateRetrieve')->willReturn(false);
         $this->_model->orderRetrieve('');
     }
@@ -88,7 +88,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderRetrieveFail()
     {
         $id = '123456';
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order request.');
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order retrieve request.');
         $this->_orderHelper->expects($this->once())->method('validateRetrieve')->willReturn(true);
         $this->_orderHelper->expects($this->once())->method('retrieve')->with($this->equalTo($id))->willReturn(false);
         $this->_model->orderRetrieve($id);
@@ -102,7 +102,33 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->_orderHelper->expects($this->once())->method('retrieve')->with($this->equalTo($id))->willReturn($result);
         $this->assertEquals($result, $this->_model->orderRetrieve($id));
     }
-    
+
+    public function testOrderCancelEmptyId()
+    {
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'ID of order to cancel is empty.');
+        $this->_orderHelper->expects($this->once())->method('validateCancel')->willReturn(false);
+        $this->_model->orderCancel('');
+    }
+
+    public function testOrderCancelFail()
+    {
+        $id = '123456';
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order cancel request.');
+        $this->_orderHelper->expects($this->once())->method('validateCancel')->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('cancel')->with($this->equalTo($id))->willReturn(false);
+        $this->_model->orderCancel($id);
+    }
+
+    public function testOrderCancelSuccess()
+    {
+        $id = '123456';
+        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+        $this->_orderHelper->expects($this->once())->method('validateCancel')->with($this->equalTo($id))->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('cancel')->with($this->equalTo($id))->willReturn($result);
+        $this->assertEquals($result, $this->_model->orderCancel($id));
+    }
+
+
     /**
      * @return object
      */

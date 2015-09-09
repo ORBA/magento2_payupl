@@ -26,4 +26,14 @@ class Sdk
     {
         return \OpenPayU_Order::retrieve($id);
     }
+
+    /**
+     * @param string $id
+     * @return \OpenPayU_Result
+     * @throws \OpenPayU_Exception
+     */
+    public function orderCancel($id)
+    {
+        return \OpenPayU_Order::cancel($id);
+    }
 }
