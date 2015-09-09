@@ -47,13 +47,19 @@ class Config
     }
 
     /**
+     * @param string $key
      * @return array
      */
-    public function getConfig()
+    public function getConfig($key = null)
     {
-        return [
+        $config = [
             'merchant_pos_id' => \OpenPayU_Configuration::getMerchantPosId(),
             'signature_key' => \OpenPayU_Configuration::getSignatureKey()
         ];
+        if ($key) {
+            return $config[$key];
+        }
+        return $config;
     }
+
 }

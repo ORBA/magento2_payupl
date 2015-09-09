@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <type name="Orba\Payupl\Logger\Handler\Exception">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Orba\Payupl\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">orba_payupl</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="exception" xsi:type="object">Orba\Payupl\Logger\Handler\Exception</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

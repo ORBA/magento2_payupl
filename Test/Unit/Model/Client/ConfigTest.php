@@ -29,12 +29,20 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetConfig()
+    public function testGetConfigWhole()
     {
-        $config = $this->_model->getConfig();
-        $this->assertInternalType('array', $config);
-        $this->assertArrayHasKey('merchant_pos_id', $config);
-        $this->assertArrayHasKey('signature_key', $config);
+        $result = $this->_model->getConfig();
+        $this->assertInternalType('array', $result);
+        $this->assertArrayHasKey('merchant_pos_id', $result);
+        $this->assertArrayHasKey('signature_key', $result);
+    }
+
+    public function testGetConfigByKey()
+    {
+        $key = 'merchant_pos_id';
+        $resultWhole = $this->_model->getConfig();
+        $result = $this->_model->getConfig($key);
+        $this->assertEquals($resultWhole[$key], $result);
     }
 
     public function testSetConfigSuccess()

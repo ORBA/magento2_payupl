@@ -18,18 +18,38 @@ class Order
     protected $_dataAdder;
 
     /**
+     * @var Sdk
+     */
+    protected $_sdk;
+
+    /**
+     * @var \Orba\Payupl\Logger\Logger
+     */
+    protected $_logger;
+
+    /**
      * @param Order\DataValidator $dataValidator
      * @param Order\DataAdder $dataAdder
+     * @param Sdk $sdk
+     * @param \Orba\Payupl\Logger\Logger $logger
      */
     public function __construct(
-        \Orba\Payupl\Model\Client\Order\DataValidator $dataValidator,
-        \Orba\Payupl\Model\Client\Order\DataAdder $dataAdder
+        Order\DataValidator $dataValidator,
+        Order\DataAdder $dataAdder,
+        Sdk $sdk,
+        \Orba\Payupl\Logger\Logger $logger
     )
     {
         $this->_dataValidator = $dataValidator;
         $this->_dataAdder = $dataAdder;
+        $this->_sdk = $sdk;
+        $this->_logger = $logger;
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     */
     public function validate(array $data = [])
     {
         return
@@ -38,6 +58,10 @@ class Order
             $this->_dataValidator->validateProductsData($data);
     }
 
+    /**
+     * @param array $data
+     * @return array
+     */
     public function addSpecialData(array $data = [])
     {
         return array_merge($data, [
@@ -46,5 +70,19 @@ class Order
             'customerIp' => $this->_dataAdder->getCustomerIp(),
             'merchantPosId' => $this->_dataAdder->getMerchantPosId()
         ]);
+    }
+
+    /**
+     * @param array $data
+     * @return \OpenPayU_Result|bool
+     */
+    public function create(array $data)
+    {
+        try {
+            return $this->_sdk->orderCreate($data);
+        } catch (\Exception $e) {
+            $this->_logger->critical($e);
+            return false;
+        }
     }
 }

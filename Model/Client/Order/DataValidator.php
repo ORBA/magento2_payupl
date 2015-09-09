@@ -12,6 +12,7 @@ class DataValidator
         'unitPrice',
         'quantity'
     ];
+
     /**
      * @var array
      */

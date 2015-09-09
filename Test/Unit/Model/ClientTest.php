@@ -22,12 +22,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_configSetter;
+    protected $_configHelper;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_orderDataHelper;
+    protected $_orderHelper;
 
     /**
      * @var ObjectManager
@@ -37,30 +37,45 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_objectManagerHelper = new ObjectManager($this);
-        $this->_configSetter = $this->getMockBuilder(\Orba\Payupl\Model\Client\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_orderDataHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Config::class)->disableOriginalConstructor()->getMock();
+        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Order::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->_getModel();
     }
 
     public function testSetConfigInConstructor()
     {
-        $this->_configSetter->expects($this->once())->method('setConfig')->willReturn(true);
+        $this->_configHelper->expects($this->once())->method('setConfig')->willReturn(true);
         // This will run constructor.
         $this->_getModel();
     }
 
-    public function testOrderInvalidData()
+    public function testOrderCreateInvalidData()
     {
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Order request data array is invalid.');
-        $this->_orderDataHelper->expects($this->once())->method('validate')->willReturn(false);
-        $this->_model->order();
+        $this->_orderHelper->expects($this->once())->method('validate')->willReturn(false);
+        $this->_model->orderCreate();
     }
 
-    public function testOrderValidData()
+    public function testOrderCreateFail()
     {
-        $this->_orderDataHelper->expects($this->once())->method('validate')->willReturn(true);
-        $this->_orderDataHelper->expects($this->once())->method('addSpecialData');
-        $this->_model->order();
+        $data = ['data'];
+        $dataExtended = ['data_extended'];
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order request.');
+        $this->_orderHelper->expects($this->once())->method('validate')->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('addSpecialData')->with($this->equalTo($data))->willReturn($dataExtended);
+        $this->_orderHelper->expects($this->once())->method('create')->with($this->equalTo($dataExtended))->willReturn(false);
+        $this->_model->orderCreate($data);
+    }
+
+    public function testOrderCreateSuccess()
+    {
+        $data = ['data'];
+        $dataExtended = ['data_extended'];
+        $result = ['result'];
+        $this->_orderHelper->expects($this->once())->method('validate')->with($this->equalTo($data))->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('addSpecialData')->with($this->equalTo($data))->willReturn($dataExtended);
+        $this->_orderHelper->expects($this->once())->method('create')->with($this->equalTo($dataExtended))->willReturn($result);
+        $this->assertEquals($result, $this->_model->orderCreate($data));
     }
     
     /**
@@ -71,8 +86,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         return $this->_objectManagerHelper->getObject(
             \Orba\Payupl\Model\Client::class,
             [
-                'configSetter' => $this->_configSetter,
-                'orderDataHelper' => $this->_orderDataHelper
+                'configHelper' => $this->_configHelper,
+                'orderHelper' => $this->_orderHelper
             ]
         );
     }

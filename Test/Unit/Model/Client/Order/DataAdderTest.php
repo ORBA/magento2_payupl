@@ -20,6 +20,11 @@ class DataAdderTest extends \PHPUnit_Framework_TestCase
     protected $_urlBuilder;
 
     /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_configHelper;
+
+    /**
      * @var \Magento\Framework\View\Context
      */
     protected $_context;
@@ -28,6 +33,7 @@ class DataAdderTest extends \PHPUnit_Framework_TestCase
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
+        $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Config::class)->disableOriginalConstructor()->getMock();
         $this->_context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
             ['urlBuilder' => $this->_urlBuilder]
@@ -35,7 +41,8 @@ class DataAdderTest extends \PHPUnit_Framework_TestCase
         $this->_model = $objectManagerHelper->getObject(
             \Orba\Payupl\Model\Client\Order\DataAdder::class,
             [
-                'context' => $this->_context
+                'context' => $this->_context,
+                'configHelper' => $this->_configHelper
             ]
         );
     }
@@ -67,6 +74,8 @@ class DataAdderTest extends \PHPUnit_Framework_TestCase
 
     public function testMerchantPosId()
     {
-        $this->markTestSkipped();
+        $merchantPosId = '123456';
+        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('merchant_pos_id'))->willReturn($merchantPosId);
+        $this->assertEquals($merchantPosId, $this->_model->getMerchantPosId());
     }
 }
