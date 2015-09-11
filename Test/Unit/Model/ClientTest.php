@@ -71,7 +71,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $data = ['data'];
         $dataExtended = ['data_extended'];
-        $result = ['result'];
+        $result = $this->_getResultMock();
         $this->_orderHelper->expects($this->once())->method('validateCreate')->with($this->equalTo($data))->willReturn(true);
         $this->_orderHelper->expects($this->once())->method('addSpecialData')->with($this->equalTo($data))->willReturn($dataExtended);
         $this->_orderHelper->expects($this->once())->method('create')->with($this->equalTo($dataExtended))->willReturn($result);
@@ -97,7 +97,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderRetrieveSuccess()
     {
         $id = '123456';
-        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+        $result = $this->_getResultMock();
         $this->_orderHelper->expects($this->once())->method('validateRetrieve')->with($this->equalTo($id))->willReturn(true);
         $this->_orderHelper->expects($this->once())->method('retrieve')->with($this->equalTo($id))->willReturn($result);
         $this->assertEquals($result, $this->_model->orderRetrieve($id));
@@ -122,12 +122,36 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderCancelSuccess()
     {
         $id = '123456';
-        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+        $result = $this->_getResultMock();
         $this->_orderHelper->expects($this->once())->method('validateCancel')->with($this->equalTo($id))->willReturn(true);
         $this->_orderHelper->expects($this->once())->method('cancel')->with($this->equalTo($id))->willReturn($result);
         $this->assertEquals($result, $this->_model->orderCancel($id));
     }
 
+    public function testOrderStatusUpdateInvalidData()
+    {
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Order status update request data array is invalid.');
+        $this->_orderHelper->expects($this->once())->method('validateStatusUpdate')->willReturn(false);
+        $this->_model->orderStatusUpdate();
+    }
+
+    public function testOrderStatusUpdateFail()
+    {
+        $data = ['data'];
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order status update request.');
+        $this->_orderHelper->expects($this->once())->method('validateStatusUpdate')->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('statusUpdate')->with($this->equalTo($data))->willReturn(false);
+        $this->_model->orderStatusUpdate($data);
+    }
+
+    public function testOrderStatusUpdateSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResultMock();
+        $this->_orderHelper->expects($this->once())->method('validateStatusUpdate')->with($this->equalTo($data))->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('statusUpdate')->with($this->equalTo($data))->willReturn($result);
+        $this->assertEquals($result, $this->_model->orderStatusUpdate($data));
+    }
 
     /**
      * @return object
@@ -141,5 +165,13 @@ class ClientTest extends \PHPUnit_Framework_TestCase
                 'orderHelper' => $this->_orderHelper
             ]
         );
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getResultMock()
+    {
+        return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
     }
 }

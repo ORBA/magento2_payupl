@@ -7,6 +7,9 @@ namespace Orba\Payupl\Model\Client\Order;
 
 class DataValidator
 {
+    /**
+     * @var array
+     */
     protected $_requiredProductKeys = [
         'name',
         'unitPrice',
@@ -22,6 +25,22 @@ class DataValidator
         'totalAmount',
         'extOrderId',
         'products'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $_requiredStatusUpdateKeys = [
+        'orderId',
+        'orderStatus'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $validStatusUpdateOrderStatuses = [
+        'COMPLETED',
+        'REJECTED'
     ];
 
     /**
@@ -67,6 +86,24 @@ class DataValidator
     }
 
     /**
+     * @param array $data
+     * @return bool
+     */
+    public function validateStatusUpdateData($data)
+    {
+        foreach ($this->_getRequiredStatusUpdateKeys() as $key) {
+            if (!isset($data[$key]) || empty($data[$key])) {
+                return false;
+            }
+        }
+        $validStatuses = $this->_getValidStatusUpdateOrderStatuses();
+        if (!in_array($data['orderStatus'], $validStatuses)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @return array
      */
     protected function _getRequiredBasicKeys()
@@ -80,5 +117,21 @@ class DataValidator
     protected function _getRequiredProductKeys()
     {
         return $this->_requiredProductKeys;
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getRequiredStatusUpdateKeys()
+    {
+        return $this->_requiredStatusUpdateKeys;
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getValidStatusUpdateOrderStatuses()
+    {
+        return $this->validStatusUpdateOrderStatuses;
     }
 }

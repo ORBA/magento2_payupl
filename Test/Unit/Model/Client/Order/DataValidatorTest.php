@@ -14,6 +14,9 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
      */
     protected $_model;
 
+    /**
+     * @var array
+     */
     protected $_exemplaryBasicData = [
         'description' => 'New order',
         'currencyCode' => 'PLN',
@@ -21,10 +24,30 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
         'extOrderId' => '10000001',
         'products' => [[]]
     ];
+
+    /**
+     * @var array
+     */
     protected $_exemplaryProductData = [
         'name' => 'Product',
         'unitPrice' => 999,
         'quantity' => 1
+    ];
+
+    /**
+     * @var array
+     */
+    protected $_exemplaryStatusUpdateData = [
+        'orderId' => '123456',
+        'orderStatus' => 'COMPLETED'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $_validStatusUpdateOrderStatuses = [
+        'COMPLETED',
+        'REJECTED'
     ];
 
     public function setUp()
@@ -90,6 +113,37 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($failCount, count($productData));
     }
 
+    public function testValidateStatusUpdateDataSuccess()
+    {
+        $data = $this->_getExemplaryStatusUpdateData();
+        $this->assertTrue($this->_model->validateStatusUpdateData($data));
+    }
+
+    public function testValidateStatusUpdateDataFailMissingKey()
+    {
+        $data = $this->_getExemplaryStatusUpdateData();
+        $failCount = 0;
+        foreach ($data as $key => $value) {
+            $missingData = array_diff_key($data, [$key => $value]);
+            if (!$this->_model->validateStatusUpdateData($missingData)) {
+                $failCount++;
+            }
+        }
+        $this->assertEquals($failCount, count($data));
+    }
+
+    public function testValidateStatusUpdateDataOrderStatus()
+    {
+        $data = $this->_getExemplaryStatusUpdateData();
+        $validStatuses = $this->_getValidStatusUpdateOrderStatuses();
+        foreach ($validStatuses as $validStatus) {
+            $data['orderStatus'] = $validStatus;
+            $this->assertTrue($this->_model->validateStatusUpdateData($data));
+        }
+        $data['orderStatus'] = 'INVALID_STATUS';
+        $this->assertFalse($this->_model->validateStatusUpdateData($data));
+    }
+
     /**
      * @return array
      */
@@ -117,5 +171,21 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
             ]
         ];
         return $data;
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getExemplaryStatusUpdateData()
+    {
+        return $this->_exemplaryStatusUpdateData;
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getValidStatusUpdateOrderStatuses()
+    {
+        return $this->_validStatusUpdateOrderStatuses;
     }
 }

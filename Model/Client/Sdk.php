@@ -36,4 +36,9 @@ class Sdk
     {
         return \OpenPayU_Order::cancel($id);
     }
+
+    public function orderStatusUpdate(array $data)
+    {
+        return false;
+    }
 }

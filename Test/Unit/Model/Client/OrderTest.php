@@ -162,4 +162,42 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->cancel($id));
     }
 
+    public function testValidateStatusUpdateFailedEmpty()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
+        $this->assertFalse($this->_model->validateStatusUpdate());
+    }
+
+    public function testValidateStatusUpdateInvalidData()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
+        $this->_dataValidator->expects($this->once())->method('validateStatusUpdateData')->willReturn(false);
+        $this->assertFalse($this->_model->validateStatusUpdate());
+    }
+
+    public function testStatusUpdateSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResultMock();
+        $this->_sdk->expects($this->once())->method('orderStatusUpdate')->with($this->equalTo($data))->willReturn($result);
+        $this->assertEquals($result, $this->_model->statusUpdate($data));
+    }
+
+    public function testStatusUpdateFail()
+    {
+        $data = ['data'];
+        $exception = new \Exception();
+        $this->_sdk->expects($this->once())->method('orderStatusUpdate')->will($this->throwException($exception));
+        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->assertFalse($this->_model->statusUpdate($data));
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getResultMock()
+    {
+        return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+    }
+
 }

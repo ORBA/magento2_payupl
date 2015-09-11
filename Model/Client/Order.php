@@ -76,6 +76,13 @@ class Order
         return $this->_dataValidator->validateEmpty($id);
     }
 
+    public function validateStatusUpdate(array $data = [])
+    {
+        return
+            $this->_dataValidator->validateEmpty($data) &&
+            $this->_dataValidator->validateStatusUpdateData($data);
+    }
+
     /**
      * @param array $data
      * @return array
@@ -115,6 +122,15 @@ class Order
     public function cancel($id)
     {
         return $this->_callSdkMethod('orderCancel', $id);
+    }
+
+    /**
+     * @param array $data
+     * @return bool|\OpenPayU_Result
+     */
+    public function statusUpdate(array $data = [])
+    {
+        return $this->_callSdkMethod('orderStatusUpdate', $data);
     }
 
     /**

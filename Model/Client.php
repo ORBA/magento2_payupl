@@ -86,4 +86,16 @@ class Client
         }
         return $result;
     }
+
+    public function orderStatusUpdate(array $data = [])
+    {
+        if (!$this->_orderHelper->validateStatusUpdate($data)) {
+            throw new Exception('Order status update request data array is invalid.');
+        }
+        $result = $this->_orderHelper->statusUpdate($data);
+        if (!$result) {
+            throw new Exception('There was a problem while processing order status update request.');
+        }
+        return $result;
+    }
 }
