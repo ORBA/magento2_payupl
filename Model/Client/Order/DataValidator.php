@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Client\Order;
 
-class DataValidator
+class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
 {
     /**
      * @var array
@@ -42,15 +42,6 @@ class DataValidator
         'COMPLETED',
         'REJECTED'
     ];
-
-    /**
-     * @param mixed $data
-     * @return bool
-     */
-    public function validateEmpty($data)
-    {
-        return !empty($data);
-    }
 
     /**
      * @param array $data

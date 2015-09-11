@@ -192,6 +192,29 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->statusUpdate($data));
     }
 
+    public function testValidateConsumeNotificationFailedEmpty()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
+        $this->assertFalse($this->_model->validateConsumeNotification());
+    }
+
+    public function testConsumeNotificationSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResultMock();
+        $this->_sdk->expects($this->once())->method('orderConsumeNotification')->with($this->equalTo($data))->willReturn($result);
+        $this->assertEquals($result, $this->_model->consumeNotification($data));
+    }
+
+    public function testConsumeNotificationFail()
+    {
+        $data = ['data'];
+        $exception = new \Exception();
+        $this->_sdk->expects($this->once())->method('orderConsumeNotification')->will($this->throwException($exception));
+        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->assertFalse($this->_model->consumeNotification($data));
+    }
+
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */

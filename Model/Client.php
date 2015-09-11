@@ -23,15 +23,18 @@ class Client
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param Client\Config $configHelper
      * @param Client\Order $orderHelper
+     * @param Client\Refund $refundHelper
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Orba\Payupl\Model\Client\Config $configHelper,
-        \Orba\Payupl\Model\Client\Order $orderHelper
+        \Orba\Payupl\Model\Client\Order $orderHelper,
+        \Orba\Payupl\Model\Client\Refund $refundHelper
     )
     {
         $this->_scopeConfig = $scopeConfig;
         $this->_orderHelper = $orderHelper;
+        $this->_refundHelper = $refundHelper;
         $configHelper->setConfig();
     }
 
@@ -87,6 +90,11 @@ class Client
         return $result;
     }
 
+    /**
+     * @param array $data
+     * @return bool|\OpenPayU_Result
+     * @throws Exception
+     */
     public function orderStatusUpdate(array $data = [])
     {
         if (!$this->_orderHelper->validateStatusUpdate($data)) {
@@ -95,6 +103,35 @@ class Client
         $result = $this->_orderHelper->statusUpdate($data);
         if (!$result) {
             throw new Exception('There was a problem while processing order status update request.');
+        }
+        return $result;
+    }
+
+    /**
+     * @param array $data
+     * @return bool|\OpenPayU_Result
+     * @throws Exception
+     */
+    public function orderConsumeNotification(array $data = [])
+    {
+        if (!$this->_orderHelper->validateConsumeNotification($data)) {
+            throw new Exception('Notification data to consume is empty.');
+        }
+        $result = $this->_orderHelper->consumeNotification($data);
+        if (!$result) {
+            throw new Exception('There was a problem while consuming order notification.');
+        }
+        return $result;
+    }
+
+    public function refundCreate($orderId = '', $description = '', $amount = null)
+    {
+        if (!$this->_refundHelper->validateCreate($orderId, $description, $amount)) {
+            throw new Exception('Refund create request data is invalid.');
+        }
+        $result = $this->_refundHelper->create($orderId, $description, $amount);
+        if (!$result) {
+            throw new Exception('There was a problem while processing refund create request.');
         }
         return $result;
     }

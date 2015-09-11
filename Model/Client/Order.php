@@ -76,11 +76,24 @@ class Order
         return $this->_dataValidator->validateEmpty($id);
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     */
     public function validateStatusUpdate(array $data = [])
     {
         return
             $this->_dataValidator->validateEmpty($data) &&
             $this->_dataValidator->validateStatusUpdateData($data);
+    }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public function validateConsumeNotification(array $data = [])
+    {
+        return $this->_dataValidator->validateEmpty($data);
     }
 
     /**
@@ -131,6 +144,15 @@ class Order
     public function statusUpdate(array $data = [])
     {
         return $this->_callSdkMethod('orderStatusUpdate', $data);
+    }
+
+    /**
+     * @param array $data
+     * @return bool|\OpenPayU_Result
+     */
+    public function consumeNotification(array $data = [])
+    {
+        return $this->_callSdkMethod('orderConsumeNotification', $data);
     }
 
     /**

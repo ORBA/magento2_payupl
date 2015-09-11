@@ -39,6 +39,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->_objectManagerHelper = new ObjectManager($this);
         $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Config::class)->disableOriginalConstructor()->getMock();
         $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_refundHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Refund::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->_getModel();
     }
 
@@ -153,6 +154,65 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $this->_model->orderStatusUpdate($data));
     }
 
+    public function testOrderConsumeNotificationEmptyData()
+    {
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Notification data to consume is empty.');
+        $this->_orderHelper->expects($this->once())->method('validateConsumeNotification')->willReturn(false);
+        $this->_model->orderConsumeNotification();
+    }
+
+    public function testOrderConsumeNotificationFail()
+    {
+        $data = ['data'];
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while consuming order notification.');
+        $this->_orderHelper->expects($this->once())->method('validateConsumeNotification')->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($data))->willReturn(false);
+        $this->_model->orderConsumeNotification($data);
+    }
+
+    public function testOrderConsumeNotificationSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResultMock();
+        $this->_orderHelper->expects($this->once())->method('validateConsumeNotification')->with($this->equalTo($data))->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($data))->willReturn($result);
+        $this->assertEquals($result, $this->_model->orderConsumeNotification($data));
+    }
+
+    public function testRefundCreateInvalidData()
+    {
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Refund create request data is invalid.');
+        $this->_refundHelper->expects($this->once())->method('validateCreate')->willReturn(false);
+        $this->_model->refundCreate();
+    }
+
+    public function testRefundCreateFail()
+    {
+        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing refund create request.');
+        $this->_refundHelper->expects($this->once())->method('validateCreate')->willReturn(true);
+        $this->_refundHelper->expects($this->once())->method('create')->willReturn(false);
+        $this->_model->refundCreate();
+    }
+
+    public function testRefundCreateSuccess()
+    {
+        $orderId = '123456';
+        $description = 'Description';
+        $amount = '100';
+        $result = $this->_getResultMock();
+        $this->_refundHelper->expects($this->once())->method('validateCreate')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($description),
+            $this->equalTo($amount)
+        )->willReturn(true);
+        $this->_refundHelper->expects($this->once())->method('create')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($description),
+            $this->equalTo($amount)
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->refundCreate($orderId, $description, $amount));
+    }
+
     /**
      * @return object
      */
@@ -162,7 +222,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             \Orba\Payupl\Model\Client::class,
             [
                 'configHelper' => $this->_configHelper,
-                'orderHelper' => $this->_orderHelper
+                'orderHelper' => $this->_orderHelper,
+                'refundHelper' => $this->_refundHelper
             ]
         );
     }

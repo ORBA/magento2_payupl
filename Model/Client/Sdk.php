@@ -37,8 +37,35 @@ class Sdk
         return \OpenPayU_Order::cancel($id);
     }
 
+    /**
+     * @param array $data
+     * @return \OpenPayU_Result
+     * @throws \OpenPayU_Exception
+     */
     public function orderStatusUpdate(array $data)
     {
-        return false;
+        return \OpenPayU_Order::statusUpdate($data);
+    }
+
+    /**
+     * @param array $data
+     * @return \OpenPayU_Result
+     * @throws \OpenPayU_Exception
+     */
+    public function orderConsumeNotification(array $data)
+    {
+        return \OpenPayU_Order::consumeNotification($data);
+    }
+
+    /**
+     * @param string $orderId
+     * @param string $description
+     * @param null|int $amount
+     * @return \OpenPayU_Result
+     * @throws \OpenPayU_Exception
+     */
+    public function refundCreate($orderId, $description, $amount = null)
+    {
+        return \OpenPayU_Refund::create($orderId, $description, $amount);
     }
 }
