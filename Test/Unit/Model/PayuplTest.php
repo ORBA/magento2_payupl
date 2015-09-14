@@ -10,7 +10,7 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 class PayuplTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Orba\Payupl\Model\Payupl
+     * @var Payupl
      */
     protected $_model;
 
@@ -19,14 +19,21 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
      */
     protected $_scopeConfig;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_urlBuilder;
+
     protected function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
+        $this->_urlBuilder = $this->getMockBuilder(\Magento\Framework\UrlInterface::class)->getMock();
         $this->_model = $objectManagerHelper->getObject(
-            \Orba\Payupl\Model\Payupl::class,
+            Payupl::class,
             [
-                'scopeConfig' => $this->_scopeConfig
+                'scopeConfig' => $this->_scopeConfig,
+                'urlBuilder' => $this->_urlBuilder
             ]
         );
 
@@ -34,9 +41,10 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
 
     public function testIsAvailableNoQuote()
     {
-        $this->assertFalse($this->_model->isAvailable());
+        $this->_expectConfigActive(true);
+        $this->assertTrue($this->_model->isAvailable());
     }
-    
+
     public function testIsAvailableNotActive()
     {
         $this->_expectConfigActive(false);
@@ -62,6 +70,15 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethodAddress);
         $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
         $this->assertFalse($this->_model->isAvailable($quote));
+    }
+    
+    public function testCheckoutRedirectUrl()
+    {
+        $path = 'orba_payupl/payment/new';
+        $baseUrl = 'http://example.com/';
+        $url = $baseUrl . $path;
+        $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
+        $this->assertEquals($url, $this->_model->getCheckoutRedirectUrl());
     }
 
     /**

@@ -1,0 +1,14 @@
+<?php
+/**
+ * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
+ */
+
+$_data = array(
+    'Place Order and Pay with Payu.pl' => __('Place Order and Pay with Payu.pl')
+);
+?>
+<script type="text/javascript">
+    require(["jquery","mage/translate"], function($){
+        $.mage.translate.add(<?php echo Zend_Json::encode($_data) ?>)
+    });
+</script>

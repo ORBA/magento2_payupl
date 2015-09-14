@@ -29,12 +29,12 @@
                         type="submit"
                         data-bind="
                         click: placeOrder,
-                        attr: {'title': $t('Place Order')},
+                        attr: {'title': $t('Place Order and Pay with Payu.pl')},
                         enable: (getCode() == isChecked()),
                         css: {disabled: !isPlaceOrderActionAllowed()}
                         "
                         disabled>
-                    <span data-bind="text: $t('Place Order')"></span>
+                    <span data-bind="text: $t('Place Order and Pay with Payu.pl')"></span>
                 </button>
             </div>
         </div>

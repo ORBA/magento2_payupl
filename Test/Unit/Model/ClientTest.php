@@ -37,9 +37,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_objectManagerHelper = new ObjectManager($this);
-        $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_refundHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Refund::class)->disableOriginalConstructor()->getMock();
+        $this->_configHelper = $this->getMockBuilder(Client\Config::class)->disableOriginalConstructor()->getMock();
+        $this->_orderHelper = $this->getMockBuilder(Client\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_refundHelper = $this->getMockBuilder(Client\Refund::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->_getModel();
     }
 
