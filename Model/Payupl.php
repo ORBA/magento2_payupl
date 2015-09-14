@@ -81,7 +81,7 @@ class Payupl extends AbstractMethod
      */
     public function getCheckoutRedirectUrl()
     {
-        return $this->_urlBuilder->getUrl('orba_payupl/payment/new');
+        return $this->_urlBuilder->getUrl('orba_payupl/payment/start');
     }
 
     /**

@@ -74,7 +74,7 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
     
     public function testCheckoutRedirectUrl()
     {
-        $path = 'orba_payupl/payment/new';
+        $path = 'orba_payupl/payment/start';
         $baseUrl = 'http://example.com/';
         $url = $baseUrl . $path;
         $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
