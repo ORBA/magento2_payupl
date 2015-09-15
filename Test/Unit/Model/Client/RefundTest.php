@@ -22,25 +22,18 @@ class RefundTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_sdk;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $_logger;
+    protected $_methodCaller;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_dataValidator = $this->getMockBuilder(Refund\DataValidator::class)->getMock();
-        $this->_sdk = $this->getMockBuilder(Sdk::class)->getMock();
-        $this->_logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()->getMock();
+        $this->_methodCaller = $this->getMockBuilder(MethodCaller::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
             Refund::class,
             [
                 'dataValidator' => $this->_dataValidator,
-                'sdk' => $this->_sdk,
-                'logger' => $this->_logger
+                'methodCaller' => $this->_methodCaller
             ]
         );
     }
@@ -86,35 +79,35 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->_model->validateCreate($orderId, $description, $amount));
     }
 
-    public function testCreateSuccess()
-    {
-        $orderId = '123456';
-        $description = 'Description';
-        $amount = '100';
-        $result = $this->_getResultMock();
-        $this->_sdk->expects($this->once())->method('refundCreate')->with(
-            $this->equalTo($orderId),
-            $this->equalTo($description),
-            $this->equalTo($amount)
-        )->willReturn($result);
-        $this->assertEquals($result, $this->_model->create($orderId, $description, $amount));
-    }
-
     public function testCreateFail()
     {
         $orderId = '123456';
         $description = 'Description';
         $amount = '100';
-        $exception = new \Exception();
-        $this->_sdk->expects($this->once())->method('refundCreate')->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('refundCreate'),
+            $this->equalTo([$orderId, $description, $amount])
+        )->willReturn(false);
         $this->assertFalse($this->_model->create($orderId, $description, $amount));
+    }
+
+    public function testCreateSuccess()
+    {
+        $orderId = '123456';
+        $description = 'Description';
+        $amount = '100';
+        $result = $this->_getResult();
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('refundCreate'),
+            $this->equalTo([$orderId, $description, $amount])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->create($orderId, $description, $amount));
     }
 
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getResultMock()
+    protected function _getResult()
     {
         return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
     }

@@ -13,24 +13,26 @@ class Refund
     protected $_dataValidator;
 
     /**
-     * @var Sdk
+     * @var MethodCaller
      */
-    protected $_sdk;
+    protected $_methodCaller;
 
     /**
      * @var \Orba\Payupl\Logger\Logger
      */
     protected $_logger;
 
+    /**
+     * @param Refund\DataValidator $dataValidator
+     * @param MethodCaller $methodCaller
+     */
     public function __construct(
         Refund\DataValidator $dataValidator,
-        Sdk $sdk,
-        \Orba\Payupl\Logger\Logger $logger
+        MethodCaller $methodCaller
     )
     {
         $this->_dataValidator = $dataValidator;
-        $this->_sdk = $sdk;
-        $this->_logger = $logger;
+        $this->_methodCaller = $methodCaller;
     }
 
     /**
@@ -55,11 +57,6 @@ class Refund
      */
     public function create($orderId = '', $description = '', $amount = null)
     {
-        try {
-            return $this->_sdk->refundCreate($orderId, $description, $amount);
-        } catch (\Exception $e) {
-            $this->_logger->critical($e);
-            return false;
-        }
+        return $this->_methodCaller->call('refundCreate', [$orderId, $description, $amount]);
     }
 }

@@ -14,6 +14,9 @@ class ConfigProvider implements ConfigProviderInterface
      */
     protected $_paymentHelper;
 
+    /**
+     * @param \Magento\Payment\Helper\Data $paymentHelper
+     */
     public function __construct(
         \Magento\Payment\Helper\Data $paymentHelper
     )
@@ -21,6 +24,9 @@ class ConfigProvider implements ConfigProviderInterface
         $this->_paymentHelper = $paymentHelper;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getConfig()
     {
         /**

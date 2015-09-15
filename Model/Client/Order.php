@@ -18,32 +18,24 @@ class Order
     protected $_dataAdder;
 
     /**
-     * @var Sdk
+     * @var MethodCaller
      */
-    protected $_sdk;
-
-    /**
-     * @var \Orba\Payupl\Logger\Logger
-     */
-    protected $_logger;
+    protected $_methodCaller;
 
     /**
      * @param Order\DataValidator $dataValidator
      * @param Order\DataAdder $dataAdder
-     * @param Sdk $sdk
-     * @param \Orba\Payupl\Logger\Logger $logger
+     * @param MethodCaller $methodCaller
      */
     public function __construct(
         Order\DataValidator $dataValidator,
         Order\DataAdder $dataAdder,
-        Sdk $sdk,
-        \Orba\Payupl\Logger\Logger $logger
+        MethodCaller $methodCaller
     )
     {
         $this->_dataValidator = $dataValidator;
         $this->_dataAdder = $dataAdder;
-        $this->_sdk = $sdk;
-        $this->_logger = $logger;
+        $this->_methodCaller = $methodCaller;
     }
 
     /**
@@ -116,7 +108,7 @@ class Order
      */
     public function create(array $data)
     {
-        return $this->_callSdkMethod('orderCreate', $data);
+        return $this->_methodCaller->call('orderCreate', [$data]);
     }
 
     /**
@@ -125,7 +117,7 @@ class Order
      */
     public function retrieve($id)
     {
-        return $this->_callSdkMethod('orderRetrieve', $id);
+        return $this->_methodCaller->call('orderRetrieve', [$id]);
     }
 
     /**
@@ -134,7 +126,7 @@ class Order
      */
     public function cancel($id)
     {
-        return $this->_callSdkMethod('orderCancel', $id);
+        return $this->_methodCaller->call('orderCancel', [$id]);
     }
 
     /**
@@ -143,7 +135,7 @@ class Order
      */
     public function statusUpdate(array $data = [])
     {
-        return $this->_callSdkMethod('orderStatusUpdate', $data);
+        return $this->_methodCaller->call('orderStatusUpdate', [$data]);
     }
 
     /**
@@ -152,21 +144,7 @@ class Order
      */
     public function consumeNotification(array $data = [])
     {
-        return $this->_callSdkMethod('orderConsumeNotification', $data);
+        return $this->_methodCaller->call('orderConsumeNotification', [$data]);
     }
 
-    /**
-     * @param $method
-     * @param mixed $data
-     * @return bool|\OpenPayU_Result
-     */
-    protected function _callSdkMethod($method, $data)
-    {
-        try {
-            return $this->_sdk->{$method}($data);
-        } catch (\Exception $e) {
-            $this->_logger->critical($e);
-            return false;
-        }
-    }
 }

@@ -31,6 +31,7 @@ class Config
      */
     public function setConfig()
     {
+        \OpenPayU_Configuration::setEnvironment('secure');
         $merchantPosId = $this->_scopeConfig->getValue(self::XML_PATH_MERCHANT_POS_ID);
         if ($merchantPosId) {
             \OpenPayU_Configuration::setMerchantPosId($merchantPosId);

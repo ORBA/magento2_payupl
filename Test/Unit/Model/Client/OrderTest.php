@@ -27,27 +27,20 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_sdk;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $_logger;
+    protected $_methodCaller;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_dataValidator = $this->getMockBuilder(Order\DataValidator::class)->getMock();
         $this->_dataAdder = $this->getMockBuilder(Order\DataAdder::class)->disableOriginalConstructor()->getMock();
-        $this->_sdk = $this->getMockBuilder(Sdk::class)->getMock();
-        $this->_logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()->getMock();
+        $this->_methodCaller = $this->getMockBuilder(MethodCaller::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
             Order::class,
             [
                 'dataValidator' => $this->_dataValidator,
                 'dataAdder' => $this->_dataAdder,
-                'sdk' => $this->_sdk,
-                'logger' => $this->_logger
+                'methodCaller' => $this->_methodCaller
             ]
         );
     }
@@ -99,21 +92,25 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('merchantPosId', $extendedData);
     }
 
-    public function testCreateSuccess()
-    {
-        $data = ['data'];
-        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
-        $this->_sdk->expects($this->once())->method('orderCreate')->with($this->equalTo($data))->willReturn($result);
-        $this->assertEquals($result, $this->_model->create($data));
-    }
-
     public function testCreateFail()
     {
         $data = ['data'];
-        $exception = new \Exception();
-        $this->_sdk->expects($this->once())->method('orderCreate')->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderCreate'),
+            $this->equalTo([$data])
+        )->willReturn(false);
         $this->assertFalse($this->_model->create($data));
+    }
+
+    public function testCreateSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResult();
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderCreate'),
+            $this->equalTo([$data])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->create($data));
     }
 
     public function testValidateRetrieveFailedEmpty()
@@ -122,21 +119,25 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateRetrieve(''));
     }
 
-    public function testRetrieveSuccess()
-    {
-        $id = '123456';
-        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
-        $this->_sdk->expects($this->once())->method('orderRetrieve')->with($this->equalTo($id))->willReturn($result);
-        $this->assertEquals($result, $this->_model->retrieve($id));
-    }
-
     public function testRetrieveFail()
     {
         $id = '123456';
-        $exception = new \Exception();
-        $this->_sdk->expects($this->once())->method('orderRetrieve')->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderRetrieve'),
+            $this->equalTo([$id])
+        )->willReturn(false);
         $this->assertFalse($this->_model->retrieve($id));
+    }
+
+    public function testRetrieveSuccess()
+    {
+        $id = '123456';
+        $result = $this->_getResult();
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderRetrieve'),
+            $this->equalTo([$id])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->retrieve($id));
     }
 
     public function testValidateCancelFailedEmpty()
@@ -145,21 +146,25 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateCancel(''));
     }
 
-    public function testCancelSuccess()
-    {
-        $id = '123456';
-        $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
-        $this->_sdk->expects($this->once())->method('orderCancel')->with($this->equalTo($id))->willReturn($result);
-        $this->assertEquals($result, $this->_model->cancel($id));
-    }
-
     public function testCancelFail()
     {
         $id = '123456';
-        $exception = new \Exception();
-        $this->_sdk->expects($this->once())->method('orderCancel')->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderCancel'),
+            $this->equalTo([$id])
+        )->willReturn(false);
         $this->assertFalse($this->_model->cancel($id));
+    }
+
+    public function testCancelSuccess()
+    {
+        $id = '123456';
+        $result = $this->_getResult();
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderCancel'),
+            $this->equalTo([$id])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->cancel($id));
     }
 
     public function testValidateStatusUpdateFailedEmpty()
@@ -175,21 +180,25 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateStatusUpdate());
     }
 
-    public function testStatusUpdateSuccess()
-    {
-        $data = ['data'];
-        $result = $this->_getResultMock();
-        $this->_sdk->expects($this->once())->method('orderStatusUpdate')->with($this->equalTo($data))->willReturn($result);
-        $this->assertEquals($result, $this->_model->statusUpdate($data));
-    }
-
     public function testStatusUpdateFail()
     {
         $data = ['data'];
-        $exception = new \Exception();
-        $this->_sdk->expects($this->once())->method('orderStatusUpdate')->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderStatusUpdate'),
+            $this->equalTo([$data])
+        )->willReturn(false);
         $this->assertFalse($this->_model->statusUpdate($data));
+    }
+
+    public function testStatusUpdateSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResult();
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderStatusUpdate'),
+            $this->equalTo([$data])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->statusUpdate($data));
     }
 
     public function testValidateConsumeNotificationFailedEmpty()
@@ -198,27 +207,28 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateConsumeNotification());
     }
 
-    public function testConsumeNotificationSuccess()
-    {
-        $data = ['data'];
-        $result = $this->_getResultMock();
-        $this->_sdk->expects($this->once())->method('orderConsumeNotification')->with($this->equalTo($data))->willReturn($result);
-        $this->assertEquals($result, $this->_model->consumeNotification($data));
-    }
-
     public function testConsumeNotificationFail()
     {
         $data = ['data'];
-        $exception = new \Exception();
-        $this->_sdk->expects($this->once())->method('orderConsumeNotification')->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderConsumeNotification'),
+            $this->equalTo([$data])
+        )->willReturn(false);
         $this->assertFalse($this->_model->consumeNotification($data));
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function _getResultMock()
+    public function testConsumeNotificationSuccess()
+    {
+        $data = ['data'];
+        $result = $this->_getResult();
+        $this->_methodCaller->expects($this->once())->method('call')->with(
+            $this->equalTo('orderConsumeNotification'),
+            $this->equalTo([$data])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->consumeNotification($data));
+    }
+
+    protected function _getResult()
     {
         return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
     }

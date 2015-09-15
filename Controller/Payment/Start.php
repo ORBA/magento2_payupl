@@ -46,6 +46,11 @@ class Start extends \Magento\Framework\App\Action\Action
         $this->_client = $client;
     }
 
+    /**
+     * @return \Magento\Framework\Controller\Result\Redirect
+     * @throws \Orba\Payupl\Model\Client\Exception
+     * @throws \Orba\Payupl\Model\Order\Exception
+     */
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();

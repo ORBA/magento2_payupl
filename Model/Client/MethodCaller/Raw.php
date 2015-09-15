@@ -3,10 +3,21 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model\Client\MethodCaller;
 
-class Sdk
+class Raw
 {
+    /**
+     * @param string $methodName
+     * @param array $args
+     * @return \OpenPayU_Result
+     * @throws \OpenPayU_Exception
+     */
+    public function call($methodName, array $args = [])
+    {
+        return call_user_func_array([$this, $methodName], $args);
+    }
+
     /**
      * @param array $data
      * @return \OpenPayU_Result

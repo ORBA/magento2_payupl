@@ -70,6 +70,9 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
                     if (!isset($productData[$key]) || empty($productData[$key])) {
                         return false;
                     }
+                    if ($key === 'quantity' && !$this->validatePositiveFloat($productData[$key])) {
+                        return false;
+                    }
                 }
             }
         }
@@ -125,4 +128,5 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     {
         return $this->validStatusUpdateOrderStatuses;
     }
+
 }

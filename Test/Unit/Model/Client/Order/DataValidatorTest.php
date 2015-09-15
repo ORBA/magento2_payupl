@@ -31,7 +31,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     protected $_exemplaryProductData = [
         'name' => 'Product',
         'unitPrice' => 999,
-        'quantity' => 1
+        'quantity' => 1.5
     ];
 
     /**
@@ -84,7 +84,14 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->_model->validateProductsData($data));
     }
 
-    public function testValidateProductsDataFail()
+    public function testValidateProductsDataFailInvalidQuantity()
+    {
+        $data = $this->_getExemplaryProductsData();
+        $data['products'][0]['quantity'] = 'string';
+        $this->assertFalse($this->_model->validateProductsData($data));
+    }
+
+    public function testValidateProductsDataFailMissingData()
     {
         $productData = $this->_getExemplaryProductData();
         $failCount = 0;

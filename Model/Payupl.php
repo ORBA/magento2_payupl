@@ -11,10 +11,19 @@ class Payupl extends AbstractMethod
 {
     const CODE = 'orba_payupl';
 
+    /**
+     * @var string
+     */
     protected $_code = self::CODE;
 
+    /**
+     * @var bool
+     */
     protected $_isGateway = true;
 
+    /**
+     * @var bool
+     */
     protected $_isOffline = false;
 
     /**

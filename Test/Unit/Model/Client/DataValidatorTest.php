@@ -40,5 +40,15 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validatePositiveInt(0));
         $this->assertFalse($this->_model->validatePositiveInt(-100));
         $this->assertTrue($this->_model->validatePositiveInt(100));
+        $this->assertFalse($this->_model->validatePositiveInt(100.99));
+    }
+
+    public function testValidatePositiveFloat()
+    {
+        $this->assertFalse($this->_model->validatePositiveFloat('string'));
+        $this->assertFalse($this->_model->validatePositiveFloat(0));
+        $this->assertFalse($this->_model->validatePositiveFloat(-100));
+        $this->assertTrue($this->_model->validatePositiveFloat(100));
+        $this->assertTrue($this->_model->validatePositiveFloat(100.99));
     }
 }
