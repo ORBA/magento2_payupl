@@ -47,6 +47,23 @@ class DataGetter
      * @param \Magento\Sales\Model\Order $order
      * @return array|null
      */
+    public function getShippingData(\Magento\Sales\Model\Order $order)
+    {
+        $shippingAmount = (float) $order->getShippingInclTax();
+        if ($shippingAmount) {
+            return [
+                'name' => $order->getShippingDescription(),
+                'unitPrice' => $shippingAmount * 100,
+                'quantity' => 1
+            ];
+        }
+        return null;
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return array|null
+     */
     public function getBuyerData(\Magento\Sales\Model\Order $order)
     {
         /**

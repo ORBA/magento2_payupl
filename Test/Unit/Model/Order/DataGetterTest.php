@@ -63,6 +63,28 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('float', $productsData[0]['quantity']);
     }
 
+    public function testGetShippingDataFree()
+    {
+        $shippingAmount = '0.0000';
+        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $order->expects($this->once())->method('getShippingInclTax')->willReturn($shippingAmount);
+        $this->assertNull($this->_model->getShippingData($order));
+    }
+
+    public function testGetShippingDataPaid()
+    {
+        $shippingDescription = 'Kurier';
+        $shippingAmount = '9.9900';
+        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $order->expects($this->once())->method('getShippingInclTax')->willReturn($shippingAmount);
+        $order->expects($this->once())->method('getShippingDescription')->willReturn($shippingDescription);
+        $this->assertEquals([
+            'name' => $shippingDescription,
+            'unitPrice' => $shippingAmount * 100,
+            'quantity' => 1
+        ], $this->_model->getShippingData($order));
+    }
+
     public function testGetBuyerDataNoAddress()
     {
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();

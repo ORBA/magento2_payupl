@@ -44,6 +44,10 @@ class Order
         $order->load($orderId);
         if ($order->getId()) {
             $data = ['products' => $this->_dataGetter->getProductsData($order)];
+            $shippingData = $this->_dataGetter->getShippingData($order);
+            if ($shippingData) {
+                $data['products'][] = $shippingData;
+            }
             $buyerData = $this->_dataGetter->getBuyerData($order);
             if ($buyerData) {
                 $data['buyer'] = $buyerData;

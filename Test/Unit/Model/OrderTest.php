@@ -51,26 +51,55 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_model->getDataForNewTransaction($orderId);
     }
 
-    public function testGetDataForNewTransactionSuccess()
+    public function testGetDataForNewTransactionSuccessNoBuyer()
     {
-        $orderId = '1';
-        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_expectOrderLoadById($order, $orderId);
-        $order->expects($this->once())->method('getId')->willReturn($orderId);
-        $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
         $productsData = ['products'];
+        $shippingData = ['shipping'];
+        $buyerData = null;
+        $basicData = ['basic'];
+        $this->_preTestGetDataForNewTransactionSuccess('1', $productsData, $shippingData, $buyerData, $basicData);
+        $productsData[] = $shippingData;
+        $this->assertEquals(
+            array_merge(
+                $basicData,
+                ['products' => $productsData]
+            ),
+            $this->_model->getDataForNewTransaction('1')
+        );
+    }
+
+    public function testGetDataForNewTransactionSuccessNoShipping()
+    {
+        $productsData = ['products'];
+        $shippingData = null;
         $buyerData = ['buyer'];
         $basicData = ['basic'];
-        $this->_dataGetter->expects($this->once())->method('getProductsData')->willReturn($productsData);
-        $this->_dataGetter->expects($this->once())->method('getBuyerData')->willReturn($buyerData);
-        $this->_dataGetter->expects($this->once())->method('getBasicData')->willReturn($basicData);
+        $this->_preTestGetDataForNewTransactionSuccess('1', $productsData, $shippingData, $buyerData, $basicData);
         $this->assertEquals(
             array_merge(
                 $basicData,
                 ['products' => $productsData],
                 ['buyer' => $buyerData]
             ),
-            $this->_model->getDataForNewTransaction($orderId)
+            $this->_model->getDataForNewTransaction('1')
+        );
+    }
+
+    public function testGetDataForNewTransactionSuccessAllData()
+    {
+        $productsData = ['products'];
+        $shippingData = ['shipping'];
+        $buyerData = ['buyer'];
+        $basicData = ['basic'];
+        $this->_preTestGetDataForNewTransactionSuccess('1', $productsData, $shippingData, $buyerData, $basicData);
+        $productsData[] = $shippingData;
+        $this->assertEquals(
+            array_merge(
+                $basicData,
+                ['products' => $productsData],
+                ['buyer' => $buyerData]
+            ),
+            $this->_model->getDataForNewTransaction('1')
         );
     }
 
@@ -81,5 +110,24 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     protected function _expectOrderLoadById($order, $orderId)
     {
         $order->expects($this->once())->method('load')->with($this->equalTo($orderId))->will($this->returnSelf());
+    }
+
+    /**
+     * @param string $orderId
+     * @param array $productsData
+     * @param array|null $shippingData
+     * @param array|null $buyerData
+     * @param array $basicData
+     */
+    protected function _preTestGetDataForNewTransactionSuccess($orderId, array $productsData, $shippingData, $buyerData, array $basicData)
+    {
+        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_expectOrderLoadById($order, $orderId);
+        $order->expects($this->once())->method('getId')->willReturn($orderId);
+        $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
+        $this->_dataGetter->expects($this->once())->method('getProductsData')->willReturn($productsData);
+        $this->_dataGetter->expects($this->once())->method('getShippingData')->willReturn($shippingData);
+        $this->_dataGetter->expects($this->once())->method('getBuyerData')->willReturn($buyerData);
+        $this->_dataGetter->expects($this->once())->method('getBasicData')->willReturn($basicData);
     }
 }
