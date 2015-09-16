@@ -13,13 +13,21 @@ class Order
     protected $_orderFactory;
 
     /**
+     * @var Order\DataGetter
+     */
+    protected $_dataGetter;
+
+    /**
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param Order\DataGetter $dataGetter
      */
     public function __construct(
-        \Magento\Sales\Model\OrderFactory $orderFactory
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        Order\DataGetter $dataGetter
     )
     {
         $this->_orderFactory = $orderFactory;
+        $this->_dataGetter = $dataGetter;
     }
 
     /**
@@ -35,37 +43,15 @@ class Order
         $order = $this->_orderFactory->create();
         $order->load($orderId);
         if ($order->getId()) {
-            $incrementId = $order->getIncrementId();
-            return [
-                'currencyCode' => $order->getOrderCurrencyCode(),
-                'totalAmount' => $order->getGrandTotal() * 100,
-                'extOrderId' => $incrementId,
-                'description' => __('Order # %1', [$incrementId]),
-                'products' => $this->_getProducts($order)
-            ];
+            $data = ['products' => $this->_dataGetter->getProductsData($order)];
+            $buyerData = $this->_dataGetter->getBuyerData($order);
+            if ($buyerData) {
+                $data['buyer'] = $buyerData;
+            }
+            $basicData = $this->_dataGetter->getBasicData($order);
+            return array_merge($basicData, $data);
         } else {
             throw new Order\Exception('Order with ID ' . $orderId . ' does not exist.');
         }
-    }
-
-    /**
-     * @param \Magento\Sales\Model\Order $order
-     * @return array
-     */
-    protected function _getProducts(\Magento\Sales\Model\Order $order)
-    {
-        /**
-         * @var $orderItem \Magento\Sales\Model\Order\Item
-         */
-        $products = [];
-        $orderItems = $order->getAllVisibleItems();
-        foreach ($orderItems as $orderItem) {
-            $products[] = [
-                'name' => $orderItem->getName(),
-                'unitPrice' => $orderItem->getPriceInclTax() * 100,
-                'quantity' => (float) $orderItem->getQtyOrdered()
-            ];
-        }
-        return $products;
     }
 }

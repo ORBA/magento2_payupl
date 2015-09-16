@@ -15,31 +15,35 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     protected $_objectManager;
 
     /**
+     * @var Order
+     */
+    protected $_model;
+
+    /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     protected $_orderFactory;
 
     /**
-     * @var Order
+     * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_model;
+    protected $_dataGetter;
 
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
         $this->_orderFactory = $this->getMockBuilder(\Magento\Sales\Model\OrderFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
+        $this->_dataGetter = $this->getMockBuilder(Order\DataGetter::class)->getMock();
         $this->_model = $this->_objectManager->getObject(Order::class, [
-            'orderFactory' => $this->_orderFactory
+            'orderFactory' => $this->_orderFactory,
+            'dataGetter' => $this->_dataGetter
         ]);
     }
 
     public function testGetDataForNewTransactionFailOrderNotFound()
     {
         $orderId = '1';
-        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->setMethods([
-            'load',
-            'getId'
-        ])->disableOriginalConstructor()->getMock();
+        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
         $this->_expectOrderLoadById($order, $orderId);
         $order->expects($this->once())->method('getId')->willReturn(null);
         $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
@@ -49,55 +53,25 @@ class OrderTest extends \PHPUnit_Framework_TestCase
 
     public function testGetDataForNewTransactionSuccess()
     {
-        $incrementId = '0000000001';
-        $id = '1';
-        $currency = 'PLN';
-        $amount = '10.9800';
-        $description = __('Order # %1', [$incrementId]);
-        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->setMethods([
-            'load',
-            'getId',
-            'getIncrementId',
-            'getOrderCurrencyCode',
-            'getGrandTotal',
-            'getAllVisibleItems'
-        ])->disableOriginalConstructor()->getMock();
-        $this->_expectOrderLoadById($order, $incrementId);
-        $order->expects($this->once())->method('getId')->willReturn($id);
-        $order->expects($this->once())->method('getIncrementId')->willReturn($incrementId);
-        $order->expects($this->once())->method('getOrderCurrencyCode')->willReturn($currency);
-        $order->expects($this->once())->method('getGrandTotal')->willReturn($amount);
-        $name = 'Example';
-        $price = '5.4900';
-        $quantity = '1.5';
-        $orderItem = $this->getMockBuilder(\Magento\Sales\Model\Order\Item::class)->setMethods([
-            'getName',
-            'getPriceInclTax',
-            'getQtyOrdered'
-        ])->disableOriginalConstructor()->getMock();
-        $orderItem->expects($this->once())->method('getName')->willReturn($name);
-        $orderItem->expects($this->once())->method('getPriceInclTax')->willReturn($price);
-        $orderItem->expects($this->once())->method('getQtyOrdered')->willReturn($quantity);
-        $orderItems = [
-            $orderItem
-        ];
-        $order->expects($this->once())->method('getAllVisibleItems')->willReturn($orderItems);
+        $orderId = '1';
+        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_expectOrderLoadById($order, $orderId);
+        $order->expects($this->once())->method('getId')->willReturn($orderId);
         $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
-        $dataForNewTransaction = $this->_model->getDataForNewTransaction($incrementId);
-        $this->assertEquals([
-            'currencyCode' => $currency,
-            'totalAmount' => $amount * 100,
-            'extOrderId' => $incrementId,
-            'description' => $description,
-            'products' => [
-                [
-                    'name' => $name,
-                    'unitPrice' => $price * 100,
-                    'quantity' => $quantity
-                ]
-            ]
-        ], $dataForNewTransaction);
-        $this->assertInternalType('float', $dataForNewTransaction['products'][0]['quantity']);
+        $productsData = ['products'];
+        $buyerData = ['buyer'];
+        $basicData = ['basic'];
+        $this->_dataGetter->expects($this->once())->method('getProductsData')->willReturn($productsData);
+        $this->_dataGetter->expects($this->once())->method('getBuyerData')->willReturn($buyerData);
+        $this->_dataGetter->expects($this->once())->method('getBasicData')->willReturn($basicData);
+        $this->assertEquals(
+            array_merge(
+                $basicData,
+                ['products' => $productsData],
+                ['buyer' => $buyerData]
+            ),
+            $this->_model->getDataForNewTransaction($orderId)
+        );
     }
 
     /**
