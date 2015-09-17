@@ -59,6 +59,7 @@ class Start extends \Magento\Framework\App\Action\Action
             $orderData = $this->_orderHelper->getDataForNewTransaction($orderId);
             $clientResult = $this->_client->orderCreate($orderData);
             $clientResponse = $clientResult->getResponse();
+            $this->_orderHelper->saveNewTransaction($orderId, $clientResponse->orderId, $orderData['extOrderId']);
             $redirectUrl = $clientResponse->redirectUri;
         } else {
             $redirectUrl = 'checkout/cart';

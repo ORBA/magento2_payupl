@@ -8,6 +8,18 @@ namespace Orba\Payupl\Model\Order;
 class DataGetter
 {
     /**
+     * @var DataGetter\ExtOrderId
+     */
+    protected $_extOrderIdHelper;
+
+    public function __construct(
+        DataGetter\ExtOrderId $extOrderIdHelper
+    )
+    {
+        $this->_extOrderIdHelper = $extOrderIdHelper;
+    }
+
+    /**
      * @param \Magento\Sales\Model\Order $order
      * @return array
      */
@@ -17,7 +29,7 @@ class DataGetter
         return [
             'currencyCode' => $order->getOrderCurrencyCode(),
             'totalAmount' => $order->getGrandTotal() * 100,
-            'extOrderId' => $incrementId,
+            'extOrderId' => $this->_extOrderIdHelper->generate($order),
             'description' => __('Order # %1', [$incrementId]),
         ];
     }

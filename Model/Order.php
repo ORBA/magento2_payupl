@@ -18,16 +18,23 @@ class Order
     protected $_dataGetter;
 
     /**
+     * @var TransactionFactory
+     */
+    protected $_transactionFactory;
+
+    /**
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
      * @param Order\DataGetter $dataGetter
      */
     public function __construct(
         \Magento\Sales\Model\OrderFactory $orderFactory,
-        Order\DataGetter $dataGetter
+        Order\DataGetter $dataGetter,
+        TransactionFactory $transactionFactory
     )
     {
         $this->_orderFactory = $orderFactory;
         $this->_dataGetter = $dataGetter;
+        $this->_transactionFactory = $transactionFactory;
     }
 
     /**
@@ -57,5 +64,17 @@ class Order
         } else {
             throw new Order\Exception('Order with ID ' . $orderId . ' does not exist.');
         }
+    }
+
+    public function saveNewTransaction($orderId, $payuplOrderId, $payuplExternalOrderId)
+    {
+        $transaction = $this->_transactionFactory->create();
+        $transaction
+            ->setOrderId($orderId)
+            ->setPayuplOrderId($payuplOrderId)
+            ->setPayuplExternalOrderId($payuplExternalOrderId)
+            ->setTry(1)
+            ->setStatus('NEW')
+            ->save();
     }
 }

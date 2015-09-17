@@ -14,10 +14,18 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
      */
     protected $_model;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_extOrderIdHelper;
+
     public function setUp()
     {
         $objectManager = new ObjectManager($this);
-        $this->_model = $objectManager->getObject(DataGetter::class, []);
+        $this->_extOrderIdHelper = $this->getMockBuilder(DataGetter\ExtOrderId::class)->disableOriginalConstructor()->getMock();
+        $this->_model = $objectManager->getObject(DataGetter::class, [
+            'extOrderIdHelper' => $this->_extOrderIdHelper
+        ]);
     }
 
     public function testGetBasicData()
@@ -26,14 +34,16 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $currency = 'PLN';
         $amount = '10.9800';
         $description = __('Order # %1', [$incrementId]);
+        $extOrderId = '0000000001-1';
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
         $order->expects($this->once())->method('getIncrementId')->willReturn($incrementId);
         $order->expects($this->once())->method('getOrderCurrencyCode')->willReturn($currency);
         $order->expects($this->once())->method('getGrandTotal')->willReturn($amount);
+        $this->_extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))->willReturn($extOrderId);
         $this->assertEquals([
             'currencyCode' => $currency,
             'totalAmount' => $amount * 100,
-            'extOrderId' => $incrementId,
+            'extOrderId' => $extOrderId,
             'description' => $description,
         ], $this->_model->getBasicData($order));
     }

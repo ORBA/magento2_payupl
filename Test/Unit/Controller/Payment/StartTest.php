@@ -75,7 +75,7 @@ class StartTest extends \PHPUnit_Framework_TestCase
     public function testRedirectToPayupl()
     {
         $orderId = '123';
-        $orderData = ['data'];
+        $orderData = ['extOrderId' => '0000000001-1'];
         $this->_successValidator->expects($this->once())->method('isValid')->willReturn(true);
         $this->_session->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
         $this->_orderHelper->expects($this->once())->method('getDataForNewTransaction')->with($this->equalTo($orderId))->willReturn($orderData);
@@ -83,7 +83,13 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willReturn($result);
         $response = $this->getMockBuilder(\stdClass::class)->getMock();
         $response->redirectUri = 'http://redirect.url';
+        $response->orderId = 'Z963D5JQR2230925GUEST000P01';
         $result->expects($this->once())->method('getResponse')->willReturn($response);
+        $this->_orderHelper->expects($this->once())->method('saveNewTransaction')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($response->orderId),
+            $this->equalTo($orderData['extOrderId'])
+        );
         $resultRedirect = $this->getMockBuilder(\Magento\Backend\Model\View\Result\Redirect::class)->disableOriginalConstructor()->getMock();
         $resultRedirect->expects($this->once())->method('setPath')->with($response->redirectUri);
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
