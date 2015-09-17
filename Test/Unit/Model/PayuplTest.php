@@ -50,6 +50,15 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         $this->_expectConfigActive(false);
         $this->assertFalse($this->_model->isAvailable($this->_getQuoteMock()));
     }
+
+    public function testIsAvailableActiveNoCarrier()
+    {
+        $this->_expectConfigActive(true);
+        $shippingMethod = null;
+        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethod);
+        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
+        $this->assertTrue($this->_model->isAvailable($quote));
+    }
     
     public function testIsAvailableActiveAllowedCarrier()
     {

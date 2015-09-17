@@ -61,13 +61,15 @@ class DataGetter
      */
     public function getShippingData(\Magento\Sales\Model\Order $order)
     {
-        $shippingAmount = (float) $order->getShippingInclTax();
-        if ($shippingAmount) {
-            return [
-                'name' => $order->getShippingDescription(),
-                'unitPrice' => $shippingAmount * 100,
-                'quantity' => 1
-            ];
+        if ($order->getShippingMethod()) {
+            $shippingInclTax = (float) $order->getShippingInclTax();
+            if ($shippingInclTax) {
+                return [
+                    'name' => __('Shipping Method') . ': ' . $order->getShippingDescription(),
+                    'unitPrice' => $shippingInclTax * 100,
+                    'quantity' => 1
+                ];
+            }
         }
         return null;
     }

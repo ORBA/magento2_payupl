@@ -12,6 +12,7 @@
                 <title>Payu.pl</title>
                 <order_status>pending_payment</order_status>
                 <model>Orba\Payupl\Model\Payupl</model>
+                <allowspecific>0</allowspecific>
             </orba_payupl>
         </payment>
     </default>

@@ -81,7 +81,7 @@ class Payupl extends AbstractMethod
         if (is_null($quote)) {
             return parent::isAvailable();
         } else {
-            return parent::isAvailable($quote) && $this->_isCarrierAllowed($quote->getShippingAddress()->getShippingMethod());
+            return parent::isAvailable($quote) && $this->_isShippingMethodAllowed($quote->getShippingAddress()->getShippingMethod());
         }
     }
 
@@ -94,12 +94,15 @@ class Payupl extends AbstractMethod
     }
 
     /**
-     * @param string $shippingMethod
+     * @param null|string $shippingMethod
      * @return bool
      */
-    protected function _isCarrierAllowed($shippingMethod)
+    protected function _isShippingMethodAllowed($shippingMethod)
     {
-        $allowedCarriers = explode(',', $this->getConfigData('allowed_carriers'));
-        return in_array($shippingMethod, $allowedCarriers);
+        if ($shippingMethod) {
+            $allowedCarriers = explode(',', $this->getConfigData('allowed_carriers'));
+            return in_array($shippingMethod, $allowedCarriers);
+        }
+        return true;
     }
 }

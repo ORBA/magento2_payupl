@@ -67,7 +67,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
             $requiredProductKeys = $this->_getRequiredProductKeys();
             foreach ($data['products'] as $productData) {
                 foreach ($requiredProductKeys as $key) {
-                    if (!isset($productData[$key]) || empty($productData[$key])) {
+                    if (!isset($productData[$key]) || $productData[$key] === '') {
                         return false;
                     }
                     if ($key === 'quantity' && !$this->validatePositiveFloat($productData[$key])) {
