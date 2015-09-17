@@ -3,7 +3,7 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Order;
+namespace Orba\Payupl\Model\Client\Rest\Order;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
@@ -17,15 +17,73 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
+    protected $_urlBuilder;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_configHelper;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $_extOrderIdHelper;
+
+    /**
+     * @var \Magento\Framework\View\Context
+     */
+    protected $_context;
 
     public function setUp()
     {
-        $objectManager = new ObjectManager($this);
+        $objectManagerHelper = new ObjectManager($this);
+        $this->_urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
+        $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Rest\Config::class)->disableOriginalConstructor()->getMock();
         $this->_extOrderIdHelper = $this->getMockBuilder(DataGetter\ExtOrderId::class)->disableOriginalConstructor()->getMock();
-        $this->_model = $objectManager->getObject(DataGetter::class, [
-            'extOrderIdHelper' => $this->_extOrderIdHelper
-        ]);
+        $this->_context = $objectManagerHelper->getObject(
+            \Magento\Framework\View\Context::class,
+            ['urlBuilder' => $this->_urlBuilder]
+        );
+        $this->_model = $objectManagerHelper->getObject(
+            DataGetter::class,
+            [
+                'context' => $this->_context,
+                'configHelper' => $this->_configHelper,
+                'extOrderIdHelper' => $this->_extOrderIdHelper
+            ]
+        );
+    }
+    
+    public function testContinueUrl()
+    {
+        $path = 'orba_payupl/payment/continue';
+        $baseUrl = 'http://example.com/';
+        $url = $baseUrl . $path;
+        $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
+        $this->assertEquals($url, $this->_model->getContinueUrl());
+    }
+
+    public function testNotifyUrl()
+    {
+        $path = 'orba_payupl/payment/notify';
+        $baseUrl = 'http://example.com/';
+        $url = $baseUrl . $path;
+        $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
+        $this->assertEquals($url, $this->_model->getNotifyUrl());
+    }
+
+    public function testCustomerIp()
+    {
+        $ip = '127.0.0.1';
+        $_SERVER['REMOTE_ADDR'] = $ip;
+        $this->assertEquals($ip, $this->_model->getCustomerIp());
+    }
+
+    public function testMerchantPosId()
+    {
+        $merchantPosId = '123456';
+        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('merchant_pos_id'))->willReturn($merchantPosId);
+        $this->assertEquals($merchantPosId, $this->_model->getMerchantPosId());
     }
 
     public function testGetBasicData()

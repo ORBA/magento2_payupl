@@ -3,9 +3,10 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model\Client\Rest;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Orba\Payupl\Model\Client\Exception;
 
 class MethodCallerTest extends \PHPUnit_Framework_TestCase
 {

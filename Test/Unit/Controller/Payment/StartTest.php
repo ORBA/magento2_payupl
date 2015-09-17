@@ -51,14 +51,12 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $this->_successValidator = $this->getMockBuilder(\Magento\Checkout\Model\Session\SuccessValidator::class)->disableOriginalConstructor()->getMock();
         $this->_resultRedirectFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RedirectFactory::class)->disableOriginalConstructor()->getMock();
         $this->_session = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId'])->getMock();
-        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_client = $this->getMockBuilder(\Orba\Payupl\Model\Client::class)->disableOriginalConstructor()->getMock();
+        $this->_client = $this->getMockBuilder(\Orba\Payupl\Model\ClientInterface::class)->disableOriginalConstructor()->getMock();
         $context->expects($this->once())->method('getResultRedirectFactory')->willReturn($this->_resultRedirectFactory);
         $this->_controller = $this->_objectManager->getObject(Start::class, [
             'context' => $context,
             'successValidator' => $this->_successValidator,
             'session' => $this->_session,
-            'orderHelper' => $this->_orderHelper,
             'client' => $this->_client
         ]);
     }
@@ -78,20 +76,22 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $orderData = ['extOrderId' => '0000000001-1'];
         $this->_successValidator->expects($this->once())->method('isValid')->willReturn(true);
         $this->_session->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
-        $this->_orderHelper->expects($this->once())->method('getDataForNewTransaction')->with($this->equalTo($orderId))->willReturn($orderData);
-        $result = $this->getMockBuilder(\OpenPayU_Result::class)->disableOriginalConstructor()->getMock();
-        $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willReturn($result);
-        $response = $this->getMockBuilder(\stdClass::class)->getMock();
-        $response->redirectUri = 'http://redirect.url';
-        $response->orderId = 'Z963D5JQR2230925GUEST000P01';
-        $result->expects($this->once())->method('getResponse')->willReturn($response);
-        $this->_orderHelper->expects($this->once())->method('saveNewTransaction')->with(
+        $orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
+        $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($orderHelper);
+        $orderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($orderId))->willReturn($orderData);
+        $response = [
+            'redirectUri' => 'http://redirect.url',
+            'orderId' => 'Z963D5JQR2230925GUEST000P01',
+            'extOrderId' => $orderData['extOrderId']
+        ];
+        $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willReturn($response);
+        $orderHelper->expects($this->once())->method('saveNewTransaction')->with(
             $this->equalTo($orderId),
-            $this->equalTo($response->orderId),
-            $this->equalTo($orderData['extOrderId'])
+            $this->equalTo($response['orderId']),
+            $this->equalTo($response['extOrderId'])
         );
         $resultRedirect = $this->getMockBuilder(\Magento\Backend\Model\View\Result\Redirect::class)->disableOriginalConstructor()->getMock();
-        $resultRedirect->expects($this->once())->method('setPath')->with($response->redirectUri);
+        $resultRedirect->expects($this->once())->method('setPath')->with($response['redirectUri']);
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $this->assertEquals($resultRedirect, $this->_controller->execute());
     }

@@ -3,20 +3,72 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Order;
+namespace Orba\Payupl\Model\Client\Rest\Order;
+
+use \Orba\Payupl\Model\Client\Rest\Config;
 
 class DataGetter
 {
+    /**
+     * @var \Magento\Framework\UrlInterface
+     */
+    protected $_urlBuilder;
+
+    /**
+     * @var Config
+     */
+    protected $_configHelper;
+
     /**
      * @var DataGetter\ExtOrderId
      */
     protected $_extOrderIdHelper;
 
+    /**
+     * @param \Magento\Framework\View\Context $context
+     * @param Config $configHelper
+     */
     public function __construct(
+        \Magento\Framework\View\Context $context,
+        Config $configHelper,
         DataGetter\ExtOrderId $extOrderIdHelper
     )
     {
+        $this->_urlBuilder = $context->getUrlBuilder();
+        $this->_configHelper = $configHelper;
         $this->_extOrderIdHelper = $extOrderIdHelper;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContinueUrl()
+    {
+        return $this->_urlBuilder->getUrl('orba_payupl/payment/continue');
+    }
+
+    /**
+     * @return string
+     */
+    public function getNotifyUrl()
+    {
+        return $this->_urlBuilder->getUrl('orba_payupl/payment/notify');
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomerIp()
+    {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getMerchantPosId()
+    {
+        return $this->_configHelper->getConfig('merchant_pos_id');
     }
 
     /**

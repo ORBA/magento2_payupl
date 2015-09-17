@@ -18,7 +18,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_model = $objectManagerHelper->getObject(
-            \Orba\Payupl\Model\Client\Order\DataValidator::class,
+            \Orba\Payupl\Model\Client\DataValidator::class,
             []
         );
     }

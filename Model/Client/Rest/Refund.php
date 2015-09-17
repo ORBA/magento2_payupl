@@ -3,9 +3,11 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model\Client\Rest;
 
-class Refund
+use Orba\Payupl\Model\Client\RefundInterface;
+
+class Refund implements RefundInterface
 {
     /**
      * @var Refund\DataValidator
@@ -36,10 +38,7 @@ class Refund
     }
 
     /**
-     * @param string $orderId
-     * @param string $description
-     * @param null|int $amount
-     * @return bool
+     * @inheritdoc
      */
     public function validateCreate($orderId = '', $description = '', $amount = null)
     {
@@ -50,13 +49,11 @@ class Refund
     }
 
     /**
-     * @param string $orderId
-     * @param string $description
-     * @param null|int $amount
-     * @return bool|\OpenPayU_Result
+     * @inheritdoc
      */
     public function create($orderId = '', $description = '', $amount = null)
     {
-        return $this->_methodCaller->call('refundCreate', [$orderId, $description, $amount]);
+        return (bool) ($this->_methodCaller->call('refundCreate', [$orderId, $description, $amount]));
+
     }
 }

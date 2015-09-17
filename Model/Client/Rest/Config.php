@@ -3,9 +3,12 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model\Client\Rest;
 
-class Config
+use Orba\Payupl\Model\Client\ConfigInterface;
+use Orba\Payupl\Model\Client\Exception as Exception;
+
+class Config implements ConfigInterface
 {
     const XML_PATH_MERCHANT_POS_ID  = 'payment/orba_payupl/merchant_pos_id';
     const XML_PATH_SIGNATURE_KEY    = 'payment/orba_payupl/signature_key';

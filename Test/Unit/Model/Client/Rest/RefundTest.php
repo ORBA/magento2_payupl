@@ -3,14 +3,14 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model\Client\Rest;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 class RefundTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Orba\Payupl\Model\Client\Refund
+     * @var Refund
      */
     protected $_model;
 
@@ -101,7 +101,7 @@ class RefundTest extends \PHPUnit_Framework_TestCase
             $this->equalTo('refundCreate'),
             $this->equalTo([$orderId, $description, $amount])
         )->willReturn($result);
-        $this->assertEquals($result, $this->_model->create($orderId, $description, $amount));
+        $this->assertTrue($this->_model->create($orderId, $description, $amount));
     }
 
     /**

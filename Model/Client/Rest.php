@@ -3,11 +3,12 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model;
+namespace Orba\Payupl\Model\Client;
 
 use Orba\Payupl\Model\Client\Exception;
+use Orba\Payupl\Model\ClientInterface;
 
-class Client
+class Rest implements ClientInterface
 {
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
@@ -15,21 +16,22 @@ class Client
     protected $_scopeConfig;
 
     /**
-     * @var Client\Order
+     * @var OrderInterface
      */
     protected $_orderHelper;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param Client\Config $configHelper
-     * @param Client\Order $orderHelper
-     * @param Client\Refund $refundHelper
+     * @param Rest\Config $configHelper
+     * @param Rest\Order $orderHelper
+     * @param Rest\Refund $refundHelper
+     * @throws Exception
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Orba\Payupl\Model\Client\Config $configHelper,
-        \Orba\Payupl\Model\Client\Order $orderHelper,
-        \Orba\Payupl\Model\Client\Refund $refundHelper
+        Rest\Config $configHelper,
+        Rest\Order $orderHelper,
+        Rest\Refund $refundHelper
     )
     {
         $this->_scopeConfig = $scopeConfig;
@@ -124,6 +126,13 @@ class Client
         return $result;
     }
 
+    /**
+     * @param string $orderId
+     * @param string $description
+     * @param int $amount
+     * @return bool|\OpenPayU_Result
+     * @throws \Orba\Payupl\Model\Client\Exception
+     */
     public function refundCreate($orderId = '', $description = '', $amount = null)
     {
         if (!$this->_refundHelper->validateCreate($orderId, $description, $amount)) {
@@ -134,5 +143,10 @@ class Client
             throw new Exception('There was a problem while processing refund create request.');
         }
         return $result;
+    }
+
+    public function getOrderHelper()
+    {
+        return $this->_orderHelper;
     }
 }

@@ -3,14 +3,14 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model;
+namespace Orba\Payupl\Model\Client;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class ClientTest extends \PHPUnit_Framework_TestCase
+class RestTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Orba\Payupl\Model\Client
+     * @var Rest
      */
     protected $_model;
 
@@ -37,9 +37,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_objectManagerHelper = new ObjectManager($this);
-        $this->_configHelper = $this->getMockBuilder(Client\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_orderHelper = $this->getMockBuilder(Client\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_refundHelper = $this->getMockBuilder(Client\Refund::class)->disableOriginalConstructor()->getMock();
+        $this->_configHelper = $this->getMockBuilder(Rest\Config::class)->disableOriginalConstructor()->getMock();
+        $this->_orderHelper = $this->getMockBuilder(Rest\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_refundHelper = $this->getMockBuilder(Rest\Refund::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->_getModel();
     }
 
@@ -213,13 +213,18 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $this->_model->refundCreate($orderId, $description, $amount));
     }
 
+    public function testGetOrderHelper()
+    {
+        $this->assertInstanceOf(Rest\Order::class, $this->_model->getOrderHelper());
+    }
+
     /**
      * @return object
      */
     protected function _getModel()
     {
         return $this->_objectManagerHelper->getObject(
-            \Orba\Payupl\Model\Client::class,
+            Rest::class,
             [
                 'configHelper' => $this->_configHelper,
                 'orderHelper' => $this->_orderHelper,
@@ -233,6 +238,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      */
     protected function _getResultMock()
     {
-        return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
+        return $this->getMockBuilder(\Magento\Framework\Object::class)->getMock();
     }
 }

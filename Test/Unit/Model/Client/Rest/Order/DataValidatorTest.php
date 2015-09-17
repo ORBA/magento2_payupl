@@ -3,14 +3,14 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client\Order;
+namespace Orba\Payupl\Model\Client\Rest\Order;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 class DataValidatorTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Orba\Payupl\Model\Client\Order\DataValidator
+     * @var \Orba\Payupl\Model\Client\Rest\Order\DataValidator
      */
     protected $_model;
 
@@ -54,7 +54,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_model = $objectManagerHelper->getObject(
-            \Orba\Payupl\Model\Client\Order\DataValidator::class,
+            DataValidator::class,
             []
         );
     }

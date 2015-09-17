@@ -3,9 +3,12 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model\Client\Rest;
 
-class MethodCaller
+use Orba\Payupl\Model\Client\MethodCallerInterface;
+use Orba\Payupl\Model\Client\Exception;
+
+class MethodCaller implements MethodCallerInterface
 {
     /**
      * @var MethodCaller\Raw

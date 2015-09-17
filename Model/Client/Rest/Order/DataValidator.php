@@ -3,7 +3,7 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client\Order;
+namespace Orba\Payupl\Model\Client\Rest\Order;
 
 class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
 {
