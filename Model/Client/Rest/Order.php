@@ -21,7 +21,7 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @var Order\DataGetter
      */
-    protected $_dataAdder;
+    protected $_dataGetter;
 
     /**
      * @var MethodCaller
@@ -29,38 +29,30 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     protected $_methodCaller;
 
     /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    protected $_orderFactory;
-
-    /**
-     * @var Order\DataGetter
-     */
-    protected $_dataGetter;
-
-    /**
      * @param \Orba\Payupl\Model\TransactionFactory $transactionFactory
-     * @param Order\DataValidator $dataValidator
-     * @param Order\DataGetter $dataAdder
-     * @param \Orba\Payupl\Model\Client\Rest\MethodCaller $methodCaller
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param Order\DataValidator $dataValidator
      * @param Order\DataGetter $dataGetter
+     * @param \Orba\Payupl\Model\Client\Rest\MethodCaller $methodCaller
      */
     public function __construct(
         \Orba\Payupl\Model\TransactionFactory $transactionFactory,
-        Order\DataValidator $dataValidator,
-        Order\DataGetter $dataAdder,
-        MethodCaller $methodCaller,
         \Magento\Sales\Model\OrderFactory $orderFactory,
-        Order\DataGetter $dataGetter
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        Order\DataValidator $dataValidator,
+        Order\DataGetter $dataGetter,
+        MethodCaller $methodCaller
     )
     {
-        parent::__construct($transactionFactory);
+        parent::__construct(
+            $transactionFactory,
+            $orderFactory,
+            $scopeConfig
+        );
         $this->_dataValidator = $dataValidator;
-        $this->_dataAdder = $dataAdder;
-        $this->_methodCaller = $methodCaller;
-        $this->_orderFactory = $orderFactory;
         $this->_dataGetter = $dataGetter;
+        $this->_methodCaller = $methodCaller;
     }
 
     /**
@@ -115,10 +107,10 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     public function addSpecialData(array $data = [])
     {
         return array_merge($data, [
-            'continueUrl' => $this->_dataAdder->getContinueUrl(),
-            'notifyUrl' => $this->_dataAdder->getNotifyUrl(),
-            'customerIp' => $this->_dataAdder->getCustomerIp(),
-            'merchantPosId' => $this->_dataAdder->getMerchantPosId()
+            'continueUrl' => $this->_dataGetter->getContinueUrl(),
+            'notifyUrl' => $this->_dataGetter->getNotifyUrl(),
+            'customerIp' => $this->_dataGetter->getCustomerIp(),
+            'merchantPosId' => $this->_dataGetter->getMerchantPosId()
         ]);
     }
 
@@ -193,28 +185,19 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function getDataForOrderCreate($orderId)
+    public function getDataForOrderCreate(\Magento\Sales\Model\Order $order)
     {
-        /**
-         * @var $order \Magento\Sales\Model\Order
-         */
-        $order = $this->_orderFactory->create();
-        $order->load($orderId);
-        if ($order->getId()) {
-            $data = ['products' => $this->_dataGetter->getProductsData($order)];
-            $shippingData = $this->_dataGetter->getShippingData($order);
-            if ($shippingData) {
-                $data['products'][] = $shippingData;
-            }
-            $buyerData = $this->_dataGetter->getBuyerData($order);
-            if ($buyerData) {
-                $data['buyer'] = $buyerData;
-            }
-            $basicData = $this->_dataGetter->getBasicData($order);
-            return array_merge($basicData, $data);
-        } else {
-            throw new Exception('Order with ID ' . $orderId . ' does not exist.');
+        $data = ['products' => $this->_dataGetter->getProductsData($order)];
+        $shippingData = $this->_dataGetter->getShippingData($order);
+        if ($shippingData) {
+            $data['products'][] = $shippingData;
         }
+        $buyerData = $this->_dataGetter->getBuyerData($order);
+        if ($buyerData) {
+            $data['buyer'] = $buyerData;
+        }
+        $basicData = $this->_dataGetter->getBasicData($order);
+        return array_merge($basicData, $data);
     }
 
     /**

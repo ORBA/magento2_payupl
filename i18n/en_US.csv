@@ -3,6 +3,7 @@
 "Copy the value of Second key (MD5) parameter from your POS configuration in Payu.pl panel","Copy the value of <b>Second key (MD5)</b> parameter from your POS configuration in Payu.pl panel"
 "Enabled","Enabled"
 "Merchant POS ID","Merchant POS ID"
+"New Order Status","New Order Status"
 "Payment from Applicable Countries","Payment from Applicable Countries"
 "Payment from Specific Countries","Payment from Specific Countries"
 "Place Order and Pay with Payu.pl","Place Order and Pay with Payu.pl"

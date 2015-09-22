@@ -54,9 +54,11 @@ class Start extends \Magento\Framework\App\Action\Action
         if ($this->_successValidator->isValid()) {
             $orderId = $this->_session->getLastOrderId();
             $orderHelper = $this->_client->getOrderHelper();
-            $orderData = $orderHelper->getDataForOrderCreate($orderId);
+            $order = $orderHelper->loadOrderById($orderId);
+            $orderData = $orderHelper->getDataForOrderCreate($order);
             $result = $this->_client->orderCreate($orderData);
             $orderHelper->saveNewTransaction($orderId, $result['orderId'], $result['extOrderId']);
+            $orderHelper->setNewOrderStatus($order);
             $redirectUrl = $result['redirectUri'];
         } else {
             $redirectUrl = 'checkout/cart';

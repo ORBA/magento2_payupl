@@ -6,6 +6,7 @@
 namespace Orba\Payupl\Model\Client\Rest;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Orba\Payupl\Model\Client\Exception;
 
 class OrderTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,7 +23,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_dataAdder;
+    protected $_dataGetter;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -33,13 +34,13 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_dataValidator = $this->getMockBuilder(Order\DataValidator::class)->getMock();
-        $this->_dataAdder = $this->getMockBuilder(Order\DataGetter::class)->disableOriginalConstructor()->getMock();
+        $this->_dataGetter = $this->getMockBuilder(Order\DataGetter::class)->disableOriginalConstructor()->getMock();
         $this->_methodCaller = $this->getMockBuilder(MethodCaller::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
             Order::class,
             [
                 'dataValidator' => $this->_dataValidator,
-                'dataAdder' => $this->_dataAdder,
+                'dataGetter' => $this->_dataGetter,
                 'methodCaller' => $this->_methodCaller
             ]
         );
@@ -80,16 +81,71 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $data = [
             'example' => true
         ];
-        $this->_dataAdder->expects($this->once())->method('getContinueUrl');
-        $this->_dataAdder->expects($this->once())->method('getNotifyUrl');
-        $this->_dataAdder->expects($this->once())->method('getCustomerIp');
-        $this->_dataAdder->expects($this->once())->method('getMerchantPosId');
+        $this->_dataGetter->expects($this->once())->method('getContinueUrl');
+        $this->_dataGetter->expects($this->once())->method('getNotifyUrl');
+        $this->_dataGetter->expects($this->once())->method('getCustomerIp');
+        $this->_dataGetter->expects($this->once())->method('getMerchantPosId');
         $extendedData = $this->_model->addSpecialData($data);
         $this->assertEquals($data, array_intersect($extendedData, $data));
         $this->assertArrayHasKey('continueUrl', $extendedData);
         $this->assertArrayHasKey('notifyUrl', $extendedData);
         $this->assertArrayHasKey('customerIp', $extendedData);
         $this->assertArrayHasKey('merchantPosId', $extendedData);
+    }
+
+    public function testGetDataForOrderCreateSuccessNoBuyer()
+    {
+        $productsData = ['products'];
+        $shippingData = ['shipping'];
+        $buyerData = null;
+        $basicData = ['basic'];
+        $order = $this->_getOrderMock();
+        $this->_preTestGetDataForOrderCreateSuccess($order, $productsData, $shippingData, $buyerData, $basicData);
+        $productsData[] = $shippingData;
+        $this->assertEquals(
+            array_merge(
+                $basicData,
+                ['products' => $productsData]
+            ),
+            $this->_model->getDataForOrderCreate($order)
+        );
+    }
+
+    public function testGetDataForOrderCreateSuccessNoShipping()
+    {
+        $productsData = ['products'];
+        $shippingData = null;
+        $buyerData = ['buyer'];
+        $basicData = ['basic'];
+        $order = $this->_getOrderMock();
+        $this->_preTestGetDataForOrderCreateSuccess($order, $productsData, $shippingData, $buyerData, $basicData);
+        $this->assertEquals(
+            array_merge(
+                $basicData,
+                ['products' => $productsData],
+                ['buyer' => $buyerData]
+            ),
+            $this->_model->getDataForOrderCreate($order)
+        );
+    }
+
+    public function testGetDataForOrderCreateSuccessAllData()
+    {
+        $productsData = ['products'];
+        $shippingData = ['shipping'];
+        $buyerData = ['buyer'];
+        $basicData = ['basic'];
+        $order = $this->_getOrderMock();
+        $this->_preTestGetDataForOrderCreateSuccess($order, $productsData, $shippingData, $buyerData, $basicData);
+        $productsData[] = $shippingData;
+        $this->assertEquals(
+            array_merge(
+                $basicData,
+                ['products' => $productsData],
+                ['buyer' => $buyerData]
+            ),
+            $this->_model->getDataForOrderCreate($order)
+        );
     }
 
     public function testCreateFail()
@@ -105,7 +161,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testCreateSuccess()
     {
         $data = ['extOrderId' => '123'];
-        $result = $this->_getResult();
+        $result = $this->_getResultMock();
         $response = new \stdClass();
         $response->orderId = '456';
         $response->redirectUri = 'http://redirect.uri';
@@ -141,7 +197,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testRetrieveSuccess()
     {
         $id = '123456';
-        $result = $this->_getResult();
+        $result = $this->_getResultMock();
         $response = new \stdClass();
         $response->status = 'COMPLETED';
         $result->expects($this->once())->method('getResponse')->willReturn($response);
@@ -172,7 +228,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testCancelSuccess()
     {
         $id = '123456';
-        $result = $this->_getResult();
+        $result = $this->_getResultMock();
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderCancel'),
             $this->equalTo([$id])
@@ -206,7 +262,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testStatusUpdateSuccess()
     {
         $data = ['data'];
-        $result = $this->_getResult();
+        $result = $this->_getResultMock();
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderStatusUpdate'),
             $this->equalTo([$data])
@@ -233,7 +289,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testConsumeNotificationSuccess()
     {
         $data = ['data'];
-        $result = $this->_getResult();
+        $result = $this->_getResultMock();
         $response = new \stdClass();
         $response->order = new \stdClass();
         $response->order->status = 'COMPLETED';
@@ -255,9 +311,31 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(Order::STATUS_NEW, $this->_model->getNewStatus());
     }
 
-    protected function _getResult()
+    protected function _getResultMock()
     {
         return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
     }
 
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @param array $productsData
+     * @param array|null $shippingData
+     * @param array|null $buyerData
+     * @param array $basicData
+     */
+    protected function _preTestGetDataForOrderCreateSuccess(\Magento\Sales\Model\Order $order, array $productsData, $shippingData, $buyerData, array $basicData)
+    {
+        $this->_dataGetter->expects($this->once())->method('getProductsData')->with($this->equalTo($order))->willReturn($productsData);
+        $this->_dataGetter->expects($this->once())->method('getShippingData')->with($this->equalTo($order))->willReturn($shippingData);
+        $this->_dataGetter->expects($this->once())->method('getBuyerData')->with($this->equalTo($order))->willReturn($buyerData);
+        $this->_dataGetter->expects($this->once())->method('getBasicData')->with($this->equalTo($order))->willReturn($basicData);
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getOrderMock()
+    {
+        return $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+    }
 }

@@ -79,10 +79,15 @@ interface OrderInterface
 
     /**
      * @param int $orderId
-     * @return array
-     * @throws \Orba\Payupl\Model\Client\Exception
+     * @return bool|\Magento\Sales\Model\Order
      */
-    public function getDataForOrderCreate($orderId);
+    public function loadOrderById($orderId);
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return array
+     */
+    public function getDataForOrderCreate(\Magento\Sales\Model\Order $order);
 
     /**
      * @param int $orderId
@@ -96,4 +101,10 @@ interface OrderInterface
      * @return string
      */
     public function getNewStatus();
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return void
+     */
+    public function setNewOrderStatus(\Magento\Sales\Model\Order $order);
 }
