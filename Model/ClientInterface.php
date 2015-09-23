@@ -9,9 +9,9 @@ interface ClientInterface
 {
     public function orderCreate(array $data = []);
 
-    public function orderRetrieve($id);
+    public function orderRetrieve($payuplOrderId);
 
-    public function orderCancel($id);
+    public function orderCancel($payuplOrderId);
 
     public function orderStatusUpdate(array $data = []);
 

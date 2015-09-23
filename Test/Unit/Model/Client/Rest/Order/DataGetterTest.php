@@ -56,7 +56,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     
     public function testContinueUrl()
     {
-        $path = 'orba_payupl/payment/continue';
+        $path = 'orba_payupl/payment/end';
         $baseUrl = 'http://example.com/';
         $url = $baseUrl . $path;
         $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));

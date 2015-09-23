@@ -198,10 +198,15 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     {
         $id = '123456';
         $result = $this->_getResultMock();
-        $response = new \stdClass();
-        $response->status = 'COMPLETED';
+        $response = (object) [
+            'orders' => [
+                0 => (object) [
+                    'status' => 'COMPLETED'
+                ]
+            ]
+        ];
         $result->expects($this->once())->method('getResponse')->willReturn($response);
-        $status = $response->status;
+        $status = $response->orders[0]->status;
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderRetrieve'),
             $this->equalTo([$id])
@@ -311,6 +316,25 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(Order::STATUS_NEW, $this->_model->getNewStatus());
     }
 
+    public function testCanContinueCheckoutFailInvalidStatus()
+    {
+        $this->setExpectedException(Exception::class, 'Invalid status.');
+        $this->_model->canContinueCheckout('INVALID STATUS');
+    }
+
+    public function testCanContinueCheckoutSuccess()
+    {
+        $this->assertFalse($this->_model->canContinueCheckout(Order::STATUS_CANCELED));
+        $this->assertFalse($this->_model->canContinueCheckout(Order::STATUS_REJECTED));
+        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_NEW));
+        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_PENDING));
+        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_WAITING));
+        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_COMPLETED));
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     protected function _getResultMock()
     {
         return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();

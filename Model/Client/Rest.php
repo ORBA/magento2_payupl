@@ -59,16 +59,16 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param string $id
+     * @param string $payuplOrderId
      * @return bool|\OpenPayU_Result
      * @throws Exception
      */
-    public function orderRetrieve($id)
+    public function orderRetrieve($payuplOrderId)
     {
-        if (!$this->_orderHelper->validateRetrieve($id)) {
+        if (!$this->_orderHelper->validateRetrieve($payuplOrderId)) {
             throw new Exception('ID of order to retrieve is empty.');
         }
-        $result = $this->_orderHelper->retrieve($id);
+        $result = $this->_orderHelper->retrieve($payuplOrderId);
         if (!$result) {
             throw new Exception('There was a problem while processing order retrieve request.');
         }
@@ -76,16 +76,16 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param string $id
+     * @param string $payuplOrderId
      * @return bool|\OpenPayU_Result
      * @throws Exception
      */
-    public function orderCancel($id)
+    public function orderCancel($payuplOrderId)
     {
-        if (!$this->_orderHelper->validateCancel($id)) {
+        if (!$this->_orderHelper->validateCancel($payuplOrderId)) {
             throw new Exception('ID of order to cancel is empty.');
         }
-        $result = $this->_orderHelper->cancel($id);
+        $result = $this->_orderHelper->cancel($payuplOrderId);
         if (!$result) {
             throw new Exception('There was a problem while processing order cancel request.');
         }

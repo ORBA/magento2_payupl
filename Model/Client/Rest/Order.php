@@ -11,7 +11,12 @@ use Orba\Payupl\Model\Client\Exception;
 
 class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
 {
-    const STATUS_NEW = 'NEW';
+    const STATUS_NEW        = 'NEW';
+    const STATUS_PENDING    = 'PENDING';
+    const STATUS_WAITING    = 'WAITING FOR CONFIRMATION';
+    const STATUS_CANCELED   = 'CANCELED';
+    const STATUS_REJECTED   = 'REJECTED';
+    const STATUS_COMPLETED  = 'COMPLETED';
 
     /**
      * @var Order\DataValidator
@@ -30,6 +35,7 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
 
     /**
      * @param \Orba\Payupl\Model\TransactionFactory $transactionFactory
+     * @param \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param Order\DataValidator $dataValidator
@@ -38,6 +44,7 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
      */
     public function __construct(
         \Orba\Payupl\Model\TransactionFactory $transactionFactory,
+        \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         Order\DataValidator $dataValidator,
@@ -47,6 +54,7 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     {
         parent::__construct(
             $transactionFactory,
+            $transactionCollectionFactory,
             $orderFactory,
             $scopeConfig
         );
@@ -69,17 +77,17 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function validateRetrieve($id)
+    public function validateRetrieve($payuplOrderId)
     {
-        return $this->_dataValidator->validateEmpty($id);
+        return $this->_dataValidator->validateEmpty($payuplOrderId);
     }
 
     /**
      * @inheritdoc
      */
-    public function validateCancel($id)
+    public function validateCancel($payuplOrderId)
     {
-        return $this->_dataValidator->validateEmpty($id);
+        return $this->_dataValidator->validateEmpty($payuplOrderId);
     }
 
     /**
@@ -137,12 +145,12 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function retrieve($id)
+    public function retrieve($payuplOrderId)
     {
-        $result = $this->_methodCaller->call('orderRetrieve', [$id]);
+        $result = $this->_methodCaller->call('orderRetrieve', [$payuplOrderId]);
         if ($result) {
             $response = $result->getResponse();
-            return $response->status;
+            return $response->orders[0]->status;
         }
         return false;
     }
@@ -150,9 +158,9 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function cancel($id)
+    public function cancel($payuplOrderId)
     {
-        return (bool) ($this->_methodCaller->call('orderCancel', [$id]));
+        return (bool) ($this->_methodCaller->call('orderCancel', [$payuplOrderId]));
     }
 
     /**
@@ -206,6 +214,24 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     public function getNewStatus()
     {
         return self::STATUS_NEW;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canContinueCheckout($status)
+    {
+        switch ($status) {
+            case self::STATUS_NEW:
+            case self::STATUS_PENDING:
+            case self::STATUS_WAITING:
+            case self::STATUS_COMPLETED:
+                return true;
+            case self::STATUS_CANCELED:
+            case self::STATUS_REJECTED:
+                return false;
+        }
+        throw new \Orba\Payupl\Model\Client\Exception('Invalid status.');
     }
 
 }

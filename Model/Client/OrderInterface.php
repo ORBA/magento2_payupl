@@ -48,18 +48,18 @@ interface OrderInterface
     /**
      * Return false on fail or transaction status on success.
      *
-     * @param string $id
+     * @param string $payuplOrderId
      * @return string|false
      */
-    public function retrieve($id);
+    public function retrieve($payuplOrderId);
 
     /**
      * Return false on fail or true success.
      *
-     * @param string $id
+     * @param string $payuplOrderId
      * @return bool
      */
-    public function cancel($id);
+    public function cancel($payuplOrderId);
 
     /**
      * Return false on fail or true success.
@@ -107,4 +107,19 @@ interface OrderInterface
      * @return void
      */
     public function setNewOrderStatus(\Magento\Sales\Model\Order $order);
+
+    /**
+     * @param int $orderId
+     * @return string
+     */
+    public function getLastPayuplOrderIdByOrderId($orderId);
+
+    /**
+     * Checks if transaction can be continued, ie. if it's not cancelled nor rejected.
+     *
+     * @param string $status
+     * @return bool
+     * @throws Exception
+     */
+    public function canContinueCheckout($status);
 }

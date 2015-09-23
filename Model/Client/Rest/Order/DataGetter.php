@@ -44,7 +44,7 @@ class DataGetter
      */
     public function getContinueUrl()
     {
-        return $this->_urlBuilder->getUrl('orba_payupl/payment/continue');
+        return $this->_urlBuilder->getUrl('orba_payupl/payment/end');
     }
 
     /**
