@@ -109,12 +109,6 @@ interface OrderInterface
     public function setNewOrderStatus(\Magento\Sales\Model\Order $order);
 
     /**
-     * @param int $orderId
-     * @return string
-     */
-    public function getLastPayuplOrderIdByOrderId($orderId);
-
-    /**
      * Checks if payment was successful basing on controller request.
      *
      * @param \Magento\Framework\App\RequestInterface $request

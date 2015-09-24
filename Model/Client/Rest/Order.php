@@ -35,7 +35,6 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
 
     /**
      * @param \Orba\Payupl\Model\TransactionFactory $transactionFactory
-     * @param \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param Order\DataValidator $dataValidator
@@ -44,7 +43,6 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
      */
     public function __construct(
         \Orba\Payupl\Model\TransactionFactory $transactionFactory,
-        \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         Order\DataValidator $dataValidator,
@@ -54,7 +52,6 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     {
         parent::__construct(
             $transactionFactory,
-            $transactionCollectionFactory,
             $orderFactory,
             $scopeConfig
         );

@@ -1,4 +1,5 @@
 "Allowed Shipping Methods","Dozwolone metody dostawy"
+"Click here to repeat payment.","Kliknij tutaj, żeby ponowić płatność."
 "Copy the value of POS ID (pos_id) parameter from your POS configuration in Payu.pl panel","Skopiuj wartość parametru <b>Id punktu płatności (pos_id)</b> z konfiguracji Twojego punktu płatności w panelu Payu.pl"
 "Copy the value of Second key (MD5) parameter from your POS configuration in Payu.pl panel","Skopiuj wartość parametru <b>Drugi klucz (MD5)</b> z konfiguracji Twojego punktu płatności w panelu Payu.pl"
 "Enabled","Włączone"

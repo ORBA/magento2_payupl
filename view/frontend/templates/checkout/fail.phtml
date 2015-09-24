@@ -2,9 +2,16 @@
 /**
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
+/**
+ * @var $this \Orba\Payupl\Block\Checkout\Fail
+ */
+$repeatPaymentUrl = $this->getRepeatPaymentUrl();
 ?>
 <div class="message info">
     <div>
         <?php echo __('Your payment was rejected.'); ?>
+        <?php if ($repeatPaymentUrl): ?>
+        <a href="<?php echo $repeatPaymentUrl; ?>" title="<?php echo __('Click here to repeat payment.'); ?>"><?php echo __('Click here to repeat payment.'); ?></a>
+        <?php endif; ?>
     </div>
 </div>

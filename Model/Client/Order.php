@@ -15,11 +15,6 @@ abstract class Order
     protected $_transactionFactory;
 
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction\CollectionFactory
-     */
-    protected $_transactionCollectionFactory;
-
-    /**
      * @var \Magento\Sales\Model\OrderFactory
      */
     protected $_orderFactory;
@@ -36,13 +31,11 @@ abstract class Order
      */
     public function __construct(
         \Orba\Payupl\Model\TransactionFactory $transactionFactory,
-        \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     )
     {
         $this->_transactionFactory = $transactionFactory;
-        $this->_transactionCollectionFactory = $transactionCollectionFactory;
         $this->_orderFactory = $orderFactory;
         $this->_scopeConfig = $scopeConfig;
     }
@@ -93,25 +86,5 @@ abstract class Order
             ->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
             ->addStatusToHistory($orderStatus)
             ->save();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getLastPayuplOrderIdByOrderId($orderId)
-    {
-        /**
-         * @var $transactionCollection \Orba\Payupl\Model\Resource\Transaction\Collection
-         * @var $transaction \Orba\Payupl\Model\Transaction
-         */
-        $transactionCollection = $this->_transactionCollectionFactory->create();
-        $transactionCollection
-            ->addFieldToFilter('order_id', $orderId)
-            ->setOrder('try', \Magento\Framework\Data\Collection::SORT_ORDER_DESC);
-        $transaction = $transactionCollection->getFirstItem();
-        if ($transaction->getId()) {
-            return $transaction->getPayuplOrderId();
-        }
-        return false;
     }
 }
