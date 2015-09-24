@@ -316,20 +316,18 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(Order::STATUS_NEW, $this->_model->getNewStatus());
     }
 
-    public function testCanContinueCheckoutFailInvalidStatus()
+    public function testPaymentSuccessCheckFail()
     {
-        $this->setExpectedException(Exception::class, 'Invalid status.');
-        $this->_model->canContinueCheckout('INVALID STATUS');
+        $request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
+        $request->expects($this->once())->method('getParam')->with($this->equalTo('error'))->willReturn('501');
+        $this->assertFalse($this->_model->paymentSuccessCheck($request));
     }
 
-    public function testCanContinueCheckoutSuccess()
+    public function testPaymentSuccessCheckSuccess()
     {
-        $this->assertFalse($this->_model->canContinueCheckout(Order::STATUS_CANCELED));
-        $this->assertFalse($this->_model->canContinueCheckout(Order::STATUS_REJECTED));
-        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_NEW));
-        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_PENDING));
-        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_WAITING));
-        $this->assertTrue($this->_model->canContinueCheckout(Order::STATUS_COMPLETED));
+        $request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
+        $request->expects($this->once())->method('getParam')->with($this->equalTo('error'))->willReturn(null);
+        $this->assertTrue($this->_model->paymentSuccessCheck($request));
     }
 
     /**

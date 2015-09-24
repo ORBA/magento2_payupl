@@ -115,11 +115,10 @@ interface OrderInterface
     public function getLastPayuplOrderIdByOrderId($orderId);
 
     /**
-     * Checks if transaction can be continued, ie. if it's not cancelled nor rejected.
+     * Checks if payment was successful basing on controller request.
      *
-     * @param string $status
+     * @param \Magento\Framework\App\RequestInterface $request
      * @return bool
-     * @throws Exception
      */
-    public function canContinueCheckout($status);
+    public function paymentSuccessCheck(\Magento\Framework\App\RequestInterface $request);
 }

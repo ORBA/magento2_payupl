@@ -219,19 +219,9 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function canContinueCheckout($status)
+    public function paymentSuccessCheck(\Magento\Framework\App\RequestInterface $request)
     {
-        switch ($status) {
-            case self::STATUS_NEW:
-            case self::STATUS_PENDING:
-            case self::STATUS_WAITING:
-            case self::STATUS_COMPLETED:
-                return true;
-            case self::STATUS_CANCELED:
-            case self::STATUS_REJECTED:
-                return false;
-        }
-        throw new \Orba\Payupl\Model\Client\Exception('Invalid status.');
+        return is_null($request->getParam('error'));
     }
 
 }

@@ -23,6 +23,11 @@ class End extends \Magento\Framework\App\Action\Action
     protected $_client;
 
     /**
+     * @var \Magento\Framework\App\Action\Context
+     */
+    protected $_context;
+
+    /**
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Checkout\Model\Session\SuccessValidator $successValidator
      * @param \Magento\Checkout\Model\Session $session
@@ -36,6 +41,7 @@ class End extends \Magento\Framework\App\Action\Action
     )
     {
         parent::__construct($context);
+        $this->_context = $context;
         $this->_successValidator = $successValidator;
         $this->_session = $session;
         $this->_client = $client;
@@ -54,15 +60,11 @@ class End extends \Magento\Framework\App\Action\Action
             if (!$this->_successValidator->isValid()) {
                 throw new \Exception('Invalid checkout.');
             }
-            $orderId = $this->_session->getLastOrderId();
             $orderHelper = $this->_client->getOrderHelper();
-            $payuplOrderId = $orderHelper->getLastPayuplOrderIdByOrderId($orderId);
-            if (!$payuplOrderId) {
-                throw new \Exception('Could not get Payu.pl order ID.');
-            }
-            $status = $this->_client->orderRetrieve($payuplOrderId);
-            if ($orderHelper->canContinueCheckout($status)) {
+            if ($orderHelper->paymentSuccessCheck($this->_context->getRequest())) {
                 $redirectUrl = 'checkout/onepage/success';
+            } else {
+                $redirectUrl = 'orba_payupl/payment/error';
             }
         } catch (\Exception $e) {
             $redirectUrl = 'checkout/cart';
