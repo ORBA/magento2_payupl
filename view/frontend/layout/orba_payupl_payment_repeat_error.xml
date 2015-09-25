@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="page.messages">
+            <block class="Orba\Payupl\Block\Messages" name="orba.payupl.messages"/>
+        </referenceContainer>
+        <referenceContainer name="content">
+            <block class="Orba\Payupl\Block\Payment\Repeat\Fail" name="orba.payupl.payment.repeat.fail" template="payment/repeat/fail.phtml" cacheable="false" />
+        </referenceContainer>
+    </body>
+</page>

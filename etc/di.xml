@@ -19,4 +19,14 @@
             </argument>
         </arguments>
     </type>
+    <virtualType name="Orba\Payupl\Model\Session\Storage" type="Magento\Framework\Session\Storage">
+        <arguments>
+            <argument name="namespace" xsi:type="string">orba_payupl</argument>
+        </arguments>
+    </virtualType>
+    <type name="Orba\Payupl\Model\Session">
+        <arguments>
+            <argument name="storage" xsi:type="object">Orba\Payupl\Model\Session\Storage</argument>
+        </arguments>
+    </type>
 </config>

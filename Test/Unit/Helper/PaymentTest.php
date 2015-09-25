@@ -59,4 +59,25 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
         )->willReturn($url);
         $this->assertEquals($url, $this->_helper->getRepeatPaymentUrl($orderId));
     }
+
+    public function testGetOrderIdIfCanRepeatFailEmptyId()
+    {
+        $this->assertFalse($this->_helper->getOrderIdIfCanRepeat(null));
+    }
+
+    public function testGetOrderIdIfCanRepeatFailInvalidId()
+    {
+        $payuplOrderId = 'invalid';
+        $this->_orderHelper->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn(false);
+        $this->assertFalse($this->_helper->getOrderIdIfCanRepeat($payuplOrderId));
+    }
+
+    public function testGetOrderIdIfCanRepeatSuccess()
+    {
+        $orderId = 1;
+        $payuplOrderId = 'valid';
+        $this->_orderHelper->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn(true);
+        $this->_orderHelper->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($payuplOrderId)->willReturn($orderId);
+        $this->assertEquals($orderId, $this->_helper->getOrderIdIfCanRepeat($payuplOrderId));
+    }
 }

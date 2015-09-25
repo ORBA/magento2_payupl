@@ -90,14 +90,6 @@ interface OrderInterface
     public function getDataForOrderCreate(\Magento\Sales\Model\Order $order);
 
     /**
-     * @param int $orderId
-     * @param string $payuplOrderId
-     * @param string $payuplExternalOrderId
-     * @return void
-     */
-    public function saveNewTransaction($orderId, $payuplOrderId, $payuplExternalOrderId);
-
-    /**
      * @return string
      */
     public function getNewStatus();

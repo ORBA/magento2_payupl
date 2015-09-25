@@ -39,4 +39,16 @@ class Payment extends AbstractHelper
         }
         return false;
     }
+
+    /**
+     * @param string $payuplOrderId
+     * @return bool
+     */
+    public function getOrderIdIfCanRepeat($payuplOrderId = null)
+    {
+        if ($payuplOrderId && $this->_orderHelper->checkIfNewestByPayuplOrderId($payuplOrderId)) {
+            return $this->_orderHelper->getOrderIdByPayuplOrderId($payuplOrderId);
+        }
+        return false;
+    }
 }
