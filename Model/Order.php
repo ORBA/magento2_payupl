@@ -78,7 +78,7 @@ class Order
 
     /**
      * @param string $payuplOrderId
-     * @return bool|int
+     * @return int|false
      */
     public function getOrderIdByPayuplOrderId($payuplOrderId)
     {
@@ -124,5 +124,25 @@ class Order
             ->setTry($transaction->getTry() + 1)
             ->setStatus($status)
             ->save();
+    }
+
+    /**
+     * @param string $payuplOrderId
+     * @return string|false
+     */
+    public function getStatusByPayuplOrderId($payuplOrderId)
+    {
+        /**
+         * @var $transactionCollection \Orba\Payupl\Model\Resource\Transaction\Collection
+         * @var $transaction \Orba\Payupl\Model\Transaction
+         */
+        $transactionCollection = $this->_transactionCollectionFactory->create();
+        $transactionCollection
+            ->addFieldToFilter('payupl_order_id', $payuplOrderId);
+        $transaction = $transactionCollection->getFirstItem();
+        if ($transaction->getId()) {
+            return $transaction->getStatus();
+        }
+        return false;
     }
 }

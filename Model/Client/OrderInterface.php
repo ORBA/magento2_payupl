@@ -32,12 +32,6 @@ interface OrderInterface
     public function validateStatusUpdate(array $data = []);
 
     /**
-     * @param array $data
-     * @return bool
-     */
-    public function validateConsumeNotification(array $data = []);
-
-    /**
      * Returns false on fail or array with the following keys on success: orderId, redirectUri, extOrderId
      *
      * @param array $data
@@ -72,10 +66,10 @@ interface OrderInterface
     /**
      * Returns false on fail or array with the following keys on success: orderId, status
      *
-     * @param array $data
+     * @param \Magento\Framework\App\Request\Http $request
      * @return array|false
      */
-    public function consumeNotification(array $data = []);
+    public function consumeNotification(\Magento\Framework\App\Request\Http $request);
 
     /**
      * @param int $orderId
@@ -107,4 +101,18 @@ interface OrderInterface
      * @return bool
      */
     public function paymentSuccessCheck(\Magento\Framework\App\RequestInterface $request);
+
+    /**
+     * @param string $payuplOrderId
+     * @return bool
+     */
+    public function canProcessNotification($payuplOrderId);
+
+    /**
+     * @param string $payuplOrderId
+     * @param string $status
+     * @return \Magento\Framework\Controller\Result\Raw
+     * @throws Exception
+     */
+    public function processNotification($payuplOrderId, $status);
 }

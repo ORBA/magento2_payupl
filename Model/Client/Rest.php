@@ -41,9 +41,7 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param array $data
-     * @return bool|\OpenPayU_Result
-     * @throws Exception
+     * @inheritdoc
      */
     public function orderCreate(array $data = [])
     {
@@ -59,9 +57,7 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param string $payuplOrderId
-     * @return bool|\OpenPayU_Result
-     * @throws Exception
+     * @inheritdoc
      */
     public function orderRetrieve($payuplOrderId)
     {
@@ -76,9 +72,7 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param string $payuplOrderId
-     * @return bool|\OpenPayU_Result
-     * @throws Exception
+     * @inheritdoc
      */
     public function orderCancel($payuplOrderId)
     {
@@ -93,9 +87,7 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param array $data
-     * @return bool|\OpenPayU_Result
-     * @throws Exception
+     * @inheritdoc
      */
     public function orderStatusUpdate(array $data = [])
     {
@@ -110,16 +102,11 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param array $data
-     * @return bool|\OpenPayU_Result
-     * @throws Exception
+     * @inheritdoc
      */
-    public function orderConsumeNotification(array $data = [])
+    public function orderConsumeNotification(\Magento\Framework\App\Request\Http $request)
     {
-        if (!$this->_orderHelper->validateConsumeNotification($data)) {
-            throw new Exception('Notification data to consume is empty.');
-        }
-        $result = $this->_orderHelper->consumeNotification($data);
+        $result = $this->_orderHelper->consumeNotification($request);
         if (!$result) {
             throw new Exception('There was a problem while consuming order notification.');
         }
@@ -127,11 +114,7 @@ class Rest implements ClientInterface
     }
 
     /**
-     * @param string $orderId
-     * @param string $description
-     * @param int $amount
-     * @return bool|\OpenPayU_Result
-     * @throws \Orba\Payupl\Model\Client\Exception
+     * @inheritdoc
      */
     public function refundCreate($orderId = '', $description = '', $amount = null)
     {
@@ -145,6 +128,9 @@ class Rest implements ClientInterface
         return $result;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getOrderHelper()
     {
         return $this->_orderHelper;

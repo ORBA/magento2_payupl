@@ -154,29 +154,20 @@ class RestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $this->_model->orderStatusUpdate($data));
     }
 
-    public function testOrderConsumeNotificationEmptyData()
-    {
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Notification data to consume is empty.');
-        $this->_orderHelper->expects($this->once())->method('validateConsumeNotification')->willReturn(false);
-        $this->_model->orderConsumeNotification();
-    }
-
     public function testOrderConsumeNotificationFail()
     {
-        $data = ['data'];
+        $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->disableOriginalConstructor()->getMock();
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while consuming order notification.');
-        $this->_orderHelper->expects($this->once())->method('validateConsumeNotification')->willReturn(true);
-        $this->_orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($data))->willReturn(false);
-        $this->_model->orderConsumeNotification($data);
+        $this->_orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($request))->willReturn(false);
+        $this->_model->orderConsumeNotification($request);
     }
 
     public function testOrderConsumeNotificationSuccess()
     {
-        $data = ['data'];
+        $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->disableOriginalConstructor()->getMock();
         $result = $this->_getResultMock();
-        $this->_orderHelper->expects($this->once())->method('validateConsumeNotification')->with($this->equalTo($data))->willReturn(true);
-        $this->_orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($data))->willReturn($result);
-        $this->assertEquals($result, $this->_model->orderConsumeNotification($data));
+        $this->_orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($request))->willReturn($result);
+        $this->assertEquals($result, $this->_model->orderConsumeNotification($request));
     }
 
     public function testRefundCreateInvalidData()

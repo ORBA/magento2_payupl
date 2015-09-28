@@ -13,8 +13,8 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
 {
     const STATUS_NEW        = 'NEW';
     const STATUS_PENDING    = 'PENDING';
-    const STATUS_WAITING    = 'WAITING FOR CONFIRMATION';
-    const STATUS_CANCELED   = 'CANCELED';
+    const STATUS_WAITING    = 'WAITING_FOR_CONFIRMATION';
+    const STATUS_CANCELLED  = 'CANCELLED';
     const STATUS_REJECTED   = 'REJECTED';
     const STATUS_COMPLETED  = 'COMPLETED';
 
@@ -34,6 +34,21 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     protected $_methodCaller;
 
     /**
+     * @var \Orba\Payupl\Model\Order
+     */
+    protected $_orderHelper;
+
+    /**
+     * @var Order\Processor
+     */
+    protected $_orderProcessor;
+
+    /**
+     * @var \Magento\Framework\Controller\Result\RawFactory
+     */
+    protected $_rawResultFactory;
+
+    /**
      * @param \Magento\Sales\Model\OrderFactory $orderFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param Order\DataValidator $dataValidator
@@ -45,7 +60,10 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         Order\DataValidator $dataValidator,
         Order\DataGetter $dataGetter,
-        MethodCaller $methodCaller
+        MethodCaller $methodCaller,
+        \Orba\Payupl\Model\Order $orderHelper,
+        Order\Processor $orderProcessor,
+        \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
     )
     {
         parent::__construct(
@@ -55,6 +73,9 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
         $this->_dataValidator = $dataValidator;
         $this->_dataGetter = $dataGetter;
         $this->_methodCaller = $methodCaller;
+        $this->_orderHelper = $orderHelper;
+        $this->_orderProcessor = $orderProcessor;
+        $this->_rawResultFactory = $rawResultFactory;
     }
 
     /**
@@ -92,14 +113,6 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
         return
             $this->_dataValidator->validateEmpty($data) &&
             $this->_dataValidator->validateStatusUpdateData($data);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function validateConsumeNotification(array $data = [])
-    {
-        return $this->_dataValidator->validateEmpty($data);
     }
 
     /**
@@ -168,16 +181,19 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function consumeNotification(array $data = [])
+    public function consumeNotification(\Magento\Framework\App\Request\Http $request)
     {
+        if (!$request->isPost()) {
+            throw new \Orba\Payupl\Model\Client\Exception('POST request is required.');
+        }
         /**
          * @var $result \OpenPayU_Result
          */
-        $result = $this->_methodCaller->call('orderConsumeNotification', [$data]);
+        $result = $this->_methodCaller->call('orderConsumeNotification', [$request]);
         if ($result) {
             $response = $result->getResponse();
             return [
-                'orderId' => $response->order->orderId,
+                'payuplOrderId' => $response->order->orderId,
                 'status' => $response->order->status
             ];
         }
@@ -216,6 +232,33 @@ class Order extends \Orba\Payupl\Model\Client\Order implements OrderInterface
     public function paymentSuccessCheck(\Magento\Framework\App\RequestInterface $request)
     {
         return is_null($request->getParam('error'));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canProcessNotification($payuplOrderId)
+    {
+        return !in_array($this->_orderHelper->getStatusByPayuplOrderId($payuplOrderId), [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processNotification($payuplOrderId, $status)
+    {
+        /**
+         * @var $result \Magento\Framework\Controller\Result\Raw
+         */
+        $orderId = $this->_orderHelper->getOrderIdByPayuplOrderId($payuplOrderId);
+        if (!$orderId) {
+            throw new Exception('Order not found.');
+        }
+        $newest = $this->_orderHelper->checkIfNewestByPayuplOrderId($payuplOrderId);
+        $this->_orderProcessor->processStatusChange($orderId, $status, $newest);
+        $result = $this->_rawResultFactory->create();
+        $result->setHttpResponseCode(200);
+        return $result;
     }
 
 }

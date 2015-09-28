@@ -102,7 +102,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testGetOrderIdByPayuplOrderIdFail()
     {
         $payuplOrderId = 'ABC';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetOrderIdByPayuplOrderId($payuplOrderId);
+        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
         $transaction = $this->_getTransactionMock();
         $transaction->expects($this->once())->method('getId')->willReturn(null);
         $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
@@ -114,7 +114,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     {
         $orderId = 1;
         $payuplOrderId = 'ABC';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetOrderIdByPayuplOrderId($payuplOrderId);
+        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
         $transaction = $this->_getTransactionMock();
         $transaction->expects($this->once())->method('getId')->willReturn(1);
         $transaction->expects($this->once())->method('getOrderId')->willReturn($orderId);
@@ -154,6 +154,30 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_model->saveNewTransaction($orderId, $payuplOrderId, $payuplExternalOrderId, $status);
     }
 
+    public function testGetStatusByPayuplOrderIdFail()
+    {
+        $payuplOrderId = 'ABC';
+        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
+        $transaction = $this->_getTransactionMock();
+        $transaction->expects($this->once())->method('getId')->willReturn(null);
+        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
+        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
+        $this->assertFalse($this->_model->getStatusByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testGetStatusByPayuplOrderIdSuccess()
+    {
+        $status = 'COMPLETED';
+        $payuplOrderId = 'ABC';
+        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
+        $transaction = $this->_getTransactionMock();
+        $transaction->expects($this->once())->method('getId')->willReturn(1);
+        $transaction->expects($this->once())->method('getStatus')->willReturn($status);
+        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
+        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
+        $this->assertEquals($status, $this->_model->getStatusByPayuplOrderId($payuplOrderId));
+    }
+
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
@@ -166,6 +190,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
                 'getNewerId',
                 'getOrderId',
                 'getTry',
+                'getStatus',
                 'setOrderId',
                 'setPayuplOrderId',
                 'setPayuplExternalOrderId',
@@ -220,7 +245,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
      * @param string $payuplOrderId
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getTransactionCollectionWithExpectedConditionsForGetOrderIdByPayuplOrderId($payuplOrderId)
+    protected function _getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId)
     {
         $transactionCollection = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\Collection::class)->disableOriginalConstructor()->getMock();
         $transactionCollection->expects($this->once())->method('addFieldToFilter')->with(

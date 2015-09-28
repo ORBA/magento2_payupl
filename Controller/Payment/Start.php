@@ -18,7 +18,7 @@ class Start extends \Magento\Framework\App\Action\Action
     protected $_session;
 
     /**
-     * @var \Orba\Payupl\Model\Client
+     * @var \Orba\Payupl\Model\ClientInterface
      */
     protected $_client;
 
