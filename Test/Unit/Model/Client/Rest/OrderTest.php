@@ -7,6 +7,7 @@ namespace Orba\Payupl\Model\Client\Rest;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Orba\Payupl\Model\Client\Exception;
+use Orba\Payupl\Model\Client\Rest\Order;
 
 class OrderTest extends \PHPUnit_Framework_TestCase
 {
@@ -33,11 +34,6 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_orderHelper;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
     protected $_orderProcessor;
 
     /**
@@ -45,13 +41,18 @@ class OrderTest extends \PHPUnit_Framework_TestCase
      */
     protected $_rawResultFactory;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_transactionResource;
+
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->_dataValidator = $this->getMockBuilder(Order\DataValidator::class)->getMock();
         $this->_dataGetter = $this->getMockBuilder(Order\DataGetter::class)->disableOriginalConstructor()->getMock();
         $this->_methodCaller = $this->getMockBuilder(MethodCaller::class)->disableOriginalConstructor()->getMock();
-        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_orderProcessor = $this->getMockBuilder(Order\Processor::class)->disableOriginalConstructor()->getMock();
         $this->_rawResultFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RawFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
@@ -60,7 +61,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
                 'dataValidator' => $this->_dataValidator,
                 'dataGetter' => $this->_dataGetter,
                 'methodCaller' => $this->_methodCaller,
-                'orderHelper' => $this->_orderHelper,
+                'transactionResource' => $this->_transactionResource,
                 'orderProcessor' => $this->_orderProcessor,
                 'rawResultFactory' => $this->_rawResultFactory
             ]
@@ -222,7 +223,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $response = (object) [
             'orders' => [
                 0 => (object) [
-                    'status' => 'COMPLETED'
+                    'status' => Order::STATUS_COMPLETED
                 ]
             ]
         ];
@@ -298,7 +299,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
 
     public function testConsumeNotificationFailNoPost()
     {
-        $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->setMethods(['isPost'])->disableOriginalConstructor()->getMock();
+        $request = $this->_getRequestMock();
         $request->expects($this->once())->method('isPost')->willReturn(false);
         $this->setExpectedException(Exception::class, 'POST request is required.');
         $this->_model->consumeNotification($request);
@@ -306,32 +307,38 @@ class OrderTest extends \PHPUnit_Framework_TestCase
 
     public function testConsumeNotificationFail()
     {
-        $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->setMethods(['isPost'])->disableOriginalConstructor()->getMock();
+        $rawBody = 'body';
+        $request = $this->_getRequestMock();
         $request->expects($this->once())->method('isPost')->willReturn(true);
+        $request->expects($this->once())->method('getContent')->willReturn($rawBody);
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderConsumeNotification'),
-            $this->equalTo([$request])
+            $this->equalTo([$rawBody])
         )->willReturn(false);
         $this->assertFalse($this->_model->consumeNotification($request));
     }
 
     public function testConsumeNotificationSuccess()
     {
-        $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->setMethods(['isPost'])->disableOriginalConstructor()->getMock();
+        $rawBody = 'body';
+        $request = $this->_getRequestMock();
         $request->expects($this->once())->method('isPost')->willReturn(true);
+        $request->expects($this->once())->method('getContent')->willReturn($rawBody);
         $result = $this->_getResultMock();
         $response = new \stdClass();
         $response->order = new \stdClass();
-        $response->order->status = 'COMPLETED';
+        $response->order->status = Order::STATUS_COMPLETED;
         $response->order->orderId = '123456';
+        $response->order->totalAmount = 222;
         $resultArray = [
             'payuplOrderId' => $response->order->orderId,
-            'status' => $response->order->status
+            'status' => $response->order->status,
+            'amount' => 2.22
         ];
         $result->expects($this->once())->method('getResponse')->willReturn($response);
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderConsumeNotification'),
-            $this->equalTo([$request])
+            $this->equalTo([$rawBody])
         )->willReturn($result);
         $this->assertEquals($resultArray, $this->_model->consumeNotification($request));
     }
@@ -358,50 +365,41 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testCanProcessNotificationFailStatusCompleted()
     {
         $payuplOrderId = 'ABC';
-        $this->_orderHelper->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)->willReturn('COMPLETED');
+        $this->_transactionResource->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)->willReturn(Order::STATUS_COMPLETED);
         $this->assertFalse($this->_model->canProcessNotification($payuplOrderId));
     }
 
     public function testCanProcessNotificationFailStatusCancelled()
     {
         $payuplOrderId = 'ABC';
-        $this->_orderHelper->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)->willReturn('CANCELLED');
+        $this->_transactionResource->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)->willReturn(Order::STATUS_CANCELLED);
         $this->assertFalse($this->_model->canProcessNotification($payuplOrderId));
     }
 
     public function testCanProcessNotificationSuccess()
     {
         $payuplOrderId = 'ABC';
-        $this->_orderHelper->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)->willReturn('OTHER STATUS');
+        $this->_transactionResource->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)->willReturn('OTHER STATUS');
         $this->assertTrue($this->_model->canProcessNotification($payuplOrderId));
-    }
-
-    public function testProcessNotificationFailOrderNotFound()
-    {
-        $payuplOrderId = 'ABC';
-        $status = 'COMPLETED';
-        $this->_orderHelper->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($payuplOrderId)->willReturn(false);
-        $this->setExpectedException(Exception::class, 'Order not found.');
-        $this->_model->processNotification($payuplOrderId, $status);
     }
 
     public function testProcessNotificationSuccess()
     {
         $payuplOrderId = 'ABC';
-        $orderId = 1;
-        $status = 'COMPLETED';
+        $status = Order::STATUS_COMPLETED;
+        $amount = 2.22;
         $check = true;
-        $this->_orderHelper->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($payuplOrderId)->willReturn($orderId);
-        $this->_orderHelper->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn($check);
+        $this->_transactionResource->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn($check);
         $this->_orderProcessor->expects($this->once())->method('processStatusChange')->with(
-            $this->equalTo($orderId),
+            $this->equalTo($payuplOrderId),
             $this->equalTo($status),
+            $this->equalTo($amount),
             $this->equalTo($check)
         );
         $result = $this->getMockBuilder(\Magento\Framework\Controller\Result\Raw::class)->setMethods(['setHttpResponseCode'])->disableOriginalConstructor()->getMock();
         $result->expects($this->once())->method('setHttpResponseCode')->with(200)->will($this->returnSelf());
         $this->_rawResultFactory->expects($this->once())->method('create')->willReturn($result);
-        $this->assertEquals($result, $this->_model->processNotification($payuplOrderId, $status));
+        $this->assertEquals($result, $this->_model->processNotification($payuplOrderId, $status, $amount));
     }
 
     /**
@@ -433,5 +431,13 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     protected function _getOrderMock()
     {
         return $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getRequestMock()
+    {
+        return $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->setMethods(['isPost', 'getContent'])->disableOriginalConstructor()->getMock();
     }
 }

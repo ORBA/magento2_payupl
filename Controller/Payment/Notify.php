@@ -44,7 +44,7 @@ class Notify extends \Magento\Framework\App\Action\Action
         $response = $this->_client->orderConsumeNotification($request);
         $clientOrderHelper = $this->_client->getOrderHelper();
         if ($clientOrderHelper->canProcessNotification($response['payuplOrderId'])) {
-            return $clientOrderHelper->processNotification($response['payuplOrderId'], $response['status']);
+            return $clientOrderHelper->processNotification($response['payuplOrderId'], $response['status'], $response['amount']);
         } else {
             /**
              * @var $resultForward \Magento\Framework\Controller\Result\Forward

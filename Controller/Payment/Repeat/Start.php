@@ -53,7 +53,7 @@ class Start extends \Magento\Framework\App\Action\Action
         $orderId = $this->_session->getLastOrderId();
         if ($orderId) {
             $clientOrderHelper = $this->_client->getOrderHelper();
-            $order = $clientOrderHelper->loadOrderById($orderId);
+            $order = $this->_orderHelper->loadOrderById($orderId);
             $orderData = $clientOrderHelper->getDataForOrderCreate($order);
             $result = $this->_client->orderCreate($orderData);
             $this->_orderHelper->saveNewTransaction(
@@ -62,7 +62,7 @@ class Start extends \Magento\Framework\App\Action\Action
                 $result['extOrderId'],
                 $clientOrderHelper->getNewStatus()
             );
-            $clientOrderHelper->setNewOrderStatus($order);
+            $this->_orderHelper->setNewOrderStatus($order);
             $redirectUrl = $result['redirectUri'];
         } else {
             $redirectUrl = 'orba_payupl/payment/repeat_error';

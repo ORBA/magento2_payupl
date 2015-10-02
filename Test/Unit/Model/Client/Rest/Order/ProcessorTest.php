@@ -5,7 +5,8 @@
 
 namespace Orba\Payupl\Model\Client\Rest\Order;
 
-use \Orba\Payupl\Model\Client\Exception;
+use Orba\Payupl\Model\Client\Rest\Order;
+use Orba\Payupl\Model\Client\Exception;
 
 class ProcessorTest extends \PHPUnit_Framework_TestCase
 {
@@ -34,58 +35,80 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->_model->processStatusChange(1, 'INVALID STATUS');
     }
 
+    public function testProcessStatusChangeNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_CANCELLED;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangeNew()
+    {
+        $orderId = 1;
+        $status = Order::STATUS_NEW;
+        $this->_orderProcessor->expects($this->once())->method('processPending')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($status)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
+    }
+
     public function testProcessStatusChangePending()
     {
-        $statuses = [
-            'NEW',
-            'PENDING'
-        ];
-        foreach ($statuses as $status) {
-            $this->assertTrue($this->_model->processStatusChange(1, $status));
-        }
+        $orderId = 1;
+        $status = Order::STATUS_PENDING;
+        $this->_orderProcessor->expects($this->once())->method('processPending')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($status)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
     }
 
     public function testProcessStatusChangeCancelled()
     {
         $orderId = 1;
-        $isNewest = true;
-        $this->_orderProcessor->expects($this->once())->method('processHold')->with(
+        $status = Order::STATUS_CANCELLED;
+        $this->_orderProcessor->expects($this->once())->method('processHolded')->with(
             $this->equalTo($orderId),
-            $this->equalTo($isNewest)
+            $this->equalTo($status)
         )->willReturn(true);
-        $this->assertTrue($this->_model->processStatusChange($orderId, 'CANCELLED'));
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
     }
 
     public function testProcessStatusChangeRejected()
     {
         $orderId = 1;
-        $isNewest = true;
-        $this->_orderProcessor->expects($this->once())->method('processHold')->with(
+        $status = Order::STATUS_REJECTED;
+        $this->_orderProcessor->expects($this->once())->method('processHolded')->with(
             $this->equalTo($orderId),
-            $this->equalTo($isNewest)
+            $this->equalTo($status)
         )->willReturn(true);
-        $this->assertTrue($this->_model->processStatusChange($orderId, 'REJECTED'));
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
     }
 
     public function testProcessStatusChangeWaiting()
     {
         $orderId = 1;
-        $isNewest = true;
+        $status = Order::STATUS_WAITING;
         $this->_orderProcessor->expects($this->once())->method('processWaiting')->with(
             $this->equalTo($orderId),
-            $this->equalTo($isNewest)
+            $this->equalTo($status)
         )->willReturn(true);
-        $this->assertTrue($this->_model->processStatusChange($orderId, 'WAITING_FOR_CONFIRMATION'));
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
     }
 
     public function testProcessStatusChangeCompleted()
     {
         $orderId = 1;
-        $isNewest = true;
+        $status = Order::STATUS_COMPLETED;
         $this->_orderProcessor->expects($this->once())->method('processCompleted')->with(
             $this->equalTo($orderId),
-            $this->equalTo($isNewest)
+            $this->equalTo($status)
         )->willReturn(true);
-        $this->assertTrue($this->_model->processStatusChange($orderId, 'COMPLETED'));
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
     }
 }

@@ -29,98 +29,34 @@ class OrderTest extends \PHPUnit_Framework_TestCase
      */
     protected $_transactionFactory;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_orderFactory;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_transactionResource;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_scopeConfig;
+
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
         $this->_transactionCollectionFactory = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\CollectionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_transactionFactory = $this->getMockBuilder(\Orba\Payupl\Model\TransactionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
+        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
+        $this->_orderFactory = $this->getMockBuilder(\Orba\Payupl\Model\Sales\OrderFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_model = $this->getMockForAbstractClass(Order::class, [
             'transactionCollectionFactory' => $this->_transactionCollectionFactory,
-            'transactionFactory' => $this->_transactionFactory
+            'transactionFactory' => $this->_transactionFactory,
+            'transactionResource' => $this->_transactionResource,
+            'orderFactory' => $this->_orderFactory
         ]);
-    }
-
-    public function testGetLastPayuplOrderIdByOrderIdFail()
-    {
-        $orderId = 1;
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetLastPayuplOrderId($orderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(null);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertFalse($this->_model->getLastPayuplOrderIdByOrderId($orderId));
-    }
-
-    public function testGetLastPayuplOrderIdByOrderIdSuccess()
-    {
-        $orderId = 1;
-        $payuplOrderId = '123';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetLastPayuplOrderId($orderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(1);
-        $transaction->expects($this->once())->method('getPayuplOrderId')->willReturn($payuplOrderId);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertEquals($payuplOrderId, $this->_model->getLastPayuplOrderIdByOrderId($orderId));
-    }
-
-    public function testCheckIfNewestByPayuplOrderIdFailNotFound()
-    {
-        $payuplOrderId = '123';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForCheckIfNewestByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(null);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertFalse($this->_model->checkIfNewestByPayuplOrderId($payuplOrderId));
-    }
-
-    public function testCheckIfNewestByPayuplOrderIdFailOld()
-    {
-        $payuplOrderId = '123';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForCheckIfNewestByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(1);
-        $transaction->expects($this->once())->method('getNewerId')->willReturn(2);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertFalse($this->_model->checkIfNewestByPayuplOrderId($payuplOrderId));
-    }
-
-    public function testCheckIfNewestByPayuplOrderIdSuccess()
-    {
-        $payuplOrderId = '123';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForCheckIfNewestByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(1);
-        $transaction->expects($this->once())->method('getNewerId')->willReturn(null);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertTrue($this->_model->checkIfNewestByPayuplOrderId($payuplOrderId));
-    }
-
-    public function testGetOrderIdByPayuplOrderIdFail()
-    {
-        $payuplOrderId = 'ABC';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(null);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertFalse($this->_model->getOrderIdByPayuplOrderId($payuplOrderId));
-    }
-
-    public function testGetOrderIdByPayuplOrderIdSuccess()
-    {
-        $orderId = 1;
-        $payuplOrderId = 'ABC';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(1);
-        $transaction->expects($this->once())->method('getOrderId')->willReturn($orderId);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertEquals($orderId, $this->_model->getOrderIdByPayuplOrderId($payuplOrderId));
     }
 
     public function testSaveNewTransaction()
@@ -154,28 +90,89 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_model->saveNewTransaction($orderId, $payuplOrderId, $payuplExternalOrderId, $status);
     }
 
-    public function testGetStatusByPayuplOrderIdFail()
+    public function testGetOrderByIdFailNotFound()
     {
-        $payuplOrderId = 'ABC';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(null);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertFalse($this->_model->getStatusByPayuplOrderId($payuplOrderId));
+        $orderId = 1;
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('load')->with($this->equalTo($orderId))->will($this->returnSelf());
+        $order->expects($this->once())->method('getId')->willReturn(false);
+        $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
+        $this->assertFalse($this->_model->loadOrderById($orderId));
     }
 
-    public function testGetStatusByPayuplOrderIdSuccess()
+    public function testGetOrderByIdSuccess()
     {
-        $status = 'COMPLETED';
+        $orderId = 1;
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('load')->with($this->equalTo($orderId))->will($this->returnSelf());
+        $order->expects($this->once())->method('getId')->willReturn($orderId);
+        $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
+        $this->assertEquals($order, $this->_model->loadOrderById($orderId));
+    }
+
+    public function testGetOrderByPayuplOrderIdFailNotFound()
+    {
         $payuplOrderId = 'ABC';
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(1);
-        $transaction->expects($this->once())->method('getStatus')->willReturn($status);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->assertEquals($status, $this->_model->getStatusByPayuplOrderId($payuplOrderId));
+        $this->_transactionResource->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn(false);
+        $this->assertFalse($this->_model->loadOrderByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testGetOrderByPayuplOrderIdSuccess()
+    {
+        $orderId = 1;
+        $payuplOrderId = 'ABC';
+        $this->_transactionResource->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn($orderId);
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('load')->with($this->equalTo($orderId))->will($this->returnSelf());
+        $order->expects($this->once())->method('getId')->willReturn($orderId);
+        $this->_orderFactory->expects($this->once())->method('create')->willReturn($order);
+        $this->assertEquals($order, $this->_model->loadOrderByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testSetNewOrderStatus()
+    {
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('setState')->with($this->equalTo(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT))->will($this->returnSelf());
+        $order->expects($this->once())->method('addStatusToHistory')->with($this->equalTo(true))->will($this->returnSelf());
+        $order->expects($this->once())->method('save')->will($this->returnSelf());
+        $this->_model->setNewOrderStatus($order);
+    }
+
+    public function testSetHoldedOrderStatus()
+    {
+        $status = 'REJECTED';
+        $orderStateOld = 'old_state';
+        $orderStatusOld = 'old_status';
+        $orderStateNew = Sales\Order::STATE_HOLDED;
+        $orderStatusNew = 'new_status';
+        $order = $this->_getOrderMock();
+        $config = $this->getMockBuilder(Sales\Order\Config::class)->disableOriginalConstructor()->getMock();
+        $config->expects($this->once())->method('getStateDefaultStatus')->with($this->equalTo($orderStateNew))->willReturn($orderStatusNew);
+        $order->expects($this->once())->method('getConfig')->willReturn($config);
+        $order->expects($this->once())->method('getState')->willReturn($orderStateOld);
+        $order->expects($this->once())->method('getStatus')->willReturn($orderStatusOld);
+        $order->expects($this->once())->method('setHoldBeforeState')->with($this->equalTo($orderStateOld))->will($this->returnSelf());
+        $order->expects($this->once())->method('setHoldBeforeStatus')->with($this->equalTo($orderStatusOld))->will($this->returnSelf());
+        $order->expects($this->once())->method('setState')->with($this->equalTo($orderStateNew))->will($this->returnSelf());
+        $order->expects($this->once())->method('setStatus')->with($this->equalTo($orderStatusNew))->will($this->returnSelf());
+        $order->expects($this->once())->method('addStatusHistoryComment')->with($this->equalTo(__('Payu.pl status') . ': ' . $status));
+        $order->expects($this->once())->method('save')->will($this->returnSelf());
+        $this->_model->setHoldedOrderStatus($order, $status);
+    }
+
+    public function testCompletePayment()
+    {
+        $amount = 2.22;
+        $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->disableOriginalConstructor()->getMock();
+        $payment->expects($this->once())->method('registerCaptureNotification')->with($this->equalTo($amount))->will($this->returnSelf());
+        $payment->expects($this->once())->method('save');
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('getPayment')->willReturn($payment);
+        $invoice = $this->getMockBuilder(\Magento\Sales\Model\Order\Invoice::class)->disableOriginalConstructor()->getMock();
+        $invoice->expects($this->once())->method('save');
+        $order->expects($this->once())->method('getRelatedObjects')->willReturn([$invoice]);
+        $order->expects($this->once())->method('save')->will($this->returnSelf());
+        $this->_model->completePayment($order, $amount);
     }
 
     /**
@@ -203,56 +200,10 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param int $orderId
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getTransactionCollectionWithExpectedConditionsForGetLastPayuplOrderId($orderId)
+    protected function _getOrderMock()
     {
-        $transactionCollection = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\Collection::class)->disableOriginalConstructor()->getMock();
-        $transactionCollection->expects($this->once())->method('addFieldToFilter')->with(
-            $this->equalTo('order_id'),
-            $this->equalTo($orderId)
-        )->will($this->returnSelf());
-        $transactionCollection->expects($this->once())->method('setOrder')->with(
-            $this->equalTo('try'),
-            $this->equalTo(\Magento\Framework\Data\Collection::SORT_ORDER_DESC)
-        )->will($this->returnSelf());
-        return $transactionCollection;
+        return $this->getMockBuilder(\Orba\Payupl\Model\Sales\Order::class)->disableOriginalConstructor()->getMock();
     }
-
-    /**
-     * @param string $payuplOrderId
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function _getTransactionCollectionWithExpectedConditionsForCheckIfNewestByPayuplOrderId($payuplOrderId)
-    {
-        $transactionCollection = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\Collection::class)->disableOriginalConstructor()->getMock();
-        $transactionCollection->expects($this->once())->method('addFieldToFilter')->with(
-            $this->equalTo('main_table.payupl_order_id'),
-            $this->equalTo($payuplOrderId)
-        )->will($this->returnSelf());
-        $select = $this->getMockBuilder(\Magento\Framework\DB\Select::class)->disableOriginalConstructor()->getMock();
-        $select->expects($this->once())->method('joinLeft')->with(
-            $this->equalTo(['t2' => 'orba_payupl_transaction']),
-            $this->equalTo('t2.order_id = main_table.order_id AND t2.try > main_table.try'),
-            $this->equalTo(['newer_id' => 't2.order_id'])
-        );
-        $transactionCollection->expects($this->once())->method('getSelect')->willReturn($select);
-        return $transactionCollection;
-    }
-
-    /**
-     * @param string $payuplOrderId
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function _getTransactionCollectionWithExpectedConditionsForGetByPayuplOrderId($payuplOrderId)
-    {
-        $transactionCollection = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\Collection::class)->disableOriginalConstructor()->getMock();
-        $transactionCollection->expects($this->once())->method('addFieldToFilter')->with(
-            $this->equalTo('payupl_order_id'),
-            $this->equalTo($payuplOrderId)
-        )->will($this->returnSelf());
-        return $transactionCollection;
-    }
-
 }

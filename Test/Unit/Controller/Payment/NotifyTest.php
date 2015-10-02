@@ -62,7 +62,8 @@ class NotifyTest extends \PHPUnit_Framework_TestCase
     {
         $response = [
             'payuplOrderId' => 'ABC',
-            'status' => 'COMPLETED'
+            'status' => 'COMPLETED',
+            'amount' => 2.22
         ];
         $result = 'result';
         $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->disableOriginalConstructor()->getMock();

@@ -8,11 +8,6 @@ namespace Orba\Payupl\Helper;
 class PaymentTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $_orderHelper;
-
-    /**
      * @var Payment
      */
     protected $_helper;
@@ -22,10 +17,15 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
      */
     protected $_urlBuilder;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_transactionResource;
+
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_urlBuilder = $this->getMockBuilder(\Magento\Framework\UrlInterface::class)->getMockForAbstractClass();
         $context = $objectManager->getObject(
             \Magento\Framework\App\Helper\Context::class,
@@ -33,14 +33,14 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
         );
         $this->_helper = $objectManager->getObject(Payment::class, [
             'context' => $context,
-            'orderHelper' => $this->_orderHelper
+            'transactionResource' => $this->_transactionResource
         ]);
     }
 
     public function testGetRepeatPaymentUrlFail()
     {
         $orderId = 1;
-        $this->_orderHelper->expects($this->once())->method('getLastPayuplOrderIdByOrderId')->with($this->equalTo($orderId))->willReturn(false);
+        $this->_transactionResource->expects($this->once())->method('getLastPayuplOrderIdByOrderId')->with($this->equalTo($orderId))->willReturn(false);
         $this->assertFalse($this->_helper->getRepeatPaymentUrl($orderId));
     }
 
@@ -48,7 +48,7 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
     {
         $orderId = 1;
         $payuplOrderId = 'ABC';
-        $this->_orderHelper->expects($this->once())->method('getLastPayuplOrderIdByOrderId')->with($this->equalTo($orderId))->willReturn($payuplOrderId);
+        $this->_transactionResource->expects($this->once())->method('getLastPayuplOrderIdByOrderId')->with($this->equalTo($orderId))->willReturn($payuplOrderId);
         $path = 'orba_payupl/payment/repeat';
         $params = ['id' => $payuplOrderId];
         $baseUrl = 'http://example.com/';
@@ -68,7 +68,7 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
     public function testGetOrderIdIfCanRepeatFailInvalidId()
     {
         $payuplOrderId = 'invalid';
-        $this->_orderHelper->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn(false);
+        $this->_transactionResource->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn(false);
         $this->assertFalse($this->_helper->getOrderIdIfCanRepeat($payuplOrderId));
     }
 
@@ -76,8 +76,8 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
     {
         $orderId = 1;
         $payuplOrderId = 'valid';
-        $this->_orderHelper->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn(true);
-        $this->_orderHelper->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($payuplOrderId)->willReturn($orderId);
+        $this->_transactionResource->expects($this->once())->method('checkIfNewestByPayuplOrderId')->with($payuplOrderId)->willReturn(true);
+        $this->_transactionResource->expects($this->once())->method('getOrderIdByPayuplOrderId')->with($payuplOrderId)->willReturn($orderId);
         $this->assertEquals($orderId, $this->_helper->getOrderIdIfCanRepeat($payuplOrderId));
     }
 }

@@ -10,21 +10,21 @@ use Magento\Framework\App\Helper\AbstractHelper;
 class Payment extends AbstractHelper
 {
     /**
-     * @var \Orba\Payupl\Model\Order
+     * @var \Orba\Payupl\Model\Resource\Transaction
      */
-    protected $_orderHelper;
+    protected $_transactionResource;
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Orba\Payupl\Model\Order $orderHelper
+     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
-        \Orba\Payupl\Model\Order $orderHelper
+        \Orba\Payupl\Model\Resource\Transaction $transactionResource
     )
     {
         parent::__construct($context);
-        $this->_orderHelper = $orderHelper;
+        $this->_transactionResource = $transactionResource;
     }
 
     /**
@@ -33,7 +33,7 @@ class Payment extends AbstractHelper
      */
     public function getRepeatPaymentUrl($orderId)
     {
-        $payuplOrderId = $this->_orderHelper->getLastPayuplOrderIdByOrderId($orderId);
+        $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($orderId);
         if ($payuplOrderId) {
             return $this->_urlBuilder->getUrl('orba_payupl/payment/repeat', ['id' => $payuplOrderId]);
         }
@@ -46,8 +46,8 @@ class Payment extends AbstractHelper
      */
     public function getOrderIdIfCanRepeat($payuplOrderId = null)
     {
-        if ($payuplOrderId && $this->_orderHelper->checkIfNewestByPayuplOrderId($payuplOrderId)) {
-            return $this->_orderHelper->getOrderIdByPayuplOrderId($payuplOrderId);
+        if ($payuplOrderId && $this->_transactionResource->checkIfNewestByPayuplOrderId($payuplOrderId)) {
+            return $this->_transactionResource->getOrderIdByPayuplOrderId($payuplOrderId);
         }
         return false;
     }

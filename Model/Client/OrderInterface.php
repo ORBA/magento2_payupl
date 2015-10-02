@@ -72,12 +72,6 @@ interface OrderInterface
     public function consumeNotification(\Magento\Framework\App\Request\Http $request);
 
     /**
-     * @param int $orderId
-     * @return bool|\Magento\Sales\Model\Order
-     */
-    public function loadOrderById($orderId);
-
-    /**
      * @param \Magento\Sales\Model\Order $order
      * @return array
      */
@@ -87,12 +81,6 @@ interface OrderInterface
      * @return string
      */
     public function getNewStatus();
-
-    /**
-     * @param \Magento\Sales\Model\Order $order
-     * @return void
-     */
-    public function setNewOrderStatus(\Magento\Sales\Model\Order $order);
 
     /**
      * Checks if payment was successful basing on controller request.
@@ -111,8 +99,9 @@ interface OrderInterface
     /**
      * @param string $payuplOrderId
      * @param string $status
+     * @param float $amount
      * @return \Magento\Framework\Controller\Result\Raw
      * @throws Exception
      */
-    public function processNotification($payuplOrderId, $status);
+    public function processNotification($payuplOrderId, $status, $amount);
 }

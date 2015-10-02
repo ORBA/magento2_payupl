@@ -72,8 +72,8 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $this->_session->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
         $clientOrderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
         $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($clientOrderHelper);
-        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $clientOrderHelper->expects($this->once())->method('loadOrderById')->with($this->equalTo($orderId))->willReturn($order);
+        $order = $this->_getOrderMock();
+        $this->_orderHelper->expects($this->once())->method('loadOrderById')->with($this->equalTo($orderId))->willReturn($order);
         $clientOrderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($order))->willReturn($orderData);
         $response = [
             'redirectUri' => 'http://redirect.url',
@@ -89,10 +89,18 @@ class StartTest extends \PHPUnit_Framework_TestCase
             $this->equalTo($response['extOrderId']),
             $this->equalTo($status)
         );
-        $clientOrderHelper->expects($this->once())->method('setNewOrderStatus')->with($this->equalTo($order));
+        $this->_orderHelper->expects($this->once())->method('setNewOrderStatus')->with($this->equalTo($order));
         $resultRedirect = $this->getMockBuilder(\Magento\Framework\Controller\Result\Redirect::class)->disableOriginalConstructor()->getMock();
         $resultRedirect->expects($this->once())->method('setPath')->with($response['redirectUri']);
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $this->assertEquals($resultRedirect, $this->_controller->execute());
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getOrderMock()
+    {
+        return $this->getMockBuilder(\Orba\Payupl\Model\Sales\Order::class)->disableOriginalConstructor()->getMock();
     }
 }

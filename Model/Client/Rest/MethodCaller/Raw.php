@@ -59,11 +59,11 @@ class Raw
     }
 
     /**
-     * @param array $data
+     * @param string $data
      * @return \OpenPayU_Result
      * @throws \OpenPayU_Exception
      */
-    public function orderConsumeNotification(array $data)
+    public function orderConsumeNotification($data)
     {
         return \OpenPayU_Order::consumeNotification($data);
     }
