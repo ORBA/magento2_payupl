@@ -218,4 +218,13 @@ class Order
             $this->_orderValidator->validatePaymentMethod($order) &&
             $this->_orderValidator->validateState($order);
     }
+
+    public function canRepeatPayment($order)
+    {
+        return
+            $this->_orderValidator->validateCustomer($order) &&
+            $this->_orderValidator->validatePaymentMethod($order) &&
+            $this->_orderValidator->validateState($order) &&
+            $this->_orderValidator->validateNotPaid($order);
+    }
 }

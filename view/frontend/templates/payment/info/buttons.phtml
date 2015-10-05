@@ -8,10 +8,19 @@
  * @var $helper \Orba\Payupl\Helper\Payment
  */
 $helper = $this->helper('Orba\Payupl\Helper\Payment');
-$startUrl = $helper->getStartPaymentUrl($this->getOrderId());
-?>
-<?php if ($startUrl): ?>
-<a class="action primary" title="Pay Now" href="<?php echo $startUrl; ?>">
-    <span><?php echo __('Pay Now'); ?></span>
-</a>
-<?php endif; ?>
+$orderId = $this->getOrderId();
+$startUrl = $helper->getStartPaymentUrl($orderId);
+$repeatUrl = $helper->getRepeatPaymentUrl($orderId);
+if ($startUrl) {
+    ?>
+    <a class="action primary" title="Pay Now" href="<?php echo $startUrl; ?>">
+        <span><?php echo __('Pay Now'); ?></span>
+    </a>
+    <?php
+} elseif ($repeatUrl) {
+    ?>
+    <a class="action primary" title="Repeat Payment" href="<?php echo $repeatUrl; ?>">
+        <span><?php echo __('Repeat Payment'); ?></span>
+    </a>
+    <?php
+}

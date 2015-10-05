@@ -65,4 +65,9 @@ class Validator
     {
         return $order->getCustomerId() === $this->_customerSession->getCustomerId();
     }
+
+    public function validateNotPaid(\Magento\Sales\Model\Order $order)
+    {
+        return !$order->getTotalPaid();
+    }
 }

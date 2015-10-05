@@ -105,6 +105,20 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateCustomer($order));
     }
 
+    public function testValidateNotPaidFail()
+    {
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('getTotalPaid')->willReturn(10);
+        $this->assertFalse($this->_model->validateNotPaid($order));
+    }
+
+    public function testValidateNotPaidSuccess()
+    {
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('getTotalPaid')->willReturn(null);
+        $this->assertTrue($this->_model->validateNotPaid($order));
+    }
+
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */

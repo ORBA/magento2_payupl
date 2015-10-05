@@ -12,11 +12,18 @@ class ExtOrderId
      */
     protected $_transactionCollectionFactory;
 
+    /**
+     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     */
+    protected $_dateTime;
+
     public function __construct(
-        \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory
+        \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory,
+        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
     )
     {
         $this->_transactionCollectionFactory = $transactionCollectionFactory;
+        $this->_dateTime = $dateTime;
     }
 
     /**
@@ -39,6 +46,6 @@ class ExtOrderId
         } else {
             $try = 1;
         }
-        return $order->getIncrementId() . ':' . $try;
+        return $order->getIncrementId() . ':' . $this->_dateTime->timestamp() . ':' . $try;
     }
 }

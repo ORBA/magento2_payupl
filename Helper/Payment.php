@@ -41,10 +41,8 @@ class Payment extends AbstractHelper
     public function getStartPaymentUrl($orderId)
     {
         $order = $this->_orderHelper->loadOrderById($orderId);
-        if ($order) {
-            if ($this->_orderHelper->canStartFirstPayment($order)) {
-                return $this->_urlBuilder->getUrl('orba_payupl/payment/start', ['id' => $orderId]);
-            }
+        if ($order && $this->_orderHelper->canStartFirstPayment($order)) {
+            return $this->_urlBuilder->getUrl('orba_payupl/payment/start', ['id' => $orderId]);
         }
         return false;
     }
@@ -55,9 +53,9 @@ class Payment extends AbstractHelper
      */
     public function getRepeatPaymentUrl($orderId)
     {
-        $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($orderId);
-        if ($payuplOrderId) {
-            return $this->_urlBuilder->getUrl('orba_payupl/payment/repeat', ['id' => $payuplOrderId]);
+        $order = $this->_orderHelper->loadOrderById($orderId);
+        if ($order && $this->_orderHelper->canRepeatPayment($order)) {
+            return $this->_urlBuilder->getUrl('orba_payupl/payment/repeat', ['id' => $this->_transactionResource->getLastPayuplOrderIdByOrderId($orderId)]);
         }
         return false;
     }
