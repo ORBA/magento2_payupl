@@ -56,7 +56,7 @@ class EndTest extends \PHPUnit_Framework_TestCase
         $this->_successValidator = $this->getMockBuilder(\Magento\Checkout\Model\Session\SuccessValidator::class)->disableOriginalConstructor()->getMock();
         $this->_resultRedirectFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RedirectFactory::class)->disableOriginalConstructor()->getMock();
         $this->_checkoutSession = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId'])->getMock();
-        $this->_session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId'])->getMock();
+        $this->_session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId', 'setLastOrderId'])->getMock();
         $this->_client = $this->getMockBuilder(\Orba\Payupl\Model\ClientInterface::class)->disableOriginalConstructor()->getMock();
         $this->_context->expects($this->once())->method('getResultRedirectFactory')->willReturn($this->_resultRedirectFactory);
         $this->_controller = $this->_objectManager->getObject(End::class, [
@@ -128,7 +128,9 @@ class EndTest extends \PHPUnit_Framework_TestCase
     {
         $this->_successValidator->expects($this->once())->method('isValid')->willReturn(!$isRepeat);
         if ($isRepeat) {
-            $this->_session->expects($this->once())->method('getLastOrderId')->willReturn(true);
+            $this->_session->expects($this->once())->method('getLastOrderId')->willReturn(1);
+        } else {
+            $this->_session->expects($this->once())->method('setLastOrderId')->with(null);
         }
         $orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
         $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($orderHelper);

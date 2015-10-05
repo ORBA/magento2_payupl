@@ -15,21 +15,43 @@ class Payment extends AbstractHelper
     protected $_transactionResource;
 
     /**
+     * @var \Orba\Payupl\Model\Order
+     */
+    protected $_orderHelper;
+
+    /**
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource
+        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\Order $orderHelper
     )
     {
         parent::__construct($context);
         $this->_transactionResource = $transactionResource;
+        $this->_orderHelper = $orderHelper;
     }
 
     /**
      * @param int $orderId
-     * @return string
+     * @return string|false
+     */
+    public function getStartPaymentUrl($orderId)
+    {
+        $order = $this->_orderHelper->loadOrderById($orderId);
+        if ($order) {
+            if ($this->_orderHelper->canStartFirstPayment($order)) {
+                return $this->_urlBuilder->getUrl('orba_payupl/payment/start', ['id' => $orderId]);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param int $orderId
+     * @return string|false
      */
     public function getRepeatPaymentUrl($orderId)
     {

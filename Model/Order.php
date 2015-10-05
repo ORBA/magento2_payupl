@@ -28,22 +28,54 @@ class Order
     protected $_orderFactory;
 
     /**
+     * @var \Magento\Checkout\Model\Session\SuccessValidator
+     */
+    protected $_checkoutSuccessValidator;
+
+    /**
+     * @var \Magento\Checkout\Model\Session
+     */
+    protected $_checkoutSession;
+
+    /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $_request;
+
+    /**
+     * @var Order\Validator
+     */
+    protected $_orderValidator;
+
+    /**
      * @param Resource\Transaction\CollectionFactory $transactionCollectionFactory
      * @param TransactionFactory $transactionFactory
      * @param Resource\Transaction $transactionResource
      * @param Sales\OrderFactory $orderFactory
+     * @param \Magento\Checkout\Model\Session\SuccessValidator $checkoutSuccessValidator
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @param Order\Validator $orderValidator
      */
     public function __construct(
         Resource\Transaction\CollectionFactory $transactionCollectionFactory,
         TransactionFactory $transactionFactory,
         Resource\Transaction $transactionResource,
-        Sales\OrderFactory $orderFactory
+        Sales\OrderFactory $orderFactory,
+        \Magento\Checkout\Model\Session\SuccessValidator $checkoutSuccessValidator,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Framework\App\RequestInterface $request,
+        Order\Validator $orderValidator
     )
     {
         $this->_transactionCollectionFactory = $transactionCollectionFactory;
         $this->_transactionFactory = $transactionFactory;
         $this->_transactionResource = $transactionResource;
         $this->_orderFactory = $orderFactory;
+        $this->_checkoutSuccessValidator = $checkoutSuccessValidator;
+        $this->_checkoutSession = $checkoutSession;
+        $this->_request = $request;
+        $this->_orderValidator = $orderValidator;
     }
 
     /**
@@ -150,5 +182,40 @@ class Order
             $object->save();
         }
         $order->save();
+    }
+
+    /**
+     * @return int|false
+     */
+    public function getOrderIdForPaymentStart()
+    {
+        if ($this->_checkoutSuccessValidator->isValid()) {
+            return $this->_checkoutSession->getLastOrderId();
+        }
+        $orderId = $this->_request->getParam('id');
+        if ($orderId) {
+            return $orderId;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if first payment can be started.
+     *
+     * Order should belong to current logged in customer.
+     * Order should have Payu.pl payment method.
+     * Order should have no Payu.pl transactions.
+     * Order shouldn't be cancelled, closed or completed.
+     *
+     * @param Sales\Order $order
+     * @return bool
+     */
+    public function canStartFirstPayment(Sales\Order $order)
+    {
+        return
+            $this->_orderValidator->validateCustomer($order) &&
+            $this->_orderValidator->validateNoTransactions($order) &&
+            $this->_orderValidator->validatePaymentMethod($order) &&
+            $this->_orderValidator->validateState($order);
     }
 }

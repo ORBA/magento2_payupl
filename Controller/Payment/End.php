@@ -67,6 +67,7 @@ class End extends \Magento\Framework\App\Action\Action
         try {
             $orderHelper = $this->_client->getOrderHelper();
             if ($this->_successValidator->isValid()) {
+                $this->_session->setLastOrderId(null);
                 if ($orderHelper->paymentSuccessCheck($this->_context->getRequest())) {
                     $redirectUrl = 'checkout/onepage/success';
                 } else {

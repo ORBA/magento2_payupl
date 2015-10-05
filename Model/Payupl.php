@@ -17,6 +17,11 @@ class Payupl extends AbstractMethod
     protected $_code = self::CODE;
 
     /**
+     * @var string
+     */
+    protected $_infoBlockType = 'Orba\Payupl\Block\Payment\Info';
+
+    /**
      * @var bool
      */
     protected $_isGateway = true;

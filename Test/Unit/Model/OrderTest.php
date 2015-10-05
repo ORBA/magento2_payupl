@@ -32,17 +32,37 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_orderFactory;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
     protected $_transactionResource;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
+    protected $_orderFactory;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $_scopeConfig;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_checkoutSuccessValidator;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_checkoutSession;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_request;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_orderValidator;
 
     public function setUp()
     {
@@ -51,11 +71,19 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_transactionFactory = $this->getMockBuilder(\Orba\Payupl\Model\TransactionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_orderFactory = $this->getMockBuilder(\Orba\Payupl\Model\Sales\OrderFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
+        $this->_checkoutSuccessValidator = $this->getMockBuilder(\Magento\Checkout\Model\Session\SuccessValidator::class)->disableOriginalConstructor()->getMock();
+        $this->_checkoutSession = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId'])->getMock();
+        $this->_request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
+        $this->_orderValidator = $this->getMockBuilder(Order\Validator::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->getMockForAbstractClass(Order::class, [
             'transactionCollectionFactory' => $this->_transactionCollectionFactory,
             'transactionFactory' => $this->_transactionFactory,
             'transactionResource' => $this->_transactionResource,
-            'orderFactory' => $this->_orderFactory
+            'orderFactory' => $this->_orderFactory,
+            'checkoutSuccessValidator' => $this->_checkoutSuccessValidator,
+            'checkoutSession' => $this->_checkoutSession,
+            'request' => $this->_request,
+            'orderValidator' => $this->_orderValidator
         ]);
     }
 
@@ -175,6 +203,73 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_model->completePayment($order, $amount);
     }
 
+    public function testGetOrderIdForPaymentStartSuccessNewOrder()
+    {
+        $orderId = 1;
+        $this->_checkoutSuccessValidator->expects($this->once())->method('isValid')->willReturn(true);
+        $this->_checkoutSession->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
+        $this->assertEquals($orderId, $this->_model->getOrderIdForPaymentStart());
+    }
+    
+    public function testGetOrderIdForPaymentStartSuccessExisitingOrder()
+    {
+        $orderId = 1;
+        $this->_checkoutSuccessValidator->expects($this->once())->method('isValid')->willReturn(false);
+        $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('id'))->willReturn($orderId);
+        $this->assertEquals($orderId, $this->_model->getOrderIdForPaymentStart());
+    }
+
+    public function testGetOrderIdForPaymentStartFail()
+    {
+        $this->_checkoutSuccessValidator->expects($this->once())->method('isValid')->willReturn(false);
+        $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('id'))->willReturn(null);
+        $this->assertFalse($this->_model->getOrderIdForPaymentStart());
+    }
+
+    public function testCanStartFirstPaymentFailInvalidCustomer()
+    {
+        $order = $this->_getOrderMock();
+        $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(false);
+        $this->assertFalse($this->_model->canStartFirstPayment($order));
+    }
+
+    public function testCanStartFirstPaymentFailAlreadyStarted()
+    {
+        $order = $this->_getOrderMock();
+        $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNoTransactions')->with($this->equalTo($order))->willReturn(false);
+        $this->assertFalse($this->_model->canStartFirstPayment($order));
+    }
+
+    public function testCanStartFirstPaymentFailInvalidPaymentMethod()
+    {
+        $order = $this->_getOrderMock();
+        $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNoTransactions')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validatePaymentMethod')->with($this->equalTo($order))->willReturn(false);
+        $this->assertFalse($this->_model->canStartFirstPayment($order));
+    }
+
+    public function testCanStartFirstPaymentFailInvalidOrderState()
+    {
+        $order = $this->_getOrderMock();
+        $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNoTransactions')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validatePaymentMethod')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateState')->with($this->equalTo($order))->willReturn(false);
+        $this->assertFalse($this->_model->canStartFirstPayment($order));
+    }
+
+    public function testCanStartFirstPaymentSuccess()
+    {
+        $order = $this->_getOrderMock();
+        $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNoTransactions')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validatePaymentMethod')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateState')->with($this->equalTo($order))->willReturn(true);
+        $this->assertTrue($this->_model->canStartFirstPayment($order));
+    }
+
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
@@ -205,5 +300,20 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     protected function _getOrderMock()
     {
         return $this->getMockBuilder(\Orba\Payupl\Model\Sales\Order::class)->disableOriginalConstructor()->getMock();
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getOrderMockForCanStartFirstPaymentWithCorrectPaymentMethodAndWithoutTransaction()
+    {
+        $order = $this->_getOrderMock();
+        $orderId = 1;
+        $order->expects($this->once())->method('getId')->willReturn($orderId);
+        $this->_transactionResource->expects($this->once())->method('getLastPayuplOrderIdByOrderId')->with($this->equalTo($orderId))->willReturn(false);
+        $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->disableOriginalConstructor()->getMock();
+        $payment->expects($this->once())->method('getMethod')->willReturn(Payupl::CODE);
+        $order->expects($this->once())->method('getPayment')->willReturn($payment);
+        return $order;
     }
 }
