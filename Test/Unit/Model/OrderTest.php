@@ -294,13 +294,24 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->canRepeatPayment($order));
     }
 
-    public function testCanRepeatPaymentFailInvalidLastTransaction()
+    public function testCanRepeatPaymentFailAlreadyPaid()
     {
         $order = $this->_getOrderMock();
         $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(true);
         $this->_orderValidator->expects($this->once())->method('validatePaymentMethod')->with($this->equalTo($order))->willReturn(true);
         $this->_orderValidator->expects($this->once())->method('validateState')->with($this->equalTo($order))->willReturn(true);
         $this->_orderValidator->expects($this->once())->method('validateNotPaid')->with($this->equalTo($order))->willReturn(false);
+        $this->assertFalse($this->_model->canRepeatPayment($order));
+    }
+
+    public function testCanRepeatPaymentFailNoTransaction()
+    {
+        $order = $this->_getOrderMock();
+        $this->_orderValidator->expects($this->once())->method('validateCustomer')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validatePaymentMethod')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateState')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNotPaid')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNoTransactions')->with($this->equalTo($order))->willReturn(true);
         $this->assertFalse($this->_model->canRepeatPayment($order));
     }
 
@@ -311,7 +322,20 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_orderValidator->expects($this->once())->method('validatePaymentMethod')->with($this->equalTo($order))->willReturn(true);
         $this->_orderValidator->expects($this->once())->method('validateState')->with($this->equalTo($order))->willReturn(true);
         $this->_orderValidator->expects($this->once())->method('validateNotPaid')->with($this->equalTo($order))->willReturn(true);
+        $this->_orderValidator->expects($this->once())->method('validateNoTransactions')->with($this->equalTo($order))->willReturn(false);
         $this->assertTrue($this->_model->canRepeatPayment($order));
+    }
+
+    public function testPaymentSuccessCheckFail()
+    {
+        $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('exception'))->willReturn('1');
+        $this->assertFalse($this->_model->paymentSuccessCheck());
+    }
+
+    public function testPaymentSuccessCheckSuccess()
+    {
+        $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('exception'))->willReturn(null);
+        $this->assertTrue($this->_model->paymentSuccessCheck());
     }
 
     /**

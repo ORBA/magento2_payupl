@@ -49,12 +49,18 @@ class Order implements OrderInterface
     protected $_transactionResource;
 
     /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $_request;
+
+    /**
      * @param Order\DataValidator $dataValidator
      * @param Order\DataGetter $dataGetter
      * @param \Orba\Payupl\Model\Client\Rest\MethodCaller $methodCaller
      * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
      * @param Order\Processor $orderProcessor
      * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
+     * @param \Magento\Framework\App\RequestInterface $request
      */
     public function __construct(
         Order\DataValidator $dataValidator,
@@ -62,7 +68,8 @@ class Order implements OrderInterface
         MethodCaller $methodCaller,
         \Orba\Payupl\Model\Resource\Transaction $transactionResource,
         Order\Processor $orderProcessor,
-        \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
+        \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
+        \Magento\Framework\App\RequestInterface $request
     )
     {
         $this->_dataValidator = $dataValidator;
@@ -71,6 +78,7 @@ class Order implements OrderInterface
         $this->_transactionResource = $transactionResource;
         $this->_orderProcessor = $orderProcessor;
         $this->_rawResultFactory = $rawResultFactory;
+        $this->_request = $request;
     }
 
     /**
@@ -225,9 +233,9 @@ class Order implements OrderInterface
     /**
      * @inheritdoc
      */
-    public function paymentSuccessCheck(\Magento\Framework\App\RequestInterface $request)
+    public function paymentSuccessCheck()
     {
-        return is_null($request->getParam('error'));
+        return is_null($this->_request->getParam('error'));
     }
 
     /**

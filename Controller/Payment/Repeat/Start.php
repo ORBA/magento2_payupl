@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Controller\Payment\Repeat;
 
+use Orba\Payupl\Model\Client\Exception;
+
 class Start extends \Magento\Framework\App\Action\Action
 {
     /**
@@ -51,23 +53,29 @@ class Start extends \Magento\Framework\App\Action\Action
          */
         $resultRedirect = $this->resultRedirectFactory->create();
         $orderId = $this->_session->getLastOrderId();
+        $redirectParams = [];
         if ($orderId) {
-            $clientOrderHelper = $this->_client->getOrderHelper();
-            $order = $this->_orderHelper->loadOrderById($orderId);
-            $orderData = $clientOrderHelper->getDataForOrderCreate($order);
-            $result = $this->_client->orderCreate($orderData);
-            $this->_orderHelper->saveNewTransaction(
-                $orderId,
-                $result['orderId'],
-                $result['extOrderId'],
-                $clientOrderHelper->getNewStatus()
-            );
-            $this->_orderHelper->setNewOrderStatus($order);
-            $redirectUrl = $result['redirectUri'];
+            try {
+                $clientOrderHelper = $this->_client->getOrderHelper();
+                $order = $this->_orderHelper->loadOrderById($orderId);
+                $orderData = $clientOrderHelper->getDataForOrderCreate($order);
+                $result = $this->_client->orderCreate($orderData);
+                $this->_orderHelper->saveNewTransaction(
+                    $orderId,
+                    $result['orderId'],
+                    $result['extOrderId'],
+                    $clientOrderHelper->getNewStatus()
+                );
+                $this->_orderHelper->setNewOrderStatus($order);
+                $redirectUrl = $result['redirectUri'];
+            } catch (Exception $e) {
+                $redirectUrl = 'orba_payupl/payment/end';
+                $redirectParams = ['exception' => '1'];
+            }
         } else {
             $redirectUrl = 'orba_payupl/payment/repeat_error';
         }
-        $resultRedirect->setPath($redirectUrl);
+        $resultRedirect->setPath($redirectUrl, $redirectParams);
         return $resultRedirect;
     }
 }

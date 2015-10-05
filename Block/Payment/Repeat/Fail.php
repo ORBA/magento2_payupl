@@ -31,11 +31,18 @@ class Fail extends \Magento\Framework\View\Element\Template
         $this->_paymentHelper = $paymentHelper;
     }
 
-    public function getRepeatPaymentUrl()
+    /**
+     * @return string|false
+     */
+    public function getPaymentUrl()
     {
         $orderId = $this->_session->getLastOrderId();
         if ($orderId) {
-            return $this->_paymentHelper->getRepeatPaymentUrl($orderId);
+            $repeatPaymentUrl = $this->_paymentHelper->getRepeatPaymentUrl($orderId);
+            if (!$repeatPaymentUrl) {
+                return $this->_paymentHelper->getStartPaymentUrl($orderId);
+            }
+            return $repeatPaymentUrl;
         }
         return false;
     }

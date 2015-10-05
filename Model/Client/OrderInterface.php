@@ -83,12 +83,11 @@ interface OrderInterface
     public function getNewStatus();
 
     /**
-     * Checks if payment was successful basing on controller request.
+     * Checks if payment was successful.
      *
-     * @param \Magento\Framework\App\RequestInterface $request
      * @return bool
      */
-    public function paymentSuccessCheck(\Magento\Framework\App\RequestInterface $request);
+    public function paymentSuccessCheck();
 
     /**
      * @param string $payuplOrderId

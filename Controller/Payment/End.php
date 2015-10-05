@@ -33,6 +33,11 @@ class End extends \Magento\Framework\App\Action\Action
     protected $_context;
 
     /**
+     * @var \Orba\Payupl\Model\Order
+     */
+    protected $_orderHelper;
+
+    /**
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Checkout\Model\Session\SuccessValidator $successValidator
      * @param \Magento\Checkout\Model\Session $checkoutSession
@@ -44,7 +49,8 @@ class End extends \Magento\Framework\App\Action\Action
         \Magento\Checkout\Model\Session\SuccessValidator $successValidator,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Orba\Payupl\Model\Session $session,
-        \Orba\Payupl\Model\ClientInterface $client
+        \Orba\Payupl\Model\ClientInterface $client,
+        \Orba\Payupl\Model\Order $orderHelper
     )
     {
         parent::__construct($context);
@@ -53,6 +59,7 @@ class End extends \Magento\Framework\App\Action\Action
         $this->_checkoutSession = $checkoutSession;
         $this->_session = $session;
         $this->_client = $client;
+        $this->_orderHelper = $orderHelper;
     }
 
     /**
@@ -61,20 +68,26 @@ class End extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         /**
-         * @var $orderHelper \Orba\Payupl\Model\Client\OrderInterface
+         * @var $clientOrderHelper \Orba\Payupl\Model\Client\OrderInterface
          */
         $resultRedirect = $this->resultRedirectFactory->create();
         try {
-            $orderHelper = $this->_client->getOrderHelper();
+            $clientOrderHelper = $this->_client->getOrderHelper();
             if ($this->_successValidator->isValid()) {
                 $this->_session->setLastOrderId(null);
-                if ($orderHelper->paymentSuccessCheck($this->_context->getRequest())) {
+                if (
+                    $this->_orderHelper->paymentSuccessCheck() &&
+                    $clientOrderHelper->paymentSuccessCheck()
+                ) {
                     $redirectUrl = 'checkout/onepage/success';
                 } else {
                     $redirectUrl = 'orba_payupl/payment/error';
                 }
             } else if ($this->_session->getLastOrderId()) {
-                if ($orderHelper->paymentSuccessCheck($this->_context->getRequest())) {
+                if (
+                    $this->_orderHelper->paymentSuccessCheck() &&
+                    $clientOrderHelper->paymentSuccessCheck()
+                ) {
                     $redirectUrl = 'orba_payupl/payment/repeat_success';
                 } else {
                     $redirectUrl = 'orba_payupl/payment/repeat_error';

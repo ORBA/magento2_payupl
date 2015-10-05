@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
+use Orba\Payupl\Model\Client\Exception;
+
 class Start extends \Magento\Framework\App\Action\Action
 {
     /**
@@ -48,28 +50,35 @@ class Start extends \Magento\Framework\App\Action\Action
     {
         /**
          * @var $clientOrderHelper \Orba\Payupl\Model\Client\OrderInterface
+         * @var $resultRedirect \Magento\Framework\Controller\Result\Redirect
          */
         $resultRedirect = $this->resultRedirectFactory->create();
         $redirectUrl = 'checkout/cart';
+        $redirectParams = [];
         $orderId = $this->_orderHelper->getOrderIdForPaymentStart();
         if ($orderId) {
             $order = $this->_orderHelper->loadOrderById($orderId);
             if ($this->_orderHelper->canStartFirstPayment($order)) {
-                $clientOrderHelper = $this->_client->getOrderHelper();
-                $orderData = $clientOrderHelper->getDataForOrderCreate($order);
-                $result = $this->_client->orderCreate($orderData);
-                $this->_orderHelper->saveNewTransaction(
-                    $orderId,
-                    $result['orderId'],
-                    $result['extOrderId'],
-                    $clientOrderHelper->getNewStatus()
-                );
-                $this->_orderHelper->setNewOrderStatus($order);
+                try {
+                    $clientOrderHelper = $this->_client->getOrderHelper();
+                    $orderData = $clientOrderHelper->getDataForOrderCreate($order);
+                    $result = $this->_client->orderCreate($orderData);
+                    $this->_orderHelper->saveNewTransaction(
+                        $orderId,
+                        $result['orderId'],
+                        $result['extOrderId'],
+                        $clientOrderHelper->getNewStatus()
+                    );
+                    $this->_orderHelper->setNewOrderStatus($order);
+                    $redirectUrl = $result['redirectUri'];
+                } catch (Exception $e) {
+                    $redirectUrl = 'orba_payupl/payment/end';
+                    $redirectParams = ['exception' => '1'];
+                }
                 $this->_session->setLastOrderId($orderId);
-                $redirectUrl = $result['redirectUri'];
             }
         }
-        $resultRedirect->setPath($redirectUrl);
+        $resultRedirect->setPath($redirectUrl, $redirectParams);
         return $resultRedirect;
     }
 }

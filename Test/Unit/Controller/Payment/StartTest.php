@@ -6,6 +6,7 @@
 namespace Orba\Payupl\Controller\Payment;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Orba\Payupl\Model\Client\Exception;
 
 class StartTest extends \PHPUnit_Framework_TestCase
 {
@@ -75,6 +76,34 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $resultRedirect = $this->getMockBuilder(\Magento\Framework\Controller\Result\Redirect::class)->disableOriginalConstructor()->getMock();
         $resultRedirect->expects($this->once())->method('setPath')->with('checkout/cart');
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
+        $this->assertEquals($resultRedirect, $this->_controller->execute());
+    }
+
+    public function testRedirectToErrorOnClientException()
+    {
+        $orderId = 123;
+        $orderData = ['extOrderId' => '0000000001-1'];
+        $this->_orderHelper->expects($this->once())->method('getOrderIdForPaymentStart')->willReturn($orderId);
+        $clientOrderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
+        $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($clientOrderHelper);
+        $order = $this->_getOrderMock();
+        $this->_orderHelper->expects($this->once())->method('loadOrderById')->with($this->equalTo($orderId))->willReturn($order);
+        $this->_orderHelper->expects($this->once())->method('canStartFirstPayment')->with($this->equalTo($order))->willReturn(true);
+        $clientOrderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($order))->willReturn($orderData);
+        $response = [
+            'redirectUri' => 'http://redirect.url',
+            'orderId' => 'Z963D5JQR2230925GUEST000P01',
+            'extOrderId' => $orderData['extOrderId']
+        ];
+        $exception = new Exception();
+        $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willThrowException($exception);
+        $resultRedirect = $this->getMockBuilder(\Magento\Framework\Controller\Result\Redirect::class)->disableOriginalConstructor()->getMock();
+        $resultRedirect->expects($this->once())->method('setPath')->with(
+            $this->equalTo('orba_payupl/payment/end'),
+            $this->equalTo(['exception' => '1'])
+        );
+        $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
+        $this->_session->expects($this->once())->method('setLastOrderId')->with($this->equalTo($orderId));
         $this->assertEquals($resultRedirect, $this->_controller->execute());
     }
 

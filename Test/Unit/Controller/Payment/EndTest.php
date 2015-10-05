@@ -49,6 +49,11 @@ class EndTest extends \PHPUnit_Framework_TestCase
      */
     protected $_session;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_orderHelper;
+
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
@@ -59,12 +64,14 @@ class EndTest extends \PHPUnit_Framework_TestCase
         $this->_session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId', 'setLastOrderId'])->getMock();
         $this->_client = $this->getMockBuilder(\Orba\Payupl\Model\ClientInterface::class)->disableOriginalConstructor()->getMock();
         $this->_context->expects($this->once())->method('getResultRedirectFactory')->willReturn($this->_resultRedirectFactory);
+        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
         $this->_controller = $this->_objectManager->getObject(End::class, [
             'context' => $this->_context,
             'successValidator' => $this->_successValidator,
             'checkoutSession' => $this->_checkoutSession,
             'session' => $this->_session,
-            'client' => $this->_client
+            'client' => $this->_client,
+            'orderHelper' => $this->_orderHelper
         ]);
     }
 
@@ -79,7 +86,7 @@ class EndTest extends \PHPUnit_Framework_TestCase
 
     public function testRedirectToCheckoutSuccess()
     {
-        $this->_preTestRedirectAfterPayuplResponse(true);
+        $this->_preTestRedirectAfterPayuplResponse(true, true);
         $resultRedirect = $this->_getRedirectMock('checkout/onepage/success');
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $this->assertEquals($resultRedirect, $this->_controller->execute());
@@ -87,7 +94,15 @@ class EndTest extends \PHPUnit_Framework_TestCase
 
     public function testRedirectToPayuplError()
     {
-        $this->_preTestRedirectAfterPayuplResponse(false);
+        $this->_preTestRedirectAfterPayuplResponse(false, false);
+        $resultRedirect = $this->_getRedirectMock('orba_payupl/payment/error');
+        $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
+        $this->assertEquals($resultRedirect, $this->_controller->execute());
+    }
+
+    public function testRedirectToPayuplErrorClient()
+    {
+        $this->_preTestRedirectAfterPayuplResponse(true, false);
         $resultRedirect = $this->_getRedirectMock('orba_payupl/payment/error');
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $this->assertEquals($resultRedirect, $this->_controller->execute());
@@ -95,7 +110,7 @@ class EndTest extends \PHPUnit_Framework_TestCase
 
     public function testRedirectToRepeatPaymentSuccess()
     {
-        $this->_preTestRedirectAfterPayuplResponse(true, true);
+        $this->_preTestRedirectAfterPayuplResponse(true, true, true);
         $resultRedirect = $this->_getRedirectMock('orba_payupl/payment/repeat_success');
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $this->assertEquals($resultRedirect, $this->_controller->execute());
@@ -103,7 +118,15 @@ class EndTest extends \PHPUnit_Framework_TestCase
 
     public function testRedirectToRepeatPaymentError()
     {
-        $this->_preTestRedirectAfterPayuplResponse(false, true);
+        $this->_preTestRedirectAfterPayuplResponse(false, true, true);
+        $resultRedirect = $this->_getRedirectMock('orba_payupl/payment/repeat_error');
+        $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
+        $this->assertEquals($resultRedirect, $this->_controller->execute());
+    }
+
+    public function testRedirectToRepeatPaymentErrorClient()
+    {
+        $this->_preTestRedirectAfterPayuplResponse(true, false, true);
         $resultRedirect = $this->_getRedirectMock('orba_payupl/payment/repeat_error');
         $this->_resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $this->assertEquals($resultRedirect, $this->_controller->execute());
@@ -124,7 +147,7 @@ class EndTest extends \PHPUnit_Framework_TestCase
      * @param bool $paymentSuccessCheck
      * @param bool $isRepeat
      */
-    protected function _preTestRedirectAfterPayuplResponse($paymentSuccessCheck, $isRepeat = false)
+    protected function _preTestRedirectAfterPayuplResponse($paymentSuccessCheck, $clientPaymentSuccessCheck, $isRepeat = false)
     {
         $this->_successValidator->expects($this->once())->method('isValid')->willReturn(!$isRepeat);
         if ($isRepeat) {
@@ -134,8 +157,9 @@ class EndTest extends \PHPUnit_Framework_TestCase
         }
         $orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
         $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($orderHelper);
-        $request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
-        $this->_context->expects($this->once())->method('getRequest')->willReturn($request);
-        $orderHelper->expects($this->once())->method('paymentSuccessCheck')->with($request)->willReturn($paymentSuccessCheck);
+        $this->_orderHelper->expects($this->once())->method('paymentSuccessCheck')->willReturn($paymentSuccessCheck);
+        if ($paymentSuccessCheck) {
+            $orderHelper->expects($this->once())->method('paymentSuccessCheck')->willReturn($clientPaymentSuccessCheck);
+        }
     }
 }

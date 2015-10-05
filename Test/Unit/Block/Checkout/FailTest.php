@@ -33,18 +33,28 @@ class FailTest extends \PHPUnit_Framework_TestCase
         ]);
     }
 
-    public function testGetRepeatPaymentUrlFail()
+    public function testGetPaymentUrlFail()
     {
         $this->_checkoutSession->expects($this->once())->method('getLastOrderId')->willReturn(null);
-        $this->assertFalse($this->_block->getRepeatPaymentUrl());
+        $this->assertFalse($this->_block->getPaymentUrl());
     }
 
-    public function testGetRepeatPaymentUrlSuccess()
+    public function testGetPaymentUrlSuccessRepeat()
     {
         $orderId = 1;
         $url = 'http://repeat.url';
         $this->_checkoutSession->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
         $this->_paymentHelper->expects($this->once())->method('getRepeatPaymentUrl')->with($this->equalTo($orderId))->willReturn($url);
-        $this->assertEquals($url, $this->_block->getRepeatPaymentUrl());
+        $this->assertEquals($url, $this->_block->getPaymentUrl());
+    }
+
+    public function testGetPaymentUrlSuccessNew()
+    {
+        $orderId = 1;
+        $url = 'http://start-new.url';
+        $this->_checkoutSession->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
+        $this->_paymentHelper->expects($this->once())->method('getRepeatPaymentUrl')->with($this->equalTo($orderId))->willReturn(false);
+        $this->_paymentHelper->expects($this->once())->method('getStartPaymentUrl')->with($this->equalTo($orderId))->willReturn($url);
+        $this->assertEquals($url, $this->_block->getPaymentUrl());
     }
 }

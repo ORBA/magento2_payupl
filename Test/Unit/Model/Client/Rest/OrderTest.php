@@ -46,6 +46,11 @@ class OrderTest extends \PHPUnit_Framework_TestCase
      */
     protected $_transactionResource;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_request;
+
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
@@ -55,6 +60,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_orderProcessor = $this->getMockBuilder(Order\Processor::class)->disableOriginalConstructor()->getMock();
         $this->_rawResultFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RawFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
+        $this->_request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
         $this->_model = $objectManagerHelper->getObject(
             Order::class,
             [
@@ -63,7 +69,8 @@ class OrderTest extends \PHPUnit_Framework_TestCase
                 'methodCaller' => $this->_methodCaller,
                 'transactionResource' => $this->_transactionResource,
                 'orderProcessor' => $this->_orderProcessor,
-                'rawResultFactory' => $this->_rawResultFactory
+                'rawResultFactory' => $this->_rawResultFactory,
+                'request' => $this->_request
             ]
         );
     }
@@ -350,16 +357,14 @@ class OrderTest extends \PHPUnit_Framework_TestCase
 
     public function testPaymentSuccessCheckFail()
     {
-        $request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
-        $request->expects($this->once())->method('getParam')->with($this->equalTo('error'))->willReturn('501');
-        $this->assertFalse($this->_model->paymentSuccessCheck($request));
+        $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('error'))->willReturn('501');
+        $this->assertFalse($this->_model->paymentSuccessCheck());
     }
 
     public function testPaymentSuccessCheckSuccess()
     {
-        $request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
-        $request->expects($this->once())->method('getParam')->with($this->equalTo('error'))->willReturn(null);
-        $this->assertTrue($this->_model->paymentSuccessCheck($request));
+        $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('error'))->willReturn(null);
+        $this->assertTrue($this->_model->paymentSuccessCheck());
     }
     
     public function testCanProcessNotificationFailStatusCompleted()

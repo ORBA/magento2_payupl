@@ -207,10 +207,10 @@ class Order
      * Order should have no Payu.pl transactions.
      * Order shouldn't be cancelled, closed or completed.
      *
-     * @param Sales\Order $order
+     * @param \Magento\Sales\Model\Order $order
      * @return bool
      */
-    public function canStartFirstPayment(Sales\Order $order)
+    public function canStartFirstPayment(\Magento\Sales\Model\Order $order)
     {
         return
             $this->_orderValidator->validateCustomer($order) &&
@@ -219,12 +219,25 @@ class Order
             $this->_orderValidator->validateState($order);
     }
 
-    public function canRepeatPayment($order)
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return bool
+     */
+    public function canRepeatPayment(\Magento\Sales\Model\Order $order)
     {
         return
             $this->_orderValidator->validateCustomer($order) &&
             $this->_orderValidator->validatePaymentMethod($order) &&
             $this->_orderValidator->validateState($order) &&
-            $this->_orderValidator->validateNotPaid($order);
+            $this->_orderValidator->validateNotPaid($order) &&
+            !$this->_orderValidator->validateNoTransactions($order);
+    }
+
+    /**
+     * @return bool
+     */
+    public function paymentSuccessCheck()
+    {
+        return is_null($this->_request->getParam('exception'));
     }
 }
