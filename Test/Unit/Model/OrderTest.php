@@ -67,8 +67,6 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
-        $this->_transactionCollectionFactory = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\CollectionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
-        $this->_transactionFactory = $this->getMockBuilder(\Orba\Payupl\Model\TransactionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_orderFactory = $this->getMockBuilder(\Orba\Payupl\Model\Sales\OrderFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_checkoutSuccessValidator = $this->getMockBuilder(\Magento\Checkout\Model\Session\SuccessValidator::class)->disableOriginalConstructor()->getMock();
@@ -76,8 +74,6 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
         $this->_orderValidator = $this->getMockBuilder(Order\Validator::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->getMockForAbstractClass(Order::class, [
-            'transactionCollectionFactory' => $this->_transactionCollectionFactory,
-            'transactionFactory' => $this->_transactionFactory,
             'transactionResource' => $this->_transactionResource,
             'orderFactory' => $this->_orderFactory,
             'checkoutSuccessValidator' => $this->_checkoutSuccessValidator,
@@ -85,37 +81,6 @@ class OrderTest extends \PHPUnit_Framework_TestCase
             'request' => $this->_request,
             'orderValidator' => $this->_orderValidator
         ]);
-    }
-
-    public function testSaveNewTransaction()
-    {
-        $orderId = '1';
-        $payuplOrderId = 'Z963D5JQR2230925GUEST000P01';
-        $payuplExternalOrderId = '0000000001:1';
-        $status = 'status';
-        $lastTry = 3;
-        $transactionCollection = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\Collection::class)->disableOriginalConstructor()->getMock();
-        $transactionCollection->expects($this->once())->method('addFieldToFilter')->with(
-            $this->equalTo('order_id'),
-            $this->equalTo($orderId)
-        )->will($this->returnSelf());
-        $transactionCollection->expects($this->once())->method('setOrder')->with(
-            $this->equalTo('try'),
-            $this->equalTo(\Magento\Framework\Data\Collection::SORT_ORDER_DESC)
-        )->will($this->returnSelf());
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getTry')->willReturn($lastTry);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $transactionToSave = $this->_getTransactionMock();
-        $transactionToSave->expects($this->once())->method('setOrderId')->with($this->equalTo($orderId))->will($this->returnSelf());
-        $transactionToSave->expects($this->once())->method('setPayuplOrderId')->with($this->equalTo($payuplOrderId))->will($this->returnSelf());
-        $transactionToSave->expects($this->once())->method('setPayuplExternalOrderId')->with($this->equalTo($payuplExternalOrderId))->will($this->returnSelf());
-        $transactionToSave->expects($this->once())->method('setTry')->with($this->equalTo($lastTry + 1))->will($this->returnSelf());
-        $transactionToSave->expects($this->once())->method('setStatus')->with($this->equalTo($status))->will($this->returnSelf());
-        $transactionToSave->expects($this->once())->method('save')->will($this->returnSelf());
-        $this->_transactionFactory->expects($this->once())->method('create')->willReturn($transactionToSave);
-        $this->_model->saveNewTransaction($orderId, $payuplOrderId, $payuplExternalOrderId, $status);
     }
 
     public function testGetOrderByIdFailNotFound()

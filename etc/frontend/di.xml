@@ -13,5 +13,4 @@
             </argument>
         </arguments>
     </type>
-    <preference for="Orba\Payupl\Model\ClientInterface" type="Orba\Payupl\Model\Client\Rest" />
 </config>

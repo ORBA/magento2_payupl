@@ -151,7 +151,7 @@ class RestTest extends \PHPUnit_Framework_TestCase
         $result = $this->_getResultMock();
         $this->_orderHelper->expects($this->once())->method('validateStatusUpdate')->with($this->equalTo($data))->willReturn(true);
         $this->_orderHelper->expects($this->once())->method('statusUpdate')->with($this->equalTo($data))->willReturn($result);
-        $this->assertEquals($result, $this->_model->orderStatusUpdate($data));
+        $this->assertTrue($this->_model->orderStatusUpdate($data));
     }
 
     public function testOrderConsumeNotificationFail()
@@ -201,7 +201,7 @@ class RestTest extends \PHPUnit_Framework_TestCase
             $this->equalTo($description),
             $this->equalTo($amount)
         )->willReturn($result);
-        $this->assertEquals($result, $this->_model->refundCreate($orderId, $description, $amount));
+        $this->assertTrue($this->_model->refundCreate($orderId, $description, $amount));
     }
 
     public function testGetOrderHelper()

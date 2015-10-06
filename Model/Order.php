@@ -8,16 +8,6 @@ namespace Orba\Payupl\Model;
 class Order
 {
     /**
-     * @var Resource\Transaction\CollectionFactory
-     */
-    protected $_transactionCollectionFactory;
-
-    /**
-     * @var TransactionFactory
-     */
-    protected $_transactionFactory;
-
-    /**
      * @var Resource\Transaction
      */
     protected $_transactionResource;
@@ -48,8 +38,6 @@ class Order
     protected $_orderValidator;
 
     /**
-     * @param Resource\Transaction\CollectionFactory $transactionCollectionFactory
-     * @param TransactionFactory $transactionFactory
      * @param Resource\Transaction $transactionResource
      * @param Sales\OrderFactory $orderFactory
      * @param \Magento\Checkout\Model\Session\SuccessValidator $checkoutSuccessValidator
@@ -58,8 +46,6 @@ class Order
      * @param Order\Validator $orderValidator
      */
     public function __construct(
-        Resource\Transaction\CollectionFactory $transactionCollectionFactory,
-        TransactionFactory $transactionFactory,
         Resource\Transaction $transactionResource,
         Sales\OrderFactory $orderFactory,
         \Magento\Checkout\Model\Session\SuccessValidator $checkoutSuccessValidator,
@@ -68,8 +54,6 @@ class Order
         Order\Validator $orderValidator
     )
     {
-        $this->_transactionCollectionFactory = $transactionCollectionFactory;
-        $this->_transactionFactory = $transactionFactory;
         $this->_transactionResource = $transactionResource;
         $this->_orderFactory = $orderFactory;
         $this->_checkoutSuccessValidator = $checkoutSuccessValidator;
@@ -79,35 +63,13 @@ class Order
     }
 
     /**
-     * Saves new transaction incrementing "try".
+     * Saves new order transaction incrementing "try".
      *
-     * @param int $orderId
+     * @param \Magento\Sales\Model\Order $order
      * @param string $payuplOrderId
      * @param string $payuplExternalOrderId
      * @param string $status
      */
-    public function saveNewTransaction($orderId, $payuplOrderId, $payuplExternalOrderId, $status)
-    {
-        /**
-         * @var $transactionCollection Resource\Transaction\Collection
-         * @var $transaction Transaction
-         * @var $transactionToSave Transaction
-         */
-        $transactionCollection = $this->_transactionCollectionFactory->create();
-        $transactionCollection
-            ->addFieldToFilter('order_id', $orderId)
-            ->setOrder('try', \Magento\Framework\Data\Collection::SORT_ORDER_DESC);
-        $transaction = $transactionCollection->getFirstItem();
-        $transactionToSave = $this->_transactionFactory->create();
-        $transactionToSave
-            ->setOrderId($orderId)
-            ->setPayuplOrderId($payuplOrderId)
-            ->setPayuplExternalOrderId($payuplExternalOrderId)
-            ->setTry($transaction->getTry() + 1)
-            ->setStatus($status)
-            ->save();
-    }
-
     public function addNewOrderTransaction(\Magento\Sales\Model\Order $order, $payuplOrderId, $payuplExternalOrderId, $status)
     {
         $orderId = $order->getId();

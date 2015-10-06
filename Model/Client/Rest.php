@@ -98,7 +98,7 @@ class Rest implements ClientInterface
         if (!$result) {
             throw new Exception('There was a problem while processing order status update request.');
         }
-        return $result;
+        return true;
     }
 
     /**
@@ -125,7 +125,7 @@ class Rest implements ClientInterface
         if (!$result) {
             throw new Exception('There was a problem while processing refund create request.');
         }
-        return $result;
+        return true;
     }
 
     /**

@@ -37,9 +37,24 @@ class Payupl extends AbstractMethod
     protected $_canRefund = true;
 
     /**
+     * @var bool
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * @var \Magento\Framework\UrlInterface
      */
     protected $_urlBuilder;
+
+    /**
+     * @var ClientInterface
+     */
+    protected $_client;
+
+    /**
+     * @var Resource\Transaction
+     */
+    protected $_transactionResource;
 
     /**
      * @param \Magento\Framework\Model\Context $context
@@ -48,11 +63,11 @@ class Payupl extends AbstractMethod
      * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
      * @param \Magento\Payment\Helper\Data $paymentData
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param Logger $logger
-     * @param \Magento\Framework\Model\Resource\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
+     * @param \Magento\Payment\Model\Method\Logger $logger
+     * @param \Magento\Framework\UrlInterface $urlBuilder
+     * @param ClientInterface $client
+     * @param Resource\Transaction $transactionResource
      * @param array $data
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -63,6 +78,8 @@ class Payupl extends AbstractMethod
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Payment\Model\Method\Logger $logger,
         \Magento\Framework\UrlInterface $urlBuilder,
+        ClientInterface $client,
+        Resource\Transaction $transactionResource,
         array $data = []
     ) {
         parent::__construct(
@@ -78,6 +95,8 @@ class Payupl extends AbstractMethod
             $data
         );
         $this->_urlBuilder = $urlBuilder;
+        $this->_client = $client;
+        $this->_transactionResource = $transactionResource;
     }
 
     /**
@@ -114,5 +133,16 @@ class Payupl extends AbstractMethod
             return in_array($shippingMethod, $allowedCarriers);
         }
         return true;
+    }
+
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+        /**
+         * @var $order \Magento\Sales\Model\Order
+         */
+        $order = $payment->getOrder();
+        $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($order->getId());
+        $this->_client->refundCreate($payuplOrderId, __('Refund for order # %1', $order->getIncrementId()), $amount * 100);
+        return $this;
     }
 }

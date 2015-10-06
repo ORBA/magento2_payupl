@@ -29,4 +29,5 @@
             <argument name="storage" xsi:type="object">Orba\Payupl\Model\Session\Storage</argument>
         </arguments>
     </type>
+    <preference for="Orba\Payupl\Model\ClientInterface" type="Orba\Payupl\Model\Client\Rest" />
 </config>

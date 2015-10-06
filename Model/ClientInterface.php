@@ -9,14 +9,14 @@ interface ClientInterface
 {
     /**
      * @param array $data
-     * @return bool|\OpenPayU_Result
+     * @return array (keys: orderId, redirectUri, extOrderId)
      * @throws Client\Exception
      */
     public function orderCreate(array $data = []);
 
     /**
      * @param string $payuplOrderId
-     * @return bool|\OpenPayU_Result
+     * @return string Transaction status
      * @throws Client\Exception
      */
     public function orderRetrieve($payuplOrderId);
@@ -30,14 +30,14 @@ interface ClientInterface
 
     /**
      * @param array $data
-     * @return bool|\OpenPayU_Result
+     * @return true
      * @throws Client\Exception
      */
     public function orderStatusUpdate(array $data = []);
 
     /**
      * @param \Magento\Framework\App\Request\Http $request
-     * @return bool|\OpenPayU_Result
+     * @return array (keys: payuplOrderId, status, amount')
      * @throws Client\Exception
      */
     public function orderConsumeNotification(\Magento\Framework\App\Request\Http $request);
@@ -46,7 +46,7 @@ interface ClientInterface
      * @param string $orderId
      * @param string $description
      * @param int $amount
-     * @return bool|\OpenPayU_Result
+     * @return true
      * @throws Client\Exception
      */
     public function refundCreate($orderId = '', $description = '', $amount = null);

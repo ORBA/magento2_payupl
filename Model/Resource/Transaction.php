@@ -103,6 +103,10 @@ class Transaction extends AbstractDb
         return false;
     }
 
+    /**
+     * @param int $orderId
+     * @return int
+     */
     public function getLastTryByOrderId($orderId)
     {
         $adapter = $this->getReadConnection();
