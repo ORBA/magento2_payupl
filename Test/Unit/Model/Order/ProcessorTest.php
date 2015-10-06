@@ -37,11 +37,13 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
         $payuplOrderId = 'ABC';
         $status = 'COMPLETED';
+        $close = true;
         $this->_transactionService->expects($this->once())->method('updateStatus')->with(
             $this->equalTo($payuplOrderId),
-            $this->equalTo($status)
+            $this->equalTo($status),
+            $this->equalTo($close)
         );
-        $this->_model->processOld($payuplOrderId, $status);
+        $this->_model->processOld($payuplOrderId, $status, $close);
     }
 
     public function testProcessPendingSuccess()
@@ -50,7 +52,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $status = 'PENDING';
         $this->_transactionService->expects($this->once())->method('updateStatus')->with(
             $this->equalTo($payuplOrderId),
-            $this->equalTo($status)
+            $this->equalTo($status),
+            $this->equalTo(false)
         );
         $this->_model->processPending($payuplOrderId, $status);
     }
@@ -73,7 +76,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         );
         $this->_transactionService->expects($this->once())->method('updateStatus')->with(
             $this->equalTo($payuplOrderId),
-            $this->equalTo($status)
+            $this->equalTo($status),
+            $this->equalTo(true)
         );
         $this->_model->processHolded($payuplOrderId, $status);
     }
@@ -84,7 +88,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $status = 'WAITING';
         $this->_transactionService->expects($this->once())->method('updateStatus')->with(
             $this->equalTo($payuplOrderId),
-            $this->equalTo($status)
+            $this->equalTo($status),
+            $this->equalTo(false)
         );
         $this->_model->processWaiting($payuplOrderId, $status);
     }
@@ -108,7 +113,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         );
         $this->_transactionService->expects($this->once())->method('updateStatus')->with(
             $this->equalTo($payuplOrderId),
-            $this->equalTo($status)
+            $this->equalTo($status),
+            $this->equalTo(true)
         );
         $this->_model->processCompleted($payuplOrderId, $status, $amount);
     }

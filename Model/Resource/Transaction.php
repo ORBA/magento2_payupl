@@ -42,14 +42,15 @@ class Transaction extends AbstractDb
         $adapter = $this->getReadConnection();
         $select = $adapter->select()
             ->from(
-                ['main_table' => $this->_resources->getTableName('orba_payupl_transaction')],
-                ['payupl_order_id']
+                ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
+                ['txn_id']
             )->where('order_id = ?', $orderId)
-            ->order('try ' . \Zend_Db_Select::SQL_DESC)
+            ->where('txn_type = ?', 'order')
+            ->order('transaction_id ' . \Zend_Db_Select::SQL_DESC)
             ->limit(1);
         $row = $adapter->fetchRow($select);
         if ($row) {
-            return $row['payupl_order_id'];
+            return $row['txn_id'];
         }
         return false;
     }
@@ -60,7 +61,7 @@ class Transaction extends AbstractDb
      */
     public function checkIfNewestByPayuplOrderId($payuplOrderId)
     {
-        $transactionTableName = $this->_resources->getTableName('orba_payupl_transaction');
+        $transactionTableName = $this->_resources->getTableName('sales_payment_transaction');
         $adapter = $this->getReadConnection();
         $select = $adapter->select()
             ->from(
@@ -68,9 +69,9 @@ class Transaction extends AbstractDb
                 ['transaction_id']
             )->joinLeft(
                 ['t2' => $transactionTableName],
-                't2.order_id = main_table.order_id AND t2.try > main_table.try',
-                ['newer_id' => 't2.order_id']
-            )->where('main_table.payupl_order_id = ?', $payuplOrderId)
+                't2.order_id = main_table.order_id AND t2.transaction_id > main_table.transaction_id',
+                ['newer_id' => 't2.transaction_id']
+            )->where('main_table.txn_id = ?', $payuplOrderId)
             ->limit(1);
         $row = $adapter->fetchRow($select);
         if ($row && is_null($row['newer_id'])) {
@@ -85,29 +86,43 @@ class Transaction extends AbstractDb
      */
     public function getOrderIdByPayuplOrderId($payuplOrderId)
     {
-        return $this->_getOneFieldByAnother('order_id', 'payupl_order_id', $payuplOrderId);
+        return $this->_getOneFieldByAnother('order_id', 'txn_id', $payuplOrderId);
     }
 
+    /**
+     * @param string $payuplOrderId
+     * @return string|false
+     */
     public function getStatusByPayuplOrderId($payuplOrderId)
     {
-        return $this->_getOneFieldByAnother('status', 'payupl_order_id', $payuplOrderId);
-    }
-
-    protected function _construct()
-    {
-        $this->_init('orba_payupl_transaction', Model::FIELD_ID);
-    }
-
-    protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
-    {
-        /**
-         * @var $object Model
-         */
-        if ($object->isObjectNew()) {
-            $object->setCreatedAt($this->_date->formatDate(true));
+        $serializedAdditionalInformation = $this->_getOneFieldByAnother('additional_information', 'txn_id', $payuplOrderId);
+        if ($serializedAdditionalInformation) {
+            $additionalInformation = unserialize($serializedAdditionalInformation);
+            return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS]['status'];
         }
-        return $this;
+        return false;
     }
+
+    public function getLastTryByOrderId($orderId)
+    {
+        $adapter = $this->getReadConnection();
+        $select = $adapter->select()
+            ->from(
+                ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
+                ['additional_information']
+            )->where('order_id = ?', $orderId)
+            ->where('txn_type = ?', 'order')
+            ->order('transaction_id ' . \Zend_Db_Select::SQL_DESC)
+            ->limit(1);
+        $row = $adapter->fetchRow($select);
+        if ($row) {
+            $additionalInformation = unserialize($row['additional_information']);
+            return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS]['try'];
+        }
+        return 0;
+    }
+
+    protected function _construct() {}
 
     /**
      * @param string $getFieldName
@@ -120,7 +135,7 @@ class Transaction extends AbstractDb
         $adapter = $this->getReadConnection();
         $select = $adapter->select()
             ->from(
-                ['main_table' => $this->_resources->getTableName('orba_payupl_transaction')],
+                ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
                 [$getFieldName]
             )->where($byFieldName . ' = ?', $value)
             ->limit(1);

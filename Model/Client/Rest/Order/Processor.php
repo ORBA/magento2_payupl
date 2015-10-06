@@ -43,7 +43,12 @@ class Processor
             throw new Exception('Invalid status.');
         }
         if (!$newest) {
-            $this->_orderProcessor->processOld($payuplOrderId, $status);
+            $close = in_array($status, [
+                Order::STATUS_CANCELLED,
+                Order::STATUS_REJECTED,
+                Order::STATUS_COMPLETED
+            ]);
+            $this->_orderProcessor->processOld($payuplOrderId, $status, $close);
             return true;
         }
         switch ($status) {

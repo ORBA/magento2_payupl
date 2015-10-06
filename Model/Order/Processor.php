@@ -32,12 +32,13 @@ class Processor
 
     /**
      * @param string $payuplOrderId
-     * @param string $status
+     * @param string$status
+     * @param bool $close
      * @throws \Orba\Payupl\Model\Transaction\Exception
      */
-    public function processOld($payuplOrderId, $status)
+    public function processOld($payuplOrderId, $status, $close = false)
     {
-        $this->_transactionService->updateStatus($payuplOrderId, $status);
+        $this->_transactionService->updateStatus($payuplOrderId, $status, $close);
     }
 
     /**
@@ -60,7 +61,7 @@ class Processor
     {
         $order = $this->_loadOrderByPayuplOrderId($payuplOrderId);
         $this->_orderHelper->setHoldedOrderStatus($order, $status);
-        $this->_transactionService->updateStatus($payuplOrderId, $status);
+        $this->_transactionService->updateStatus($payuplOrderId, $status, true);
     }
 
     /**
@@ -84,8 +85,8 @@ class Processor
     public function processCompleted($payuplOrderId, $status, $amount)
     {
         $order = $this->_loadOrderByPayuplOrderId($payuplOrderId);
-        $this->_orderHelper->completePayment($order, $amount);
-        $this->_transactionService->updateStatus($payuplOrderId, $status);
+        $this->_orderHelper->completePayment($order, $amount, $payuplOrderId);
+        $this->_transactionService->updateStatus($payuplOrderId, $status, true);
     }
 
     /**

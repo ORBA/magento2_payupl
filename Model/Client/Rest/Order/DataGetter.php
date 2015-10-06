@@ -52,7 +52,8 @@ class DataGetter
      */
     public function getNotifyUrl()
     {
-        return $this->_urlBuilder->getUrl('orba_payupl/payment/notify');
+        return 'http://payupl.magento2.sofie.orba.pl';
+        //return $this->_urlBuilder->getUrl('orba_payupl/payment/notify');
     }
 
     /**

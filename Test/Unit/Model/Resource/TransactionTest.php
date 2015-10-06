@@ -46,27 +46,6 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         ]);
     }
     
-    public function testSaveCreationTimeExistingModel()
-    {
-        $transaction = $this->getMockBuilder(\Orba\Payupl\Model\Transaction::class)->disableOriginalConstructor()->getMock();
-        $transaction->expects($this->once())->method('isObjectNew')->willReturn(false);
-        $transaction->expects($this->never())->method('setCreatedAt');
-        $this->assertEquals(Util::callMethod($this->_model, '_beforeSave', [$transaction]), $this->_model);
-    }
-
-    public function testSaveCreationTimeNewModel()
-    {
-        $transaction = $this->getMockBuilder(\Orba\Payupl\Model\Transaction::class)->setMethods([
-            'isObjectNew',
-            'setCreatedAt'
-        ])->disableOriginalConstructor()->getMock();
-        $transaction->expects($this->once())->method('isObjectNew')->willReturn(true);
-        $date = 'date';
-        $this->_date->expects($this->once())->method('formatDate')->with($this->equalTo(true))->willReturn($date);
-        $transaction->expects($this->once())->method('setCreatedAt')->with($this->equalTo($date));
-        $this->assertEquals(Util::callMethod($this->_model, '_beforeSave', [$transaction]), $this->_model);
-    }
-    
     public function testGetLastPayuplOrderIdByOrderIdFail()
     {
         $orderId = 1;
@@ -79,10 +58,10 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
     {
         $orderId = 1;
         $resultTableRow = [
-            'payupl_order_id' => 'ABC'
+            'txn_id' => 'ABC'
         ];
         $this->_testGetLastPayuplOrderIdByOrderId($orderId, $resultTableRow);
-        $this->assertEquals($resultTableRow['payupl_order_id'], $this->_model->getLastPayuplOrderIdByOrderId($orderId));
+        $this->assertEquals($resultTableRow['txn_id'], $this->_model->getLastPayuplOrderIdByOrderId($orderId));
     }
 
     public function testCheckIfNewestByPayuplOrderIdFailNotFound()
@@ -142,11 +121,39 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
     public function testGetStatusByPayuplOrderIdSuccess()
     {
         $payuplOrderId = 'ABC';
+        $status = 'PENDING';
         $resultTableRow = [
-            'status' => 'COMPLETED'
+            'additional_information' => serialize([
+                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
+                    'status' => $status
+                ]
+            ])
         ];
         $this->_testGetStatusByPayuplOrderId($payuplOrderId, $resultTableRow);
-        $this->assertEquals($resultTableRow['status'], $this->_model->getStatusByPayuplOrderId($payuplOrderId));
+        $this->assertEquals($status, $this->_model->getStatusByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testGetLastTryByOrderIdFirst()
+    {
+        $orderId = 1;
+        $resultTableRow = null;
+        $this->_testGetLastTryByOrderId($orderId, $resultTableRow);
+        $this->assertEquals(0, $this->_model->getLastTryByOrderId($orderId));
+    }
+
+    public function testGetLastTryByOrderIdNotFirst()
+    {
+        $orderId = 1;
+        $try = 2;
+        $resultTableRow = [
+            'additional_information' => serialize([
+                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
+                    'try' => $try
+                ]
+            ])
+        ];
+        $this->_testGetLastTryByOrderId($orderId, $resultTableRow);
+        $this->assertEquals($try, $this->_model->getLastTryByOrderId($orderId));
     }
 
     /**
@@ -155,18 +162,22 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
      */
     protected function _testGetLastPayuplOrderIdByOrderId($orderId, $resultTableRow)
     {
-        $transactionTable = 'orba_payupl_transaction';
+        $transactionTable = 'sales_payment_transaction';
         $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);
         $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
         $select->expects($this->once())->method('from')->with(
             $this->equalTo(['main_table' => $transactionTable]),
-            $this->equalTo(['payupl_order_id'])
+            $this->equalTo(['txn_id'])
         )->will($this->returnSelf());
-        $select->expects($this->once())->method('where')->with(
+        $select->expects($this->at(1))->method('where')->with(
             $this->equalTo('order_id = ?'),
             $this->equalTo($orderId)
         )->will($this->returnSelf());
-        $select->expects($this->once())->method('order')->with($this->equalTo('try ' . \Zend_Db_Select::SQL_DESC))->will($this->returnSelf());
+        $select->expects($this->at(2))->method('where')->with(
+            $this->equalTo('txn_type = ?'),
+            $this->equalTo('order')
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('order')->with($this->equalTo('transaction_id ' . \Zend_Db_Select::SQL_DESC))->will($this->returnSelf());
         $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
         $this->_adapter->expects($this->once())->method('select')->willReturn($select);
         $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
@@ -178,7 +189,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
      */
     protected function _testCheckIfNewestByPayuplOrderId($payuplOrderId, $resultTableRow)
     {
-        $transactionTable = 'orba_payupl_transaction';
+        $transactionTable = 'sales_payment_transaction';
         $transactionTableReal = 'table';
         $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTableReal);
         $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
@@ -188,11 +199,11 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         )->will($this->returnSelf());
         $select->expects($this->once())->method('joinLeft')->with(
             $this->equalTo(['t2' => $transactionTableReal]),
-            $this->equalTo('t2.order_id = main_table.order_id AND t2.try > main_table.try'),
-            $this->equalTo(['newer_id' => 't2.order_id'])
+            $this->equalTo('t2.order_id = main_table.order_id AND t2.transaction_id > main_table.transaction_id'),
+            $this->equalTo(['newer_id' => 't2.transaction_id'])
         )->will($this->returnSelf());
         $select->expects($this->once())->method('where')->with(
-            $this->equalTo('main_table.payupl_order_id = ?'),
+            $this->equalTo('main_table.txn_id = ?'),
             $this->equalTo($payuplOrderId)
         )->will($this->returnSelf());
         $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
@@ -202,12 +213,38 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
 
     protected function _testGetOrderIdByPayuplOrderId($payuplOrderId, $resultTableRow)
     {
-        $this->_testGetBy('order_id', 'payupl_order_id', $payuplOrderId, $resultTableRow);
+        $transactionTable = 'sales_payment_transaction';
+        $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);
+        $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
+        $select->expects($this->once())->method('from')->with(
+            $this->equalTo(['main_table' => $transactionTable]),
+            $this->equalTo(['order_id'])
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('where')->with(
+            $this->equalTo('txn_id = ?'),
+            $this->equalTo($payuplOrderId)
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
+        $this->_adapter->expects($this->once())->method('select')->willReturn($select);
+        $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
     }
 
     protected function _testGetStatusByPayuplOrderId($payuplOrderId, $resultTableRow)
     {
-        $this->_testGetBy('status', 'payupl_order_id', $payuplOrderId, $resultTableRow);
+        $transactionTable = 'sales_payment_transaction';
+        $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);
+        $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
+        $select->expects($this->once())->method('from')->with(
+            $this->equalTo(['main_table' => $transactionTable]),
+            $this->equalTo(['additional_information'])
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('where')->with(
+            $this->equalTo('txn_id = ?'),
+            $this->equalTo($payuplOrderId)
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
+        $this->_adapter->expects($this->once())->method('select')->willReturn($select);
+        $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
     }
 
     /**
@@ -218,7 +255,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
      */
     protected function _testGetBy($getFieldName, $byFieldName, $value, $resultTableRow)
     {
-        $transactionTable = 'orba_payupl_transaction';
+        $transactionTable = 'sales_payment_transaction';
         $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);
         $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
         $select->expects($this->once())->method('from')->with(
@@ -229,6 +266,29 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
             $this->equalTo($byFieldName . ' = ?'),
             $this->equalTo($value)
         )->will($this->returnSelf());
+        $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
+        $this->_adapter->expects($this->once())->method('select')->willReturn($select);
+        $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
+    }
+
+    protected function _testGetLastTryByOrderId($orderId, $resultTableRow)
+    {
+        $transactionTable = 'sales_payment_transaction';
+        $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);
+        $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
+        $select->expects($this->once())->method('from')->with(
+            $this->equalTo(['main_table' => $transactionTable]),
+            $this->equalTo(['additional_information'])
+        )->will($this->returnSelf());
+        $select->expects($this->at(1))->method('where')->with(
+            $this->equalTo('order_id = ?'),
+            $this->equalTo($orderId)
+        )->will($this->returnSelf());
+        $select->expects($this->at(2))->method('where')->with(
+            $this->equalTo('txn_type = ?'),
+            $this->equalTo('order')
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('order')->with($this->equalTo('transaction_id ' . \Zend_Db_Select::SQL_DESC))->will($this->returnSelf());
         $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
         $this->_adapter->expects($this->once())->method('select')->willReturn($select);
         $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);

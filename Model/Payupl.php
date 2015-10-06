@@ -32,6 +32,11 @@ class Payupl extends AbstractMethod
     protected $_isOffline = false;
 
     /**
+     * @var bool
+     */
+    protected $_canRefund = true;
+
+    /**
      * @var \Magento\Framework\UrlInterface
      */
     protected $_urlBuilder;

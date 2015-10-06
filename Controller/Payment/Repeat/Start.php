@@ -60,8 +60,8 @@ class Start extends \Magento\Framework\App\Action\Action
                 $order = $this->_orderHelper->loadOrderById($orderId);
                 $orderData = $clientOrderHelper->getDataForOrderCreate($order);
                 $result = $this->_client->orderCreate($orderData);
-                $this->_orderHelper->saveNewTransaction(
-                    $orderId,
+                $this->_orderHelper->addNewOrderTransaction(
+                    $order,
                     $result['orderId'],
                     $result['extOrderId'],
                     $clientOrderHelper->getNewStatus()

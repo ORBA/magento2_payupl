@@ -8,9 +8,9 @@ namespace Orba\Payupl\Model\Client\Rest\Order\DataGetter;
 class ExtOrderId
 {
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction\CollectionFactory
+     * @var \Orba\Payupl\Model\Resource\Transaction
      */
-    protected $_transactionCollectionFactory;
+    protected $_transactionResource;
 
     /**
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
@@ -18,11 +18,11 @@ class ExtOrderId
     protected $_dateTime;
 
     public function __construct(
-        \Orba\Payupl\Model\Resource\Transaction\CollectionFactory $transactionCollectionFactory,
+        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
     )
     {
-        $this->_transactionCollectionFactory = $transactionCollectionFactory;
+        $this->_transactionResource = $transactionResource;
         $this->_dateTime = $dateTime;
     }
 
@@ -32,20 +32,7 @@ class ExtOrderId
      */
     public function generate(\Magento\Sales\Model\Order $order)
     {
-        /**
-         * @var $transactionCollection \Orba\Payupl\Model\Resource\Transaction\Collection
-         * @var $transaction \Orba\Payupl\Model\Transaction
-         */
-        $transactionCollection = $this->_transactionCollectionFactory->create();
-        $transactionCollection
-            ->addFieldToFilter('order_id', $order->getId())
-            ->setOrder('try', \Magento\Framework\Data\Collection::SORT_ORDER_DESC);
-        $transaction = $transactionCollection->getFirstItem();
-        if ($transaction->getId()) {
-            $try = $transaction->getTry() + 1;
-        } else {
-            $try = 1;
-        }
+        $try = $this->_transactionResource->getLastTryByOrderId($order->getId()) + 1;
         return $order->getIncrementId() . ':' . $this->_dateTime->timestamp() . ':' . $try;
     }
 }

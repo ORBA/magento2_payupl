@@ -126,8 +126,8 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willReturn($response);
         $status = 'status';
         $clientOrderHelper->expects($this->once())->method('getNewStatus')->willReturn($status);
-        $this->_orderHelper->expects($this->once())->method('saveNewTransaction')->with(
-            $this->equalTo($orderId),
+        $this->_orderHelper->expects($this->once())->method('addNewOrderTransaction')->with(
+            $this->equalTo($order),
             $this->equalTo($response['orderId']),
             $this->equalTo($response['extOrderId']),
             $this->equalTo($status)

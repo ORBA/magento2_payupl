@@ -15,7 +15,7 @@ class ExtOrderIdTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_transactionCollectionFactory;
+    protected $_transactionResource;
 
     /**
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
@@ -25,42 +25,22 @@ class ExtOrderIdTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_transactionCollectionFactory = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\CollectionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
+        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_dateTime = $this->getMockBuilder(\Magento\Framework\Stdlib\DateTime\DateTime::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManager->getObject(ExtOrderId::class, [
-            'transactionCollectionFactory' => $this->_transactionCollectionFactory,
+            'transactionResource' => $this->_transactionResource,
             'dateTime' => $this->_dateTime
         ]);
     }
 
-    public function testGenerateFirst()
+    public function testGenerate()
     {
         $orderId = '1';
         $orderIncrementId = '0000000001';
         $timestamp = 12345678;
+        $try = 2;
         $order = $this->_getOrderMock($orderId, $orderIncrementId);
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditions($orderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn(null);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
-        $this->_dateTime->expects($this->once())->method('timestamp')->willReturn($timestamp);
-        $this->assertEquals($orderIncrementId . ':' . $timestamp . ':1', $this->_model->generate($order));
-    }
-
-    public function testGenerateNth()
-    {
-        $orderId = '1';
-        $orderIncrementId = '0000000001';
-        $try = 10;
-        $timestamp = 12345678;
-        $order = $this->_getOrderMock($orderId, $orderIncrementId);
-        $transactionCollection = $this->_getTransactionCollectionWithExpectedConditions($orderId);
-        $transaction = $this->_getTransactionMock();
-        $transaction->expects($this->once())->method('getId')->willReturn($orderId);
-        $transaction->expects($this->once())->method('getTry')->willReturn($try);
-        $transactionCollection->expects($this->once())->method('getFirstItem')->willReturn($transaction);
-        $this->_transactionCollectionFactory->expects($this->once())->method('create')->willReturn($transactionCollection);
+        $this->_transactionResource->expects($this->once())->method('getLastTryByOrderId')->with($this->equalTo($orderId))->willReturn($try);
         $this->_dateTime->expects($this->once())->method('timestamp')->willReturn($timestamp);
         $this->assertEquals($orderIncrementId . ':' . $timestamp . ':' . ($try + 1), $this->_model->generate($order));
     }

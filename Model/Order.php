@@ -108,6 +108,22 @@ class Order
             ->save();
     }
 
+    public function addNewOrderTransaction(\Magento\Sales\Model\Order $order, $payuplOrderId, $payuplExternalOrderId, $status)
+    {
+        $orderId = $order->getId();
+        $payment = $order->getPayment();
+        $payment->setTransactionId($payuplOrderId);
+        $payment->setTransactionAdditionalInfo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, [
+            'order_id' => $payuplExternalOrderId,
+            'try' => $this->_transactionResource->getLastTryByOrderId($orderId) + 1,
+            'status' => $status
+        ]);
+        $payment->setIsTransactionClosed(0);
+        $transaction = $payment->addTransaction('order');
+        $transaction->save();
+        $payment->save();
+    }
+
     /**
      * @param int $orderId
      * @return Sales\Order|false
@@ -172,10 +188,12 @@ class Order
      * @param Sales\Order $order
      * @param float $amount
      */
-    public function completePayment(Sales\Order $order, $amount)
+    public function completePayment(Sales\Order $order, $amount, $payuplOrderId)
     {
         $payment = $order->getPayment();
         $payment
+            ->setParentTransactionId($payuplOrderId)
+            ->setTransactionId($payuplOrderId . ':C')
             ->registerCaptureNotification($amount)
             ->save();
         foreach ($order->getRelatedObjects() as $object) {

@@ -63,12 +63,13 @@ class Start extends \Magento\Framework\App\Action\Action
                     $clientOrderHelper = $this->_client->getOrderHelper();
                     $orderData = $clientOrderHelper->getDataForOrderCreate($order);
                     $result = $this->_client->orderCreate($orderData);
-                    $this->_orderHelper->saveNewTransaction(
-                        $orderId,
-                        $result['orderId'],
-                        $result['extOrderId'],
-                        $clientOrderHelper->getNewStatus()
-                    );
+                    $this->_orderHelper->addNewOrderTransaction($order, $result['orderId'], $result['extOrderId'], $clientOrderHelper->getNewStatus());
+//                    $this->_orderHelper->saveNewTransaction(
+//                        $orderId,
+//                        $result['orderId'],
+//                        $result['extOrderId'],
+//                        $clientOrderHelper->getNewStatus()
+//                    );
                     $this->_orderHelper->setNewOrderStatus($order);
                     $redirectUrl = $result['redirectUri'];
                 } catch (Exception $e) {

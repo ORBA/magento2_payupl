@@ -5,34 +5,44 @@
 
 namespace Orba\Payupl\Model\Transaction;
 
-use Orba\Payupl\Model\Transaction;
-
 class Service
 {
     /**
-     * @var \Orba\Payupl\Model\TransactionFactory
+     * @var \Magento\Sales\Model\Order\Payment\TransactionFactory
      */
     protected $_transactionFactory;
 
+    /**
+     * @var \Orba\Payupl\Model\Order
+     */
+    protected $_orderHelper;
+
     public function __construct(
-        \Orba\Payupl\Model\TransactionFactory $transactionFactory
+        \Magento\Sales\Model\Order\Payment\TransactionFactory $transactionFactory,
+        \Orba\Payupl\Model\Order $orderHelper
     )
     {
         $this->_transactionFactory = $transactionFactory;
+        $this->_orderHelper = $orderHelper;
     }
 
-    public function updateStatus($payuplOrderId, $status)
+    public function updateStatus($payuplOrderId, $status, $close = false)
     {
         /**
-         * @var $transaction Transaction
+         * @var $transaction \Magento\Sales\Model\Order\Payment\Transaction
          */
-        $transaction = $this->_transactionFactory->create();
-        $transaction->load($payuplOrderId, 'payupl_order_id');
-        if (!$transaction->getId()) {
+        $order = $this->_orderHelper->loadOrderByPayuplOrderId($payuplOrderId);
+        if (!$order) {
             throw new Exception('Transaction not found.');
         }
+        $transaction = $order->getPayment()->getTransaction($payuplOrderId);
+        if ($close) {
+            $transaction->setIsClosed(1);
+        }
+        $rawDetailsInfo = $transaction->getAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS);
+        $rawDetailsInfo['status'] = $status;
         $transaction
-            ->setStatus($status)
+            ->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $rawDetailsInfo)
             ->save();
     }
 }

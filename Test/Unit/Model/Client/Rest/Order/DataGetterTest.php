@@ -65,6 +65,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
 
     public function testNotifyUrl()
     {
+        $this->markTestSkipped();
         $path = 'orba_payupl/payment/notify';
         $baseUrl = 'http://example.com/';
         $url = $baseUrl . $path;

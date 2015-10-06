@@ -35,13 +35,74 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->_model->processStatusChange(1, 'INVALID STATUS');
     }
 
-    public function testProcessStatusChangeNotNewest()
+    public function testProcessStatusChangeNewNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_NEW;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(false)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangePendingNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_PENDING;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(false)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangeCancelledNotNewest()
     {
         $payuplOrderId = 'ABC';
         $status = Order::STATUS_CANCELLED;
         $this->_orderProcessor->expects($this->once())->method('processOld')->with(
             $this->equalTo($payuplOrderId),
-            $this->equalTo($status)
+            $this->equalTo($status),
+            $this->equalTo(true)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangeRejectedNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_REJECTED;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(true)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangeWaitingNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_WAITING;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(false)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangeCompletedNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_REJECTED;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(true)
         )->willReturn(true);
         $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
     }

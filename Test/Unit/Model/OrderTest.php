@@ -191,7 +191,15 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testCompletePayment()
     {
         $amount = 2.22;
-        $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->disableOriginalConstructor()->getMock();
+        $payuplOrderId = 'ABC';
+        $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->setMethods([
+            'setParentTransactionId',
+            'setTransactionId',
+            'registerCaptureNotification',
+            'save'
+        ])->disableOriginalConstructor()->getMock();
+        $payment->expects($this->once())->method('setParentTransactionId')->with($payuplOrderId)->will($this->returnSelf());
+        $payment->expects($this->once())->method('setTransactionId')->with($payuplOrderId . ':C')->will($this->returnSelf());
         $payment->expects($this->once())->method('registerCaptureNotification')->with($this->equalTo($amount))->will($this->returnSelf());
         $payment->expects($this->once())->method('save');
         $order = $this->_getOrderMock();
@@ -200,7 +208,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $invoice->expects($this->once())->method('save');
         $order->expects($this->once())->method('getRelatedObjects')->willReturn([$invoice]);
         $order->expects($this->once())->method('save')->will($this->returnSelf());
-        $this->_model->completePayment($order, $amount);
+        $this->_model->completePayment($order, $amount, $payuplOrderId);
     }
 
     public function testGetOrderIdForPaymentStartSuccessNewOrder()
@@ -336,6 +344,35 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     {
         $this->_request->expects($this->once())->method('getParam')->with($this->equalTo('exception'))->willReturn(null);
         $this->assertTrue($this->_model->paymentSuccessCheck());
+    }
+
+    public function testAddNewOrderTransaction()
+    {
+        $payuplOrderId = 'ABC';
+        $payuplExternalOrderId = '123';
+        $status = 'NEW';
+        $orderId = 1;
+        $try = 2;
+        $order = $this->_getOrderMock();
+        $order->expects($this->once())->method('getId')->willReturn($orderId);
+        $this->_transactionResource->expects($this->once())->method('getLastTryByOrderId')->willReturn($try);
+        $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->disableOriginalConstructor()->getMock();
+        $payment->expects($this->once())->method('setTransactionId')->with($this->equalTo($payuplOrderId));
+        $payment->expects($this->once())->method('setTransactionAdditionalInfo')->with(
+            $this->equalTo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS),
+            $this->equalTo([
+                'order_id' => $payuplExternalOrderId,
+                'try' => $try + 1,
+                'status' => $status
+            ])
+        );
+        $payment->expects($this->once())->method('setIsTransactionClosed')->with($this->equalTo(0));
+        $transaction = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment\Transaction::class)->disableOriginalConstructor()->getMock();
+        $transaction->expects($this->once())->method('save');
+        $payment->expects($this->once())->method('addTransaction')->with($this->equalTo('order'))->willReturn($transaction);
+        $payment->expects($this->once())->method('save');
+        $order->expects($this->once())->method('getPayment')->willReturn($payment);
+        $this->_model->addNewOrderTransaction($order, $payuplOrderId, $payuplExternalOrderId, $status);
     }
 
     /**
