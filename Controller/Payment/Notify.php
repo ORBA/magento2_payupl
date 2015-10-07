@@ -13,9 +13,9 @@ class Notify extends \Magento\Framework\App\Action\Action
     protected $_context;
 
     /**
-     * @var \Orba\Payupl\Model\ClientInterface
+     * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_client;
+    protected $_clientFactory;
 
     /**
      * @var \Magento\Framework\Controller\Result\ForwardFactory
@@ -28,21 +28,22 @@ class Notify extends \Magento\Framework\App\Action\Action
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Orba\Payupl\Model\ClientInterface $client,
+        \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory
     )
     {
         parent::__construct($context);
         $this->_context = $context;
-        $this->_client = $client;
+        $this->_clientFactory = $clientFactory;
         $this->_resultForwardFactory = $resultForwardFactory;
     }
 
     public function execute()
     {
         $request = $this->_context->getRequest();
-        $response = $this->_client->orderConsumeNotification($request);
-        $clientOrderHelper = $this->_client->getOrderHelper();
+        $client = $this->_clientFactory->create();
+        $response = $client->orderConsumeNotification($request);
+        $clientOrderHelper = $client->getOrderHelper();
         if ($clientOrderHelper->canProcessNotification($response['payuplOrderId'])) {
             return $clientOrderHelper->processNotification($response['payuplOrderId'], $response['status'], $response['amount']);
         } else {

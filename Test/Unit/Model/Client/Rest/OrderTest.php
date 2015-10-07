@@ -114,7 +114,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_dataGetter->expects($this->once())->method('getNotifyUrl');
         $this->_dataGetter->expects($this->once())->method('getCustomerIp');
         $this->_dataGetter->expects($this->once())->method('getMerchantPosId');
-        $extendedData = $this->_model->addSpecialData($data);
+        $extendedData = $this->_model->addSpecialDataToOrder($data);
         $this->assertEquals($data, array_intersect($extendedData, $data));
         $this->assertArrayHasKey('continueUrl', $extendedData);
         $this->assertArrayHasKey('notifyUrl', $extendedData);

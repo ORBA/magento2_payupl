@@ -16,13 +16,26 @@
                 <field id="title" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Title</label>
                 </field>
-                <field id="merchant_pos_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Merchant POS ID</label>
-                    <comment>Copy the value of POS ID (pos_id) parameter from your POS configuration in Payu.pl panel</comment>
+                <field id="classic_api" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Classic POS</label>
+                    <comment>Set to No if you are using Checkout POS</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="signature_key" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Signature Key</label>
-                    <comment>Copy the value of Second key (MD5) parameter from your POS configuration in Payu.pl panel</comment>
+                <field id="pos_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>POS ID (pos_id)</label>
+                    <comment>Copy from your POS configuration in Payu.pl panel</comment>
+                </field>
+                <field id="key_md5" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Key (MD5)</label>
+                    <comment>Copy from your POS configuration in Payu.pl panel</comment>
+                </field>
+                <field id="second_key_md5" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Second key (MD5)</label>
+                    <comment>Copy from your POS configuration in Payu.pl panel</comment>
+                </field>
+                <field id="pos_auth_key" translate="label" type="text" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payment authorisation key (pos_auth_key)</label>
+                    <comment>Copy from your POS configuration in Payu.pl panel</comment>
                 </field>
                 <field id="order_status_new" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>New Payment Order Status</label>

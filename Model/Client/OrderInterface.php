@@ -78,6 +78,14 @@ interface OrderInterface
     public function getDataForOrderCreate(\Magento\Sales\Model\Order $order);
 
     /**
+     * Adds API-related special data to standard order data.
+     *
+     * @param array $data
+     * @return array
+     */
+    public function addSpecialDataToOrder(array $data = []);
+
+    /**
      * @return string
      */
     public function getNewStatus();

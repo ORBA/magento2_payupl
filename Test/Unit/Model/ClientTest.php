@@ -3,11 +3,11 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client;
+namespace Orba\Payupl\Model;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class RestTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var Rest
@@ -37,9 +37,9 @@ class RestTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_objectManagerHelper = new ObjectManager($this);
-        $this->_configHelper = $this->getMockBuilder(Rest\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_orderHelper = $this->getMockBuilder(Rest\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_refundHelper = $this->getMockBuilder(Rest\Refund::class)->disableOriginalConstructor()->getMock();
+        $this->_configHelper = $this->getMockBuilder(Client\ConfigInterface::class)->disableOriginalConstructor()->getMock();
+        $this->_orderHelper = $this->getMockBuilder(Client\OrderInterface::class)->disableOriginalConstructor()->getMock();
+        $this->_refundHelper = $this->getMockBuilder(Client\RefundInterface::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->_getModel();
     }
 
@@ -63,7 +63,7 @@ class RestTest extends \PHPUnit_Framework_TestCase
         $dataExtended = ['data_extended'];
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'There was a problem while processing order create request.');
         $this->_orderHelper->expects($this->once())->method('validateCreate')->willReturn(true);
-        $this->_orderHelper->expects($this->once())->method('addSpecialData')->with($this->equalTo($data))->willReturn($dataExtended);
+        $this->_orderHelper->expects($this->once())->method('addSpecialDataToOrder')->with($this->equalTo($data))->willReturn($dataExtended);
         $this->_orderHelper->expects($this->once())->method('create')->with($this->equalTo($dataExtended))->willReturn(false);
         $this->_model->orderCreate($data);
     }
@@ -74,7 +74,7 @@ class RestTest extends \PHPUnit_Framework_TestCase
         $dataExtended = ['data_extended'];
         $result = $this->_getResultMock();
         $this->_orderHelper->expects($this->once())->method('validateCreate')->with($this->equalTo($data))->willReturn(true);
-        $this->_orderHelper->expects($this->once())->method('addSpecialData')->with($this->equalTo($data))->willReturn($dataExtended);
+        $this->_orderHelper->expects($this->once())->method('addSpecialDataToOrder')->with($this->equalTo($data))->willReturn($dataExtended);
         $this->_orderHelper->expects($this->once())->method('create')->with($this->equalTo($dataExtended))->willReturn($result);
         $this->assertEquals($result, $this->_model->orderCreate($data));
     }
@@ -206,7 +206,7 @@ class RestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrderHelper()
     {
-        $this->assertInstanceOf(Rest\Order::class, $this->_model->getOrderHelper());
+        $this->assertInstanceOf(Client\OrderInterface::class, $this->_model->getOrderHelper());
     }
 
     /**
@@ -215,7 +215,7 @@ class RestTest extends \PHPUnit_Framework_TestCase
     protected function _getModel()
     {
         return $this->_objectManagerHelper->getObject(
-            Rest::class,
+            Client::class,
             [
                 'configHelper' => $this->_configHelper,
                 'orderHelper' => $this->_orderHelper,
@@ -229,6 +229,6 @@ class RestTest extends \PHPUnit_Framework_TestCase
      */
     protected function _getResultMock()
     {
-        return $this->getMockBuilder(\Magento\Framework\Object::class)->getMock();
+        return 'result';
     }
 }

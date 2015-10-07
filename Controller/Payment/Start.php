@@ -10,9 +10,9 @@ use Orba\Payupl\Model\Client\Exception;
 class Start extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var \Orba\Payupl\Model\ClientInterface
+     * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_client;
+    protected $_clientFactory;
 
     /**
      * @var \Orba\Payupl\Model\Order
@@ -26,18 +26,18 @@ class Start extends \Magento\Framework\App\Action\Action
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
-     * @param \Orba\Payupl\Model\ClientInterface $client
+     * @param \Orba\Payupl\Model\ClientFactory $clientFactory
      * @param \Orba\Payupl\Model\Order $orderHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Orba\Payupl\Model\ClientInterface $client,
+        \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Orba\Payupl\Model\Order $orderHelper,
         \Orba\Payupl\Model\Session $session
     )
     {
         parent::__construct($context);
-        $this->_client = $client;
+        $this->_clientFactory = $clientFactory;
         $this->_orderHelper = $orderHelper;
         $this->_session = $session;
     }
@@ -60,16 +60,11 @@ class Start extends \Magento\Framework\App\Action\Action
             $order = $this->_orderHelper->loadOrderById($orderId);
             if ($this->_orderHelper->canStartFirstPayment($order)) {
                 try {
-                    $clientOrderHelper = $this->_client->getOrderHelper();
+                    $client = $this->_clientFactory->create();
+                    $clientOrderHelper = $client->getOrderHelper();
                     $orderData = $clientOrderHelper->getDataForOrderCreate($order);
-                    $result = $this->_client->orderCreate($orderData);
+                    $result = $client->orderCreate($orderData);
                     $this->_orderHelper->addNewOrderTransaction($order, $result['orderId'], $result['extOrderId'], $clientOrderHelper->getNewStatus());
-//                    $this->_orderHelper->saveNewTransaction(
-//                        $orderId,
-//                        $result['orderId'],
-//                        $result['extOrderId'],
-//                        $clientOrderHelper->getNewStatus()
-//                    );
                     $this->_orderHelper->setNewOrderStatus($order);
                     $redirectUrl = $result['redirectUri'];
                 } catch (Exception $e) {

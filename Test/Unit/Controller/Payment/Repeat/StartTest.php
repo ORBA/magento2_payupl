@@ -33,7 +33,7 @@ class StartTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_client;
+    protected $_clientFactory;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -46,13 +46,13 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $context = $this->getMockBuilder(\Magento\Framework\App\Action\Context::class)->disableOriginalConstructor()->getMock();
         $this->_resultRedirectFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RedirectFactory::class)->disableOriginalConstructor()->getMock();
         $this->_session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId', 'setLastOrderId'])->getMock();
-        $this->_client = $this->getMockBuilder(\Orba\Payupl\Model\ClientInterface::class)->disableOriginalConstructor()->getMock();
+        $this->_clientFactory = $this->getMockBuilder(\Orba\Payupl\Model\ClientFactory::class)->disableOriginalConstructor()->getMock();
         $context->expects($this->once())->method('getResultRedirectFactory')->willReturn($this->_resultRedirectFactory);
         $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
         $this->_controller = $this->_objectManager->getObject(Start::class, [
             'context' => $context,
             'session' => $this->_session,
-            'client' => $this->_client,
+            'clientFactory' => $this->_clientFactory,
             'orderHelper' => $this->_orderHelper
         ]);
     }
@@ -72,12 +72,13 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $orderData = ['extOrderId' => '0000000001-1'];
         $this->_session->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
         $clientOrderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
-        $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($clientOrderHelper);
+        $client = $this->_getClientMock();
+        $client->expects($this->once())->method('getOrderHelper')->willReturn($clientOrderHelper);
         $order = $this->_getOrderMock();
         $this->_orderHelper->expects($this->once())->method('loadOrderById')->with($this->equalTo($orderId))->willReturn($order);
         $clientOrderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($order))->willReturn($orderData);
         $exception = new Exception();
-        $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willThrowException($exception);
+        $client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willThrowException($exception);
         $resultRedirect = $this->getMockBuilder(\Magento\Framework\Controller\Result\Redirect::class)->disableOriginalConstructor()->getMock();
         $resultRedirect->expects($this->once())->method('setPath')->with(
             $this->equalTo('orba_payupl/payment/end'),
@@ -93,7 +94,8 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $orderData = ['extOrderId' => '0000000001-1'];
         $this->_session->expects($this->once())->method('getLastOrderId')->willReturn($orderId);
         $clientOrderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\OrderInterface::class)->getMock();
-        $this->_client->expects($this->once())->method('getOrderHelper')->willReturn($clientOrderHelper);
+        $client = $this->_getClientMock();
+        $client->expects($this->once())->method('getOrderHelper')->willReturn($clientOrderHelper);
         $order = $this->_getOrderMock();
         $this->_orderHelper->expects($this->once())->method('loadOrderById')->with($this->equalTo($orderId))->willReturn($order);
         $clientOrderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($order))->willReturn($orderData);
@@ -102,7 +104,7 @@ class StartTest extends \PHPUnit_Framework_TestCase
             'orderId' => 'Z963D5JQR2230925GUEST000P01',
             'extOrderId' => $orderData['extOrderId']
         ];
-        $this->_client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willReturn($response);
+        $client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willReturn($response);
         $status = 'status';
         $clientOrderHelper->expects($this->once())->method('getNewStatus')->willReturn($status);
         $this->_orderHelper->expects($this->once())->method('addNewOrderTransaction')->with(
@@ -124,5 +126,15 @@ class StartTest extends \PHPUnit_Framework_TestCase
     protected function _getOrderMock()
     {
         return $this->getMockBuilder(\Orba\Payupl\Model\Sales\Order::class)->disableOriginalConstructor()->getMock();
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function _getClientMock()
+    {
+        $client = $this->getMockBuilder(\Orba\Payupl\Model\Client::class)->disableOriginalConstructor()->getMock();
+        $this->_clientFactory->expects($this->once())->method('create')->willReturn($client);
+        return $client;
     }
 }

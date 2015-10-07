@@ -7,12 +7,10 @@ namespace Orba\Payupl\Model\Client\Rest;
 
 use Orba\Payupl\Model\Client\ConfigInterface;
 use Orba\Payupl\Model\Client\Exception as Exception;
+use Orba\Payupl\Model\Payupl;
 
 class Config implements ConfigInterface
 {
-    const XML_PATH_MERCHANT_POS_ID  = 'payment/orba_payupl/merchant_pos_id';
-    const XML_PATH_SIGNATURE_KEY    = 'payment/orba_payupl/signature_key';
-
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
@@ -35,13 +33,13 @@ class Config implements ConfigInterface
     public function setConfig()
     {
         \OpenPayU_Configuration::setEnvironment('secure');
-        $merchantPosId = $this->_scopeConfig->getValue(self::XML_PATH_MERCHANT_POS_ID);
+        $merchantPosId = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_ID);
         if ($merchantPosId) {
             \OpenPayU_Configuration::setMerchantPosId($merchantPosId);
         } else {
             throw new Exception('Merchant POS ID is empty.');
         }
-        $signatureKey = $this->_scopeConfig->getValue(self::XML_PATH_SIGNATURE_KEY);
+        $signatureKey = $this->_scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5);
         if ($signatureKey) {
             \OpenPayU_Configuration::setSignatureKey($signatureKey);
         } else {

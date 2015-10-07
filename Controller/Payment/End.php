@@ -23,9 +23,9 @@ class End extends \Magento\Framework\App\Action\Action
     protected $_session;
 
     /**
-     * @var \Orba\Payupl\Model\Client
+     * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_client;
+    protected $_clientFactory;
 
     /**
      * @var \Magento\Framework\App\Action\Context
@@ -42,14 +42,15 @@ class End extends \Magento\Framework\App\Action\Action
      * @param \Magento\Checkout\Model\Session\SuccessValidator $successValidator
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Orba\Payupl\Model\Session $session
-     * @param \Orba\Payupl\Model\ClientInterface $client
+     * @param \Orba\Payupl\Model\ClientFactory $clientFactory
+     * @param \Orba\Payupl\Model\Order $orderHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Checkout\Model\Session\SuccessValidator $successValidator,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Orba\Payupl\Model\Session $session,
-        \Orba\Payupl\Model\ClientInterface $client,
+        \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Orba\Payupl\Model\Order $orderHelper
     )
     {
@@ -58,7 +59,7 @@ class End extends \Magento\Framework\App\Action\Action
         $this->_successValidator = $successValidator;
         $this->_checkoutSession = $checkoutSession;
         $this->_session = $session;
-        $this->_client = $client;
+        $this->_clientFactory = $clientFactory;
         $this->_orderHelper = $orderHelper;
     }
 
@@ -72,8 +73,8 @@ class End extends \Magento\Framework\App\Action\Action
          */
         $resultRedirect = $this->resultRedirectFactory->create();
         try {
-            $clientOrderHelper = $this->_client->getOrderHelper();
             if ($this->_successValidator->isValid()) {
+                $clientOrderHelper = $this->_getClientOrderHelper();
                 $this->_session->setLastOrderId(null);
                 if (
                     $this->_orderHelper->paymentSuccessCheck() &&
@@ -84,6 +85,7 @@ class End extends \Magento\Framework\App\Action\Action
                     $redirectUrl = 'orba_payupl/payment/error';
                 }
             } else if ($this->_session->getLastOrderId()) {
+                $clientOrderHelper = $this->_getClientOrderHelper();
                 if (
                     $this->_orderHelper->paymentSuccessCheck() &&
                     $clientOrderHelper->paymentSuccessCheck()
@@ -100,5 +102,13 @@ class End extends \Magento\Framework\App\Action\Action
         }
         $resultRedirect->setPath($redirectUrl);
         return $resultRedirect;
+    }
+
+    /**
+     * @return \Orba\Payupl\Model\Client\OrderInterface
+     */
+    protected function _getClientOrderHelper()
+    {
+        return $this->_clientFactory->create()->getOrderHelper();
     }
 }

@@ -122,7 +122,7 @@ class Order implements OrderInterface
      * @param array $data
      * @return array
      */
-    public function addSpecialData(array $data = [])
+    public function addSpecialDataToOrder(array $data = [])
     {
         return array_merge($data, [
             'continueUrl' => $this->_dataGetter->getContinueUrl(),

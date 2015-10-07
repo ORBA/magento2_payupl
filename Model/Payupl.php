@@ -11,6 +11,11 @@ class Payupl extends AbstractMethod
 {
     const CODE = 'orba_payupl';
 
+    const XML_PATH_POS_ID           = 'payment/orba_payupl/pos_id';
+    const XML_PATH_KEY_MD5          = 'payment/orba_payupl/key_md5';
+    const XML_PATH_SECOND_KEY_MD5   = 'payment/orba_payupl/second_key_md5';
+    const XML_PATH_POS_AUTH_KEY     = 'payment/orba_payupl/pos_auth_key';
+
     /**
      * @var string
      */
@@ -47,9 +52,9 @@ class Payupl extends AbstractMethod
     protected $_urlBuilder;
 
     /**
-     * @var ClientInterface
+     * @var ClientFactory
      */
-    protected $_client;
+    protected $_clientFactory;
 
     /**
      * @var Resource\Transaction
@@ -65,7 +70,7 @@ class Payupl extends AbstractMethod
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Payment\Model\Method\Logger $logger
      * @param \Magento\Framework\UrlInterface $urlBuilder
-     * @param ClientInterface $client
+     * @param ClientFactory $clientFactory
      * @param Resource\Transaction $transactionResource
      * @param array $data
      */
@@ -78,7 +83,7 @@ class Payupl extends AbstractMethod
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Payment\Model\Method\Logger $logger,
         \Magento\Framework\UrlInterface $urlBuilder,
-        ClientInterface $client,
+        ClientFactory $clientFactory,
         Resource\Transaction $transactionResource,
         array $data = []
     ) {
@@ -95,7 +100,7 @@ class Payupl extends AbstractMethod
             $data
         );
         $this->_urlBuilder = $urlBuilder;
-        $this->_client = $client;
+        $this->_clientFactory = $clientFactory;
         $this->_transactionResource = $transactionResource;
     }
 
@@ -142,7 +147,8 @@ class Payupl extends AbstractMethod
          */
         $order = $payment->getOrder();
         $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($order->getId());
-        $this->_client->refundCreate($payuplOrderId, __('Refund for order # %1', $order->getIncrementId()), $amount * 100);
+        $client = $this->_clientFactory->create();
+        $client->refundCreate($payuplOrderId, __('Refund for order # %1', $order->getIncrementId()), $amount * 100);
         return $this;
     }
 }

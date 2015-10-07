@@ -15,9 +15,9 @@ class Start extends \Magento\Framework\App\Action\Action
     protected $_session;
 
     /**
-     * @var \Orba\Payupl\Model\Client
+     * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_client;
+    protected $_clientFactory;
 
     /**
      * @var \Orba\Payupl\Model\Order
@@ -27,19 +27,19 @@ class Start extends \Magento\Framework\App\Action\Action
     /**
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Orba\Payupl\Model\Session $session
-     * @param \Orba\Payupl\Model\ClientInterface $client
+     * @param \Orba\Payupl\Model\ClientFactory $clientFactory
      * @param \Orba\Payupl\Model\Order $orderHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Orba\Payupl\Model\Session $session,
-        \Orba\Payupl\Model\ClientInterface $client,
+        \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Orba\Payupl\Model\Order $orderHelper
     )
     {
         parent::__construct($context);
         $this->_session = $session;
-        $this->_client = $client;
+        $this->_clientFactory = $clientFactory;
         $this->_orderHelper = $orderHelper;
     }
 
@@ -56,10 +56,11 @@ class Start extends \Magento\Framework\App\Action\Action
         $redirectParams = [];
         if ($orderId) {
             try {
-                $clientOrderHelper = $this->_client->getOrderHelper();
+                $client = $this->_clientFactory->create();
+                $clientOrderHelper = $client->getOrderHelper();
                 $order = $this->_orderHelper->loadOrderById($orderId);
                 $orderData = $clientOrderHelper->getDataForOrderCreate($order);
-                $result = $this->_client->orderCreate($orderData);
+                $result = $client->orderCreate($orderData);
                 $this->_orderHelper->addNewOrderTransaction(
                     $order,
                     $result['orderId'],
