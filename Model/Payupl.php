@@ -15,6 +15,7 @@ class Payupl extends AbstractMethod
     const XML_PATH_KEY_MD5          = 'payment/orba_payupl/key_md5';
     const XML_PATH_SECOND_KEY_MD5   = 'payment/orba_payupl/second_key_md5';
     const XML_PATH_POS_AUTH_KEY     = 'payment/orba_payupl/pos_auth_key';
+    const XML_PATH_CLASSIC_API      = 'payment/orba_payupl/classic_api';
 
     /**
      * @var string

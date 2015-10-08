@@ -9,31 +9,105 @@ use Orba\Payupl\Model\Client\Exception;
 
 class Order implements \Orba\Payupl\Model\Client\OrderInterface
 {
+    const STATUS_PRE_NEW    = 0;
+    const STATUS_NEW        = 1;
+
     /**
-     * @param $id
-     * @return bool
+     * @var Order\DataValidator
      */
-    public function validateCancel($id)
+    protected $_dataValidator;
+
+    /**
+     * @var Order\DataGetter
+     */
+    protected $_dataGetter;
+
+    /**
+     * @var \Magento\Framework\UrlInterface
+     */
+    protected $_urlBuilder;
+
+    /**
+     * @var \Orba\Payupl\Model\Session
+     */
+    protected $_session;
+
+    /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $_request;
+
+    /**
+     * @var \Orba\Payupl\Logger\Logger
+     */
+    protected $_logger;
+
+    public function __construct(
+        \Magento\Framework\View\Context $context,
+        Order\DataValidator $dataValidator,
+        Order\DataGetter $dataGetter,
+        \Orba\Payupl\Model\Session $session,
+        \Magento\Framework\App\RequestInterface $request,
+        \Orba\Payupl\Logger\Logger $logger
+    )
     {
-        // TODO: Implement validateCancel() method.
+        $this->_urlBuilder = $context->getUrlBuilder();
+        $this->_dataValidator = $dataValidator;
+        $this->_dataGetter = $dataGetter;
+        $this->_session = $session;
+        $this->_request = $request;
+        $this->_logger = $logger;
     }
 
     /**
-     * Returns false on fail or array with the following keys on success: orderId, redirectUri, extOrderId
-     *
-     * @param array $data
-     * @return array|false
+     * @inheritDoc
+     */
+    public function validateCreate(array $data = [])
+    {
+        return
+            $this->_dataValidator->validateEmpty($data) &&
+            $this->_dataValidator->validateBasicData($data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validateRetrieve($payuplOrderId)
+    {
+        return $this->_dataValidator->validateEmpty($payuplOrderId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validateCancel($payuplOrderId)
+    {
+        return $this->_dataValidator->validateEmpty($payuplOrderId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validateStatusUpdate(array $data = [])
+    {
+        // TODO: Implement validateStatusUpdate() method.
+    }
+
+    /**
+     * @inheritDoc
      */
     public function create(array $data)
     {
-        // TODO: Implement create() method.
+        $this->_session->setOrderCreateData($data);
+        return [
+            'orderId' => md5($data['session_id']),
+            'extOrderId' => $data['session_id'],
+            'redirectUri' => $this->_urlBuilder->getUrl('orba_payupl/classic/form')
+        ];
     }
 
     /**
-     * Return false on fail or transaction status on success.
-     *
-     * @param string $payuplOrderId
-     * @return string|false
+     * @inheritDoc
      */
     public function retrieve($payuplOrderId)
     {
@@ -41,10 +115,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     }
 
     /**
-     * Return false on fail or true success.
-     *
-     * @param string $payuplOrderId
-     * @return bool
+     * @inheritDoc
      */
     public function cancel($payuplOrderId)
     {
@@ -52,10 +123,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     }
 
     /**
-     * Return false on fail or true success.
-     *
-     * @param array $data
-     * @return bool
+     * @inheritDoc
      */
     public function statusUpdate(array $data = [])
     {
@@ -63,10 +131,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     }
 
     /**
-     * Returns false on fail or array with the following keys on success: orderId, status
-     *
-     * @param \Magento\Framework\App\Request\Http $request
-     * @return array|false
+     * @inheritDoc
      */
     public function consumeNotification(\Magento\Framework\App\Request\Http $request)
     {
@@ -74,35 +139,50 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $order
-     * @return array
+     * @inheritDoc
      */
     public function getDataForOrderCreate(\Magento\Sales\Model\Order $order)
     {
-        // TODO: Implement getDataForOrderCreate() method.
+        return $this->_dataGetter->getBasicData($order);
     }
 
     /**
-     * @return string
+     * @inheritDoc
+     */
+    public function addSpecialDataToOrder(array $data = [])
+    {
+        $data['pos_id'] = $this->_dataGetter->getPosId();
+        $data['pos_auth_key'] = $this->_dataGetter->getPosAuthKey();
+        $data['client_ip'] = $this->_dataGetter->getClientIp();
+        $data['ts'] = $this->_dataGetter->getTs();
+        $data['sig'] = $this->_dataGetter->getSigForOrderCreate($data);
+        return $data;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getNewStatus()
     {
-        // TODO: Implement getNewStatus() method.
+        return Order::STATUS_PRE_NEW;
     }
 
     /**
-     * Checks if payment was successful.
-     *
-     * @return bool
+     * @inheritDoc
      */
     public function paymentSuccessCheck()
     {
-        // TODO: Implement paymentSuccessCheck() method.
+        $errorCode = $this->_request->getParam('error');
+        if ($errorCode) {
+            $extOrderId = $this->_request->getParam('session_id');
+            $this->_logger->error('Payment error ' . $errorCode . ' for transaction ' . $extOrderId . '.');
+            return false;
+        }
+        return true;
     }
 
     /**
-     * @param string $payuplOrderId
-     * @return bool
+     * @inheritDoc
      */
     public function canProcessNotification($payuplOrderId)
     {
@@ -110,46 +190,10 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     }
 
     /**
-     * @param string $payuplOrderId
-     * @param string $status
-     * @param float $amount
-     * @return \Magento\Framework\Controller\Result\Raw
-     * @throws Exception
+     * @inheritDoc
      */
     public function processNotification($payuplOrderId, $status, $amount)
     {
         // TODO: Implement processNotification() method.
-    }
-
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public function validateCreate(array $data = [])
-    {
-        // TODO: Implement validateCreate() method.
-    }
-
-    /**
-     * @param $id
-     * @return bool
-     */
-    public function validateRetrieve($id)
-    {
-        // TODO: Implement validateRetrieve() method.
-    }
-
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public function validateStatusUpdate(array $data = [])
-    {
-        // TODO: Implement validateStatusUpdate() method.
-    }
-
-    public function addSpecialDataToOrder(array $data = [])
-    {
-        // TODO: Implement addSpecialDataToOrder() method.
     }
 }

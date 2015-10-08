@@ -39,7 +39,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $objectManagerHelper = new ObjectManager($this);
         $this->_urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
         $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Rest\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_extOrderIdHelper = $this->getMockBuilder(DataGetter\ExtOrderId::class)->disableOriginalConstructor()->getMock();
+        $this->_extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)->disableOriginalConstructor()->getMock();
         $this->_context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
             ['urlBuilder' => $this->_urlBuilder]

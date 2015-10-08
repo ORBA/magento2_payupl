@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
+use Orba\Payupl\Model\Client\Exception;
+
 class End extends \Magento\Framework\App\Action\Action
 {
     /**
@@ -38,12 +40,18 @@ class End extends \Magento\Framework\App\Action\Action
     protected $_orderHelper;
 
     /**
+     * @var \Orba\Payupl\Logger\Logger
+     */
+    protected $_logger;
+
+    /**
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Checkout\Model\Session\SuccessValidator $successValidator
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Orba\Payupl\Model\Session $session
      * @param \Orba\Payupl\Model\ClientFactory $clientFactory
      * @param \Orba\Payupl\Model\Order $orderHelper
+     * @param \Orba\Payupl\Logger\Logger $logger
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -51,7 +59,8 @@ class End extends \Magento\Framework\App\Action\Action
         \Magento\Checkout\Model\Session $checkoutSession,
         \Orba\Payupl\Model\Session $session,
         \Orba\Payupl\Model\ClientFactory $clientFactory,
-        \Orba\Payupl\Model\Order $orderHelper
+        \Orba\Payupl\Model\Order $orderHelper,
+        \Orba\Payupl\Logger\Logger $logger
     )
     {
         parent::__construct($context);
@@ -61,6 +70,7 @@ class End extends \Magento\Framework\App\Action\Action
         $this->_session = $session;
         $this->_clientFactory = $clientFactory;
         $this->_orderHelper = $orderHelper;
+        $this->_logger = $logger;
     }
 
     /**
@@ -72,33 +82,31 @@ class End extends \Magento\Framework\App\Action\Action
          * @var $clientOrderHelper \Orba\Payupl\Model\Client\OrderInterface
          */
         $resultRedirect = $this->resultRedirectFactory->create();
+        $redirectUrl = '/';
         try {
             if ($this->_successValidator->isValid()) {
-                $clientOrderHelper = $this->_getClientOrderHelper();
+                $redirectUrl = 'orba_payupl/payment/error';
                 $this->_session->setLastOrderId(null);
+                $clientOrderHelper = $this->_getClientOrderHelper();
                 if (
                     $this->_orderHelper->paymentSuccessCheck() &&
                     $clientOrderHelper->paymentSuccessCheck()
                 ) {
                     $redirectUrl = 'checkout/onepage/success';
-                } else {
-                    $redirectUrl = 'orba_payupl/payment/error';
                 }
+
             } else if ($this->_session->getLastOrderId()) {
+                $redirectUrl = 'orba_payupl/payment/repeat_error';
                 $clientOrderHelper = $this->_getClientOrderHelper();
                 if (
                     $this->_orderHelper->paymentSuccessCheck() &&
                     $clientOrderHelper->paymentSuccessCheck()
                 ) {
                     $redirectUrl = 'orba_payupl/payment/repeat_success';
-                } else {
-                    $redirectUrl = 'orba_payupl/payment/repeat_error';
                 }
-            } else {
-                throw new \Exception('Invalid checkout.');
             }
-        } catch (\Exception $e) {
-            $redirectUrl = '/';
+        } catch (Exception $e) {
+            $this->_logger->critical($e);
         }
         $resultRedirect->setPath($redirectUrl);
         return $resultRedirect;

@@ -10,6 +10,8 @@ namespace Orba\Payupl\Model;
  *
  * @method int getLastOrderId()
  * @method Session setLastOrderId(int)
+ * @method array getOrderCreateData()
+ * @method Session setOrderCreateData(array)
  */
 class Session extends \Magento\Framework\Session\SessionManager
 {

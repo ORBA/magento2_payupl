@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Client\Rest\Order;
 
-use \Orba\Payupl\Model\Client\Rest\Config;
+use Orba\Payupl\Model\Client\Rest\Config;
 
 class DataGetter
 {
@@ -31,7 +31,7 @@ class DataGetter
     public function __construct(
         \Magento\Framework\View\Context $context,
         Config $configHelper,
-        DataGetter\ExtOrderId $extOrderIdHelper
+        \Orba\Payupl\Model\Order\ExtOrderId $extOrderIdHelper
     )
     {
         $this->_urlBuilder = $context->getUrlBuilder();

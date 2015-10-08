@@ -13,13 +13,20 @@ class ClientFactory
     protected $_objectManager;
 
     /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $_scopeConfig;
+
+    /**
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      */
     public function __construct(
-        \Magento\Framework\ObjectManagerInterface $objectManager
+        \Magento\Framework\ObjectManagerInterface $objectManager,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     )
     {
         $this->_objectManager = $objectManager;
+        $this->_scopeConfig = $scopeConfig;
     }
 
     /**
@@ -28,6 +35,11 @@ class ClientFactory
      */
     public function create(array $data = [])
     {
-        return $this->_objectManager->create(Client\Rest::class, []);
+        if ($this->_scopeConfig->isSetFlag(Payupl::XML_PATH_CLASSIC_API)) {
+            $class = Client\Classic::class;
+        } else {
+            $class = Client\Rest::class;
+        }
+        return $this->_objectManager->create($class, []);
     }
 }

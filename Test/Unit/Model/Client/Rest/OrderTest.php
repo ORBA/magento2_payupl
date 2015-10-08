@@ -213,6 +213,12 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateRetrieve(''));
     }
 
+    public function testValidateRetrieveSuccess()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
+        $this->assertTrue($this->_model->validateRetrieve('ABC'));
+    }
+
     public function testRetrieveFail()
     {
         $id = '123456';
@@ -249,6 +255,12 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->_model->validateCancel(''));
     }
 
+    public function testValidateCancelSuccess()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
+        $this->assertTrue($this->_model->validateCancel('ABC'));
+    }
+
     public function testCancelFail()
     {
         $id = '123456';
@@ -281,6 +293,13 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
         $this->_dataValidator->expects($this->once())->method('validateStatusUpdateData')->willReturn(false);
         $this->assertFalse($this->_model->validateStatusUpdate());
+    }
+
+    public function testValidateStatusUpdateSuccess()
+    {
+        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(true);
+        $this->_dataValidator->expects($this->once())->method('validateStatusUpdateData')->willReturn(true);
+        $this->assertTrue($this->_model->validateStatusUpdate(['data']));
     }
 
     public function testStatusUpdateFail()

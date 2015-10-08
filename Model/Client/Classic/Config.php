@@ -6,7 +6,7 @@
 namespace Orba\Payupl\Model\Client\Classic;
 
 use Orba\Payupl\Model\Client\ConfigInterface;
-use Orba\Payupl\Model\Client\Exception as Exception;
+use Orba\Payupl\Model\Client\Exception;
 use Orba\Payupl\Model\Payupl;
 
 class Config implements ConfigInterface

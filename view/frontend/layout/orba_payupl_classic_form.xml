@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="empty" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="root">
+            <block class="Magento\Framework\View\Element\Template" name="orba.payupl.classic.form" template="Orba_Payupl::classic/form.phtml" cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -8,6 +8,11 @@ namespace Orba\Payupl\Controller\Payment;
 class NotifyTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @var Notify
+     */
+    protected $_controller;
+
+    /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     protected $_context;
@@ -23,9 +28,9 @@ class NotifyTest extends \PHPUnit_Framework_TestCase
     protected $_resultForwardFactory;
 
     /**
-     * @var Notify
+     * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_controller;
+    protected $_logger;
 
     public function setUp()
     {
@@ -33,14 +38,27 @@ class NotifyTest extends \PHPUnit_Framework_TestCase
         $this->_context = $this->getMockBuilder(\Magento\Framework\App\Action\Context::class)->disableOriginalConstructor()->getMock();
         $this->_clientFactory = $this->getMockBuilder(\Orba\Payupl\Model\ClientFactory::class)->disableOriginalConstructor()->getMock();
         $this->_resultForwardFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\ForwardFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
+        $this->_logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()->getMock();
         $this->_controller = $objectManager->getObject(Notify::class, [
             'context' => $this->_context,
             'clientFactory' => $this->_clientFactory,
-            'resultForwardFactory' => $this->_resultForwardFactory
+            'resultForwardFactory' => $this->_resultForwardFactory,
+            'logger' => $this->_logger
         ]);
     }
 
-    public function testIgnoreNotification()
+    public function testIgnoreNotificationClientException()
+    {
+        $exception = new \Orba\Payupl\Model\Client\Exception();
+        $this->_clientFactory->expects($this->once())->method('create')->willThrowException($exception);
+        $this->_logger->expects($this->once())->method('critical')->with($exception);
+        $resultForward = $this->getMockBuilder(\Magento\Framework\Controller\Result\Forward::class)->disableOriginalConstructor()->getMock();
+        $resultForward->expects($this->once())->method('forward')->with('noroute');
+        $this->_resultForwardFactory->expects($this->once())->method('create')->willReturn($resultForward);
+        $this->assertEquals($resultForward, $this->_controller->execute());
+    }
+
+    public function testIgnoreNotificationInvalidOrder()
     {
         $response = [
             'payuplOrderId' => 'ABC',

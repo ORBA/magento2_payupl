@@ -3,7 +3,7 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client\Rest\Order\DataGetter;
+namespace Orba\Payupl\Model\Order;
 
 class ExtOrderIdTest extends \PHPUnit_Framework_TestCase
 {
@@ -56,24 +56,6 @@ class ExtOrderIdTest extends \PHPUnit_Framework_TestCase
         $order->expects($this->once())->method('getId')->willReturn($orderId);
         $order->expects($this->once())->method('getIncrementId')->willReturn($orderIncrementId);
         return $order;
-    }
-
-    /**
-     * @param $orderId
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function _getTransactionCollectionWithExpectedConditions($orderId)
-    {
-        $transactionCollection = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction\Collection::class)->disableOriginalConstructor()->getMock();
-        $transactionCollection->expects($this->once())->method('addFieldToFilter')->with(
-            $this->equalTo('order_id'),
-            $this->equalTo($orderId)
-        )->will($this->returnSelf());
-        $transactionCollection->expects($this->once())->method('setOrder')->with(
-            $this->equalTo('try'),
-            $this->equalTo(\Magento\Framework\Data\Collection::SORT_ORDER_DESC)
-        )->will($this->returnSelf());
-        return $transactionCollection;
     }
 
     /**
