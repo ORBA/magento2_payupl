@@ -8,7 +8,7 @@ namespace Orba\Payupl\Model;
 class ClientFactoryTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var CientFactory
+     * @var ClientFactory
      */
     protected $_model;
 
@@ -35,7 +35,7 @@ class ClientFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateClassic()
     {
-        $this->_scopeConfig->expects($this->once())->method('isSetFlag')->with($this->equalTo(Payupl::XML_PATH_CLASSIC_API))->willReturn(true);
+        $this->_scopeConfig->expects($this->once())->method('isSetFlag')->with($this->equalTo(Payupl::XML_PATH_CLASSIC_API), $this->equalTo('store'))->willReturn(true);
         $object = $this->getMockBuilder(Client::class)->disableOriginalConstructor()->getMock();
         $this->_objectManager->expects($this->once())->method('create')->with(
             $this->equalTo(Client\Classic::class),
@@ -46,7 +46,7 @@ class ClientFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateRest()
     {
-        $this->_scopeConfig->expects($this->once())->method('isSetFlag')->with($this->equalTo(Payupl::XML_PATH_CLASSIC_API))->willReturn(false);
+        $this->_scopeConfig->expects($this->once())->method('isSetFlag')->with($this->equalTo(Payupl::XML_PATH_CLASSIC_API), $this->equalTo('store'))->willReturn(false);
         $object = $this->getMockBuilder(Client::class)->disableOriginalConstructor()->getMock();
         $this->_objectManager->expects($this->once())->method('create')->with(
             $this->equalTo(Client\Rest::class),

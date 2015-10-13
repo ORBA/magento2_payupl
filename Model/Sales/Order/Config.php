@@ -42,11 +42,11 @@ class Config extends \Magento\Sales\Model\Order\Config
     {
         switch ($state) {
             case Order::STATE_PENDING_PAYMENT:
-                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_NEW);
+                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_NEW, 'store');
             case Order::STATE_HOLDED:
-                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_HOLDED);
+                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_HOLDED, 'store');
             case Order::STATE_PROCESSING:
-                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_PROCESSING);
+                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_PROCESSING, 'store');
         }
         return parent::getStateDefaultStatus($state);
     }

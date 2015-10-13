@@ -106,7 +106,7 @@ class Client
 
     /**
      * @param \Magento\Framework\App\Request\Http $request
-     * @return array (keys: payuplOrderId, status, amount')
+     * @return array (keys: payuplOrderId, status, amount)
      * @throws Client\Exception
      */
     public function orderConsumeNotification(\Magento\Framework\App\Request\Http $request)

@@ -133,4 +133,22 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals($sig, $this->_model->getSigForOrderCreate($data));
     }
+
+    public function testSigForOrderRetrieve()
+    {
+        $data = [
+            'pos_id' => '123456',
+            'session_id' => 'ABC',
+            'ts' => 12345678
+        ];
+        $keyMd5 = 'GHI';
+        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))->willReturn($keyMd5);
+        $sig = md5(
+            $data['pos_id'] .
+            $data['session_id'] .
+            $data['ts'] .
+            $keyMd5
+        );
+        $this->assertEquals($sig, $this->_model->getSigForOrderRetrieve($data));
+    }
 }

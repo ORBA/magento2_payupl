@@ -9,8 +9,15 @@ use Orba\Payupl\Model\Client\Exception;
 
 class Order implements \Orba\Payupl\Model\Client\OrderInterface
 {
-    const STATUS_PRE_NEW    = 0;
-    const STATUS_NEW        = 1;
+    const STATUS_PRE_NEW            = 0;
+    const STATUS_NEW                = 1;
+    const STATUS_CANCELLED          = 2;
+    const STATUS_REJECTED           = 3;
+    const STATUS_PENDING            = 4;
+    const STATUS_WAITING            = 5;
+    const STATUS_REJECTED_CANCELLED = 7;
+    const STATUS_COMPLETED          = 99;
+    const STATUS_ERROR              = 888;
 
     /**
      * @var Order\DataValidator
@@ -42,13 +49,56 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     protected $_logger;
 
+    /**
+     * @var Order\Notification
+     */
+    protected $_notificationHelper;
+
+    /**
+     * @var MethodCaller
+     */
+    protected $_methodCaller;
+
+    /**
+     * @var \Orba\Payupl\Model\Resource\Transaction
+     */
+    protected $_transactionResource;
+
+    /**
+     * @var Order\Processor
+     */
+    protected $_orderProcessor;
+
+    /**
+     * @var \Magento\Framework\Controller\Result\RawFactory
+     */
+    protected $_rawResultFactory;
+
+    /**
+     * @param \Magento\Framework\View\Context $context
+     * @param Order\DataValidator $dataValidator
+     * @param Order\DataGetter $dataGetter
+     * @param \Orba\Payupl\Model\Session $session
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @param \Orba\Payupl\Logger\Logger $logger
+     * @param Order\Notification $notificationHelper
+     * @param MethodCaller $methodCaller
+     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
+     * @param Order\Processor $orderProcessor
+     * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
+     */
     public function __construct(
         \Magento\Framework\View\Context $context,
         Order\DataValidator $dataValidator,
         Order\DataGetter $dataGetter,
         \Orba\Payupl\Model\Session $session,
         \Magento\Framework\App\RequestInterface $request,
-        \Orba\Payupl\Logger\Logger $logger
+        \Orba\Payupl\Logger\Logger $logger,
+        Order\Notification $notificationHelper,
+        MethodCaller $methodCaller,
+        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        Order\Processor $orderProcessor,
+        \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
     )
     {
         $this->_urlBuilder = $context->getUrlBuilder();
@@ -57,6 +107,11 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
         $this->_session = $session;
         $this->_request = $request;
         $this->_logger = $logger;
+        $this->_notificationHelper = $notificationHelper;
+        $this->_methodCaller = $methodCaller;
+        $this->_transactionResource = $transactionResource;
+        $this->_orderProcessor = $orderProcessor;
+        $this->_rawResultFactory = $rawResultFactory;
     }
 
     /**
@@ -111,7 +166,26 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function retrieve($payuplOrderId)
     {
-        // TODO: Implement retrieve() method.
+        $posId = $this->_dataGetter->getPosId();
+        $ts = $this->_dataGetter->getTs();
+        $sig = $this->_dataGetter->getSigForOrderRetrieve([
+            'pos_id' => $posId,
+            'session_id' => $payuplOrderId,
+            'ts' => $ts
+        ]);
+        $result = $this->_methodCaller->call('orderRetrieve', [
+            $posId,
+            $payuplOrderId,
+            $ts,
+            $sig
+        ]);
+        if ($result) {
+            return [
+                'status' => $result->transStatus,
+                'amount' => $result->transAmount / 100
+            ];
+        }
+        return false;
     }
 
     /**
@@ -135,7 +209,16 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function consumeNotification(\Magento\Framework\App\Request\Http $request)
     {
-        // TODO: Implement consumeNotification() method.
+        $payuplOrderId = $this->_notificationHelper->getPayuplOrderId($request);
+        $orderData = $this->retrieve($payuplOrderId);
+        if ($orderData) {
+            return [
+                'payuplOrderId' => md5($payuplOrderId),
+                'status' => $orderData['status'],
+                'amount' => $orderData['amount']
+            ];
+        }
+        return false;
     }
 
     /**
@@ -186,7 +269,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function canProcessNotification($payuplOrderId)
     {
-        // TODO: Implement canProcessNotification() method.
+        return !in_array($this->_transactionResource->getStatusByPayuplOrderId($payuplOrderId), [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
     }
 
     /**
@@ -194,6 +277,15 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function processNotification($payuplOrderId, $status, $amount)
     {
-        // TODO: Implement processNotification() method.
+        /**
+         * @var $result \Magento\Framework\Controller\Result\Raw
+         */
+        $newest = $this->_transactionResource->checkIfNewestByPayuplOrderId($payuplOrderId);
+        $this->_orderProcessor->processStatusChange($payuplOrderId, $status, $amount, $newest);
+        $result = $this->_rawResultFactory->create();
+        $result
+            ->setHttpResponseCode(200)
+            ->setContents('OK');
+        return $result;
     }
 }

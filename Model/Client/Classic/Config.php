@@ -51,25 +51,25 @@ class Config implements ConfigInterface
      * @throws Exception
      */
     public function setConfig() {
-        $posId = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_ID);
+        $posId = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_ID, 'store');
         if ($posId) {
             $this->_posId = $posId;
         } else {
             throw new Exception('POS ID is empty.');
         }
-        $keyMd5 = $this->_scopeConfig->getValue(Payupl::XML_PATH_KEY_MD5);
+        $keyMd5 = $this->_scopeConfig->getValue(Payupl::XML_PATH_KEY_MD5, 'store');
         if ($keyMd5) {
             $this->_keyMd5 = $keyMd5;
         } else {
             throw new Exception('Key MD5 is empty.');
         }
-        $secondKeyMd5 = $this->_scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5);
+        $secondKeyMd5 = $this->_scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5, 'store');
         if ($secondKeyMd5) {
             $this->_secondKeyMd5 = $secondKeyMd5;
         } else {
             throw new Exception('Second key MD5 is empty.');
         }
-        $posAuthKey = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_AUTH_KEY);
+        $posAuthKey = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_AUTH_KEY, 'store');
         if ($posAuthKey) {
             $this->_posAuthKey = $posAuthKey;
         } else {

@@ -40,10 +40,10 @@ interface OrderInterface
     public function create(array $data);
 
     /**
-     * Return false on fail or transaction status on success.
+     * Return false on fail or array with the following keys: status, amount on success.
      *
      * @param string $payuplOrderId
-     * @return string|false
+     * @return array|false
      */
     public function retrieve($payuplOrderId);
 
@@ -64,7 +64,7 @@ interface OrderInterface
     public function statusUpdate(array $data = []);
 
     /**
-     * Returns false on fail or array with the following keys on success: orderId, status
+     * Returns false on fail or array with the following keys on success: payuplOrderId, status, amount
      *
      * @param \Magento\Framework\App\Request\Http $request
      * @return array|false

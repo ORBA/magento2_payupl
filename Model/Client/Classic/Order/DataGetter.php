@@ -88,6 +88,7 @@ class DataGetter
     }
 
     /**
+     * @param array $data
      * @return string
      */
     public function getSigForOrderCreate(array $data = [])
@@ -103,6 +104,20 @@ class DataGetter
             $data['last_name'] .
             $data['email'] .
             $data['client_ip'] .
+            $data['ts'] .
+            $this->_configHelper->getConfig('key_md5')
+        );
+    }
+
+    /**
+     * @param array $data
+     * @return string
+     */
+    public function getSigForOrderRetrieve(array $data = [])
+    {
+        return md5(
+            $data['pos_id'] .
+            $data['session_id'] .
             $data['ts'] .
             $this->_configHelper->getConfig('key_md5')
         );

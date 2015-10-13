@@ -50,8 +50,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $merchantPosId = self::EXEMPLARY_MERCHANT_POS_ID;
         $signatureKey = self::EXEMPLARY_SIGNATURE_KEY;
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn($merchantPosId);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5))->willReturn($signatureKey);
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn($merchantPosId);
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn($signatureKey);
         $this->assertTrue($this->_model->setConfig());
         $this->assertEquals($this->_model->getConfig(), [
             'merchant_pos_id' => $merchantPosId,
@@ -61,15 +61,15 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testSetConfigMerchantPosIdEmpty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Merchant POS ID is empty.');
         $this->_model->setConfig();
     }
 
     public function testSetConfigSignatureKeyEmpty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Signature key is empty.');
         $this->_model->setConfig();
     }

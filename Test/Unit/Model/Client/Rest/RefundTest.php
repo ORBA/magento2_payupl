@@ -96,20 +96,12 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $orderId = '123456';
         $description = 'Description';
         $amount = '100';
-        $result = $this->_getResult();
+        $result = new \stdClass();
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('refundCreate'),
             $this->equalTo([$orderId, $description, $amount])
         )->willReturn($result);
         $this->assertTrue($this->_model->create($orderId, $description, $amount));
-    }
-
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function _getResult()
-    {
-        return $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
     }
 
     /**

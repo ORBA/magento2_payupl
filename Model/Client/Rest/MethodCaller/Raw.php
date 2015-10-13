@@ -5,17 +5,21 @@
 
 namespace Orba\Payupl\Model\Client\Rest\MethodCaller;
 
-class Raw
+use Orba\Payupl\Model\Client\Exception;
+use Orba\Payupl\Model\Client\MethodCaller\RawInterface;
+
+class Raw implements RawInterface
 {
     /**
      * @param string $methodName
      * @param array $args
-     * @return \OpenPayU_Result
-     * @throws \OpenPayU_Exception
+     * @return \stdClass
+     * @throws Exception
      */
     public function call($methodName, array $args = [])
     {
-        return call_user_func_array([$this, $methodName], $args);
+        $result = call_user_func_array([$this, $methodName], $args);
+        return $this->_getResponse($result);
     }
 
     /**
@@ -78,5 +82,22 @@ class Raw
     public function refundCreate($orderId, $description, $amount = null)
     {
         return \OpenPayU_Refund::create($orderId, $description, $amount);
+    }
+
+    /**
+     * @param \OpenPayU_Result $result
+     * @return \stdClass
+     * @throws Exception
+     */
+    protected function _getResponse($result)
+    {
+        $response = $result->getResponse();
+        if (isset($response->status)) {
+            $status = $response->status;
+            if ((string)$status->statusCode !== 'SUCCESS') {
+                throw new Exception(\Zend_Json::encode($status));
+            }
+        }
+        return $response;
     }
 }

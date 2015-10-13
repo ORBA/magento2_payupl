@@ -57,10 +57,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $keyMd5 = 'ABC';
         $secondKeyMd5 = 'DEF';
         $posAuthKey = 'GHI';
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn($posId);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5))->willReturn($keyMd5);
-        $this->_scopeConfig->expects($this->at(2))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5))->willReturn($secondKeyMd5);
-        $this->_scopeConfig->expects($this->at(3))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_AUTH_KEY))->willReturn($posAuthKey);
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn($posId);
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5), $this->equalTo('store'))->willReturn($keyMd5);
+        $this->_scopeConfig->expects($this->at(2))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn($secondKeyMd5);
+        $this->_scopeConfig->expects($this->at(3))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_AUTH_KEY), $this->equalTo('store'))->willReturn($posAuthKey);
         $this->assertTrue($this->_model->setConfig());
         $this->assertEquals($this->_model->getConfig(), [
             'pos_id' => $posId,
@@ -72,34 +72,34 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testSetConfigPosIdEmpty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(Exception::class, 'POS ID is empty.');
         $this->_model->setConfig();
     }
 
     public function testSetConfigKeyMd5Empty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn('value');
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('value');
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(Exception::class, 'Key MD5 is empty.');
         $this->_model->setConfig();
     }
 
     public function testSetConfigSecondKeyMd5Empty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn('value');
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5))->willReturn('value');
-        $this->_scopeConfig->expects($this->at(2))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('value');
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5), $this->equalTo('store'))->willReturn('value');
+        $this->_scopeConfig->expects($this->at(2))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(Exception::class, 'Second key MD5 is empty.');
         $this->_model->setConfig();
     }
 
     public function testSetConfigPosAuthKeyEmpty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID))->willReturn('value');
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5))->willReturn('value');
-        $this->_scopeConfig->expects($this->at(2))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5))->willReturn('value');
-        $this->_scopeConfig->expects($this->at(3))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_AUTH_KEY))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('value');
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_KEY_MD5), $this->equalTo('store'))->willReturn('value');
+        $this->_scopeConfig->expects($this->at(2))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn('value');
+        $this->_scopeConfig->expects($this->at(3))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_AUTH_KEY), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(Exception::class, 'POS auth key is empty.');
         $this->_model->setConfig();
     }

@@ -30,4 +30,9 @@
             <argument name="storage" xsi:type="object">Orba\Payupl\Model\Session\Storage</argument>
         </arguments>
     </type>
+    <type name="Orba\Payupl\Model\Client\Classic\MethodCaller\SoapClient\Order">
+        <arguments>
+            <argument name="wsdl" xsi:type="string">https://secure.payu.com/paygw/webapi/Payments?wsdl</argument>
+        </arguments>
+    </type>
 </config>

@@ -194,11 +194,10 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $response = new \stdClass();
         $response->orderId = '456';
         $response->redirectUri = 'http://redirect.uri';
-        $result->expects($this->once())->method('getResponse')->willReturn($response);
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderCreate'),
             $this->equalTo([$data])
-        )->willReturn($result);
+        )->willReturn($response);
         $returnArray = [
             'orderId' => $response->orderId,
             'redirectUri' => $response->redirectUri,
@@ -231,22 +230,24 @@ class OrderTest extends \PHPUnit_Framework_TestCase
 
     public function testRetrieveSuccess()
     {
-        $id = '123456';
-        $result = $this->_getResultMock();
+        $payuplOrderId = '123456';
         $response = (object) [
             'orders' => [
                 0 => (object) [
-                    'status' => Order::STATUS_COMPLETED
+                    'status' => Order::STATUS_COMPLETED,
+                    'totalAmount' => '3200'
                 ]
             ]
         ];
-        $result->expects($this->once())->method('getResponse')->willReturn($response);
-        $status = $response->orders[0]->status;
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderRetrieve'),
-            $this->equalTo([$id])
-        )->willReturn($result);
-        $this->assertEquals($status, $this->_model->retrieve($id));
+            $this->equalTo([$payuplOrderId])
+        )->willReturn($response);
+        $result = [
+            'status' => $response->orders[0]->status,
+            'amount' => $response->orders[0]->totalAmount / 100
+        ];
+        $this->assertEquals($result, $this->_model->retrieve($payuplOrderId));
     }
 
     public function testValidateCancelFailedEmpty()
@@ -350,7 +351,6 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $request = $this->_getRequestMock();
         $request->expects($this->once())->method('isPost')->willReturn(true);
         $request->expects($this->once())->method('getContent')->willReturn($rawBody);
-        $result = $this->_getResultMock();
         $response = new \stdClass();
         $response->order = new \stdClass();
         $response->order->status = Order::STATUS_COMPLETED;
@@ -361,11 +361,10 @@ class OrderTest extends \PHPUnit_Framework_TestCase
             'status' => $response->order->status,
             'amount' => 2.22
         ];
-        $result->expects($this->once())->method('getResponse')->willReturn($response);
         $this->_methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('orderConsumeNotification'),
             $this->equalTo([$rawBody])
-        )->willReturn($result);
+        )->willReturn($response);
         $this->assertEquals($resultArray, $this->_model->consumeNotification($request));
     }
 

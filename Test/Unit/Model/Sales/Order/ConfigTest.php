@@ -39,7 +39,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $state = Order::STATE_PENDING_PAYMENT;
         $status = 'pending_payment';
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Config::XML_PATH_ORDER_STATUS_NEW))->willReturn($status);
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Config::XML_PATH_ORDER_STATUS_NEW), $this->equalTo('store'))->willReturn($status);
         $this->assertEquals($status, $this->_model->getStateDefaultStatus($state));
     }
 
@@ -47,7 +47,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $state = Order::STATE_HOLDED;
         $status = 'holded';
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Config::XML_PATH_ORDER_STATUS_HOLDED))->willReturn($status);
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Config::XML_PATH_ORDER_STATUS_HOLDED), $this->equalTo('store'))->willReturn($status);
         $this->assertEquals($status, $this->_model->getStateDefaultStatus($state));
     }
 
@@ -55,7 +55,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $state = Order::STATE_PROCESSING;
         $status = 'processing';
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Config::XML_PATH_ORDER_STATUS_PROCESSING))->willReturn($status);
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Config::XML_PATH_ORDER_STATUS_PROCESSING), $this->equalTo('store'))->willReturn($status);
         $this->assertEquals($status, $this->_model->getStateDefaultStatus($state));
     }
 }

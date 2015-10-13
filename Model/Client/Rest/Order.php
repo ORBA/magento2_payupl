@@ -140,9 +140,8 @@ class Order implements OrderInterface
         /**
          * @var $result \OpenPayU_Result
          */
-        $result = $this->_methodCaller->call('orderCreate', [$data]);
-        if ($result) {
-            $response = $result->getResponse();
+        $response = $this->_methodCaller->call('orderCreate', [$data]);
+        if ($response) {
             return [
                 'orderId' => $response->orderId,
                 'redirectUri' => $response->redirectUri,
@@ -157,10 +156,12 @@ class Order implements OrderInterface
      */
     public function retrieve($payuplOrderId)
     {
-        $result = $this->_methodCaller->call('orderRetrieve', [$payuplOrderId]);
-        if ($result) {
-            $response = $result->getResponse();
-            return $response->orders[0]->status;
+        $response = $this->_methodCaller->call('orderRetrieve', [$payuplOrderId]);
+        if ($response) {
+            return [
+                'status' => $response->orders[0]->status,
+                'amount' => $response->orders[0]->totalAmount / 100
+            ];
         }
         return false;
     }
@@ -189,12 +190,8 @@ class Order implements OrderInterface
         if (!$request->isPost()) {
             throw new \Orba\Payupl\Model\Client\Exception('POST request is required.');
         }
-        /**
-         * @var $result \OpenPayU_Result
-         */
-        $result = $this->_methodCaller->call('orderConsumeNotification', [$request->getContent()]);
-        if ($result) {
-            $response = $result->getResponse();
+        $response = $this->_methodCaller->call('orderConsumeNotification', [$request->getContent()]);
+        if ($response) {
             return [
                 'payuplOrderId' => $response->order->orderId,
                 'status' => $response->order->status,

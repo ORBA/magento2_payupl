@@ -51,6 +51,9 @@ class Notify extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
+        /**
+         * @var $client \Orba\Payupl\Model\Client
+         */
         $request = $this->_context->getRequest();
         try {
             $client = $this->_clientFactory->create();

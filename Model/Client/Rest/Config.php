@@ -33,13 +33,13 @@ class Config implements ConfigInterface
     public function setConfig()
     {
         \OpenPayU_Configuration::setEnvironment('secure');
-        $merchantPosId = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_ID);
+        $merchantPosId = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_ID, 'store');
         if ($merchantPosId) {
             \OpenPayU_Configuration::setMerchantPosId($merchantPosId);
         } else {
             throw new Exception('Merchant POS ID is empty.');
         }
-        $signatureKey = $this->_scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5);
+        $signatureKey = $this->_scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5, 'store');
         if ($signatureKey) {
             \OpenPayU_Configuration::setSignatureKey($signatureKey);
         } else {

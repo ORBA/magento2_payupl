@@ -44,9 +44,6 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
         $paymentMethodMock->expects($this->once())->method('isAvailable')->willReturn(false);
         $this->_paymentHelper->expects($this->once())->method('getMethodInstance')->with($this->equalTo('orba_payupl'))->willReturn($paymentMethodMock);
         $this->assertEquals([], $this->_model->getConfig());
-//        $payment->expects($this->once())->method('getCheckoutRedirectUrl')->willReturn('http://redirect.url');
-//        $paymentHelper->expects($this->once())->method('getMethodInstance')->with($this->equalTo('orba_payupl'))->willReturn($payment);
-//        $model->getConfig();
     }
 
     public function testGetConfigAvailable()

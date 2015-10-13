@@ -3,7 +3,7 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client\Rest;
+namespace Orba\Payupl\Model\Client\Classic;
 
 class MethodCaller extends \Orba\Payupl\Model\Client\MethodCaller
 {

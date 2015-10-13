@@ -3,9 +3,9 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Client\Rest\Order;
+namespace Orba\Payupl\Model\Client\Classic\Order;
 
-use Orba\Payupl\Model\Client\Rest\Order;
+use Orba\Payupl\Model\Client\Classic\Order;
 use Orba\Payupl\Model\Client\Exception;
 
 class ProcessorTest extends \PHPUnit_Framework_TestCase
@@ -95,6 +95,18 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
     }
 
+    public function testProcessStatusChangeRejectedCancelledNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_REJECTED_CANCELLED;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(false)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
     public function testProcessStatusChangeCompletedNotNewest()
     {
         $payuplOrderId = 'ABC';
@@ -103,6 +115,18 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             $this->equalTo($payuplOrderId),
             $this->equalTo($status),
             $this->equalTo(true)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
+    }
+
+    public function testProcessStatusChangeErrorNotNewest()
+    {
+        $payuplOrderId = 'ABC';
+        $status = Order::STATUS_ERROR;
+        $this->_orderProcessor->expects($this->once())->method('processOld')->with(
+            $this->equalTo($payuplOrderId),
+            $this->equalTo($status),
+            $this->equalTo(false)
         )->willReturn(true);
         $this->assertTrue($this->_model->processStatusChange($payuplOrderId, $status, 2.22, false));
     }
@@ -162,11 +186,33 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->_model->processStatusChange($orderId, $status));
     }
 
+    public function testProcessStatusChangeRejectedCancelled()
+    {
+        $orderId = 1;
+        $status = Order::STATUS_REJECTED_CANCELLED;
+        $this->_orderProcessor->expects($this->once())->method('processHolded')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($status)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
+    }
+
     public function testProcessStatusChangeCompleted()
     {
         $orderId = 1;
         $status = Order::STATUS_COMPLETED;
         $this->_orderProcessor->expects($this->once())->method('processCompleted')->with(
+            $this->equalTo($orderId),
+            $this->equalTo($status)
+        )->willReturn(true);
+        $this->assertTrue($this->_model->processStatusChange($orderId, $status));
+    }
+
+    public function testProcessStatusChangeError()
+    {
+        $orderId = 1;
+        $status = Order::STATUS_ERROR;
+        $this->_orderProcessor->expects($this->once())->method('processHolded')->with(
             $this->equalTo($orderId),
             $this->equalTo($status)
         )->willReturn(true);

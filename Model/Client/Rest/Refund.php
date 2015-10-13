@@ -54,6 +54,5 @@ class Refund implements RefundInterface
     public function create($orderId = '', $description = '', $amount = null)
     {
         return (bool) ($this->_methodCaller->call('refundCreate', [$orderId, $description, $amount]));
-
     }
 }
