@@ -144,4 +144,9 @@ class Client
     {
         return $this->_orderHelper;
     }
+
+    public function getPaytypes()
+    {
+        return $this->_orderHelper->getPaytypes();
+    }
 }

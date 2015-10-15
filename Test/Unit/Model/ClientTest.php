@@ -10,7 +10,7 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Rest
+     * @var Client
      */
     protected $_model;
 
@@ -202,6 +202,13 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             $this->equalTo($amount)
         )->willReturn($result);
         $this->assertTrue($this->_model->refundCreate($orderId, $description, $amount));
+    }
+
+    public function testGetPaytypes()
+    {
+        $paytypes = ['paytypes'];
+        $this->_orderHelper->expects($this->once())->method('getPaytypes')->willReturn($paytypes);
+        $this->assertEquals($paytypes, $this->_model->getPaytypes());
     }
 
     public function testGetOrderHelper()

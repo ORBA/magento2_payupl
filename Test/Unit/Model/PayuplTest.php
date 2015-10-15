@@ -34,6 +34,11 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
      */
     protected $_transactionResource;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_paytypeHelper;
+
     protected function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
@@ -41,13 +46,15 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         $this->_urlBuilder = $this->getMockBuilder(\Magento\Framework\UrlInterface::class)->getMock();
         $this->_clientFactory = $this->getMockBuilder(ClientFactory::class)->disableOriginalConstructor()->getMock();
         $this->_transactionResource = $this->getMockBuilder(Resource\Transaction::class)->disableOriginalConstructor()->getMock();
+        $this->_paytypeHelper = $this->getMockBuilder(Order\Paytype::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
             Payupl::class,
             [
                 'scopeConfig' => $this->_scopeConfig,
                 'urlBuilder' => $this->_urlBuilder,
                 'clientFactory' => $this->_clientFactory,
-                'transactionResource' => $this->_transactionResource
+                'transactionResource' => $this->_transactionResource,
+                'paytypeHelper' => $this->_paytypeHelper
             ]
         );
 
@@ -74,16 +81,6 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->_model->isAvailable($quote));
     }
     
-    public function testIsAvailableActiveAllowedCarrier()
-    {
-        $this->_expectConfigActive(true);
-        $shippingMethod = 'flatrate_flatrate';
-        $this->_expectShippingMethodConfig($shippingMethod);
-        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethod);
-        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
-        $this->assertTrue($this->_model->isAvailable($quote));
-    }
-
     public function testIsAvailableActiveNotAllowedCarrier()
     {
         $this->_expectConfigActive(true);
@@ -94,7 +91,40 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
         $this->assertFalse($this->_model->isAvailable($quote));
     }
-    
+
+    public function testIsAvailableActiveAllowedCarrierNoPaytypes()
+    {
+        $this->_expectConfigActive(true);
+        $shippingMethod = 'flatrate_flatrate';
+        $this->_expectShippingMethodConfig($shippingMethod);
+        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethod);
+        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
+        $this->_paytypeHelper->expects($this->once())->method('getAllForQuote')->with($this->equalTo($quote))->willReturn(false);
+        $this->assertTrue($this->_model->isAvailable($quote));
+    }
+
+    public function testIsAvailableActiveAllowedCarrierEmptyPaytypes()
+    {
+        $this->_expectConfigActive(true);
+        $shippingMethod = 'flatrate_flatrate';
+        $this->_expectShippingMethodConfig($shippingMethod);
+        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethod);
+        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
+        $this->_paytypeHelper->expects($this->once())->method('getAllForQuote')->with($this->equalTo($quote))->willReturn([]);
+        $this->assertFalse($this->_model->isAvailable($quote));
+    }
+
+    public function testIsAvailableActiveAllowedCarrierSomePaytypes()
+    {
+        $this->_expectConfigActive(true);
+        $shippingMethod = 'flatrate_flatrate';
+        $this->_expectShippingMethodConfig($shippingMethod);
+        $shippingAddress = $this->_getShippingAddressMockWithShippingMethod($shippingMethod);
+        $quote = $this->_getQuoteMockWithShippingAddress($shippingAddress);
+        $this->_paytypeHelper->expects($this->once())->method('getAllForQuote')->with($this->equalTo($quote))->willReturn(['paytypes']);
+        $this->assertTrue($this->_model->isAvailable($quote));
+    }
+
     public function testCheckoutRedirectUrl()
     {
         $path = 'orba_payupl/payment/start';

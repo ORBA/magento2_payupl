@@ -15,13 +15,27 @@ class ConfigProvider implements ConfigProviderInterface
     protected $_paymentHelper;
 
     /**
+     * @var Order\Paytype
+     */
+    protected $_paytypeHelper;
+
+    /**
+     * @var \Magento\Checkout\Model\Session
+     */
+    protected $_checkoutSession;
+
+    /**
      * @param \Magento\Payment\Helper\Data $paymentHelper
      */
     public function __construct(
-        \Magento\Payment\Helper\Data $paymentHelper
+        \Magento\Payment\Helper\Data $paymentHelper,
+        Order\Paytype $paytypeHelper,
+        \Magento\Checkout\Model\Session $checkoutSession
     )
     {
         $this->_paymentHelper = $paymentHelper;
+        $this->_paytypeHelper = $paytypeHelper;
+        $this->_checkoutSession = $checkoutSession;
     }
 
     /**
@@ -36,10 +50,12 @@ class ConfigProvider implements ConfigProviderInterface
         $payment = $this->_paymentHelper->getMethodInstance(Payupl::CODE);
         if ($payment->isAvailable()) {
             $redirectUrl = $payment->getCheckoutRedirectUrl();
+            $quote = $this->_checkoutSession->getQuote();
             $config = [
                 'payment' => [
                     'orbaPayupl' => [
-                        'redirectUrl' => $redirectUrl
+                        'redirectUrl' => $redirectUrl,
+                        'paytypes' => $this->_paytypeHelper->getAllForQuote($quote)
                     ]
                 ]
             ];

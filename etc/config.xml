@@ -16,6 +16,7 @@
                 <order_status_processing>processing</order_status_processing>
                 <model>Orba\Payupl\Model\Payupl</model>
                 <allowspecific>0</allowspecific>
+                <paytypes_in_checkout>0</paytypes_in_checkout>
             </orba_payupl>
         </payment>
     </default>

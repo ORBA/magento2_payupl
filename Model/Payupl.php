@@ -11,11 +11,12 @@ class Payupl extends AbstractMethod
 {
     const CODE = 'orba_payupl';
 
-    const XML_PATH_POS_ID           = 'payment/orba_payupl/pos_id';
-    const XML_PATH_KEY_MD5          = 'payment/orba_payupl/key_md5';
-    const XML_PATH_SECOND_KEY_MD5   = 'payment/orba_payupl/second_key_md5';
-    const XML_PATH_POS_AUTH_KEY     = 'payment/orba_payupl/pos_auth_key';
-    const XML_PATH_CLASSIC_API      = 'payment/orba_payupl/classic_api';
+    const XML_PATH_POS_ID               = 'payment/orba_payupl/pos_id';
+    const XML_PATH_KEY_MD5              = 'payment/orba_payupl/key_md5';
+    const XML_PATH_SECOND_KEY_MD5       = 'payment/orba_payupl/second_key_md5';
+    const XML_PATH_POS_AUTH_KEY         = 'payment/orba_payupl/pos_auth_key';
+    const XML_PATH_CLASSIC_API          = 'payment/orba_payupl/classic_api';
+    const XML_PATH_PAYTYPES_IN_CHECKOUT = 'payment/orba_payupl/paytypes_in_checkout';
 
     /**
      * @var string
@@ -63,6 +64,11 @@ class Payupl extends AbstractMethod
     protected $_transactionResource;
 
     /**
+     * @var Order\Paytype
+     */
+    protected $_paytypeHelper;
+
+    /**
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
@@ -73,6 +79,7 @@ class Payupl extends AbstractMethod
      * @param \Magento\Framework\UrlInterface $urlBuilder
      * @param ClientFactory $clientFactory
      * @param Resource\Transaction $transactionResource
+     * @param Order\Paytype $paytypeHelper
      * @param array $data
      */
     public function __construct(
@@ -86,6 +93,7 @@ class Payupl extends AbstractMethod
         \Magento\Framework\UrlInterface $urlBuilder,
         ClientFactory $clientFactory,
         Resource\Transaction $transactionResource,
+        Order\Paytype $paytypeHelper,
         array $data = []
     ) {
         parent::__construct(
@@ -103,6 +111,7 @@ class Payupl extends AbstractMethod
         $this->_urlBuilder = $urlBuilder;
         $this->_clientFactory = $clientFactory;
         $this->_transactionResource = $transactionResource;
+        $this->_paytypeHelper = $paytypeHelper;
     }
 
     /**
@@ -116,7 +125,10 @@ class Payupl extends AbstractMethod
         if (is_null($quote)) {
             return parent::isAvailable();
         } else {
-            return parent::isAvailable($quote) && $this->_isShippingMethodAllowed($quote->getShippingAddress()->getShippingMethod());
+            return
+                parent::isAvailable($quote) &&
+                $this->_isShippingMethodAllowed($quote->getShippingAddress()->getShippingMethod()) &&
+                $this->_paytypeHelper->getAllForQuote($quote) !== [];
         }
     }
 
@@ -126,6 +138,18 @@ class Payupl extends AbstractMethod
     public function getCheckoutRedirectUrl()
     {
         return $this->_urlBuilder->getUrl('orba_payupl/payment/start');
+    }
+
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+        /**
+         * @var $order \Magento\Sales\Model\Order
+         */
+        $order = $payment->getOrder();
+        $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($order->getId());
+        $client = $this->_clientFactory->create();
+        $client->refundCreate($payuplOrderId, __('Refund for order # %1', $order->getIncrementId()), $amount * 100);
+        return $this;
     }
 
     /**
@@ -139,17 +163,5 @@ class Payupl extends AbstractMethod
             return in_array($shippingMethod, $allowedCarriers);
         }
         return true;
-    }
-
-    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
-    {
-        /**
-         * @var $order \Magento\Sales\Model\Order
-         */
-        $order = $payment->getOrder();
-        $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($order->getId());
-        $client = $this->_clientFactory->create();
-        $client->refundCreate($payuplOrderId, __('Refund for order # %1', $order->getIncrementId()), $amount * 100);
-        return $this;
     }
 }

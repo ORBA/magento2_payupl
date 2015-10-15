@@ -17,6 +17,27 @@ define(
                 redirectAfterPlaceOrder: false,
                 template: 'Orba_Payupl/payment/payupl'
             },
+            getData: function() {
+                return {
+                    "method": this.item.method,
+                    "po_number": null,
+                    "cc_owner": null,
+                    "cc_number": null,
+                    "cc_type": null,
+                    "cc_exp_year": null,
+                    "cc_exp_month": null,
+                    "additional_data": this.getAdditionalData()
+                };
+            },
+            getAdditionalData: function() {
+                var paytypeRadio = $("input[name=payment\\[additional_data\\]\\[paytype\\]]:checked");
+                if (paytypeRadio.length) {
+                    return {
+                        "paytype": paytypeRadio.val()
+                    }
+                }
+                return null;
+            },
             placeOrder: function (data, event) {
                 if (event) {
                     event.preventDefault();
@@ -40,6 +61,9 @@ define(
                     return true;
                 }
                 return false;
+            },
+            getPaytypes: function() {
+                return window.checkoutConfig.payment.orbaPayupl.paytypes;
             }
         });
     }

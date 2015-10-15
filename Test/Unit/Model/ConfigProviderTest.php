@@ -29,12 +29,26 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
      */
     protected $_paymentInstance;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_paytypeHelper;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_checkoutSession;
+
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
         $this->_paymentHelper = $this->getMockBuilder(\Magento\Payment\Helper\Data::class)->disableOriginalConstructor()->getMock();
+        $this->_paytypeHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\Paytype::class)->disableOriginalConstructor()->getMock();
+        $this->_checkoutSession = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)->disableOriginalConstructor()->getMock();
         $this->_model = $this->_objectManager->getObject(ConfigProvider::class, [
-            'paymentHelper' => $this->_paymentHelper
+            'paymentHelper' => $this->_paymentHelper,
+            'paytypeHelper' => $this->_paytypeHelper,
+            'checkoutSession' => $this->_checkoutSession
         ]);
     }
 
@@ -49,10 +63,12 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
     public function testGetConfigAvailable()
     {
         $redirectUrl = 'http://redirect.url';
+        $paytypes = ['paytypes'];
         $expectedConfig = [
             'payment' => [
                 'orbaPayupl' => [
-                    'redirectUrl' => $redirectUrl
+                    'redirectUrl' => $redirectUrl,
+                    'paytypes' => $paytypes
                 ]
             ]
         ];
@@ -60,6 +76,9 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
         $paymentMethodMock->expects($this->once())->method('isAvailable')->willReturn(true);
         $paymentMethodMock->expects($this->once())->method('getCheckoutRedirectUrl')->willReturn($redirectUrl);
         $this->_paymentHelper->expects($this->once())->method('getMethodInstance')->with($this->equalTo('orba_payupl'))->willReturn($paymentMethodMock);
+        $quote = $this->getMockBuilder(\Magento\Quote\Api\Data\CartInterface::class)->getMock();
+        $this->_checkoutSession->expects($this->once())->method('getQuote')->willReturn($quote);
+        $this->_paytypeHelper->expects($this->once())->method('getAllForQuote')->with($this->equalTo($quote))->willReturn($paytypes);
         $this->assertEquals($expectedConfig, $this->_model->getConfig());
     }
 

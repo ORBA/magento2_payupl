@@ -12,6 +12,8 @@ namespace Orba\Payupl\Model;
  * @method Session setLastOrderId(int)
  * @method array getOrderCreateData()
  * @method Session setOrderCreateData(array)
+ * @method string getPaytype()
+ * @method Session setPaytype(string)
  */
 class Session extends \Magento\Framework\Session\SessionManager
 {

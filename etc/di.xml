@@ -35,4 +35,7 @@
             <argument name="wsdl" xsi:type="string">https://secure.payu.com/paygw/webapi/Payments?wsdl</argument>
         </arguments>
     </type>
+    <type name="Magento\Checkout\Model\PaymentInformationManagement">
+        <plugin name="orba_payupl_checkout_model_paymentinformationmanagement" type="Orba\Payupl\Model\Checkout\PaymentInformationManagement\Plugin" sortOrder="1" />
+    </type>
 </config>

@@ -111,4 +111,11 @@ interface OrderInterface
      * @throws Exception
      */
     public function processNotification($payuplOrderId, $status, $amount);
+
+    /**
+     * Returns false if there is no API for paytypes.
+     *
+     * @return false|array
+     */
+    public function getPaytypes();
 }

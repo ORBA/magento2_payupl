@@ -320,6 +320,13 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->_rawResultFactory->expects($this->once())->method('create')->willReturn($result);
         $this->assertEquals($result, $this->_model->processNotification($payuplOrderId, $status, $amount));
     }
+    
+    public function testGetPaytypes()
+    {
+        $response = ['paytypes'];
+        $this->_methodCaller->expects($this->once())->method('call')->with($this->equalTo('getPaytypes'))->willReturn($response);
+        $this->assertEquals($response, $this->_model->getPaytypes());
+    }
 
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject

@@ -258,4 +258,11 @@ class Order implements OrderInterface
         return $result;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getPaytypes()
+    {
+        return false;
+    }
 }

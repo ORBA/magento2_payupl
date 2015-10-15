@@ -16,13 +16,21 @@ class Raw implements RawInterface
     protected $_orderClient;
 
     /**
+     * @var PaytypesClient
+     */
+    protected $_paytypesClient;
+
+    /**
      * @param SoapClient\Order $orderClient
+     * @param PaytypesClient $paytypesClient
      */
     public function __construct(
-        SoapClient\Order $orderClient
+        SoapClient\Order $orderClient,
+        PaytypesClient $paytypesClient
     )
     {
         $this->_orderClient = $orderClient;
+        $this->_paytypesClient = $paytypesClient;
     }
 
     /**
@@ -50,4 +58,25 @@ class Raw implements RawInterface
             'sig' => $sig
         ]);
     }
+
+    public function getPaytypes()
+    {
+        $client = $this->_paytypesClient->getClient();
+        $client->send();
+        $xml = new \SimpleXMLElement($client->getResponse()->getBody());
+        $paytypes = [];
+        foreach ($xml as $paytypeXml) {
+            $paytypes[] = [
+                'type' => (string) $paytypeXml->type,
+                'name' => (string) $paytypeXml->name,
+                'enable' => (string) $paytypeXml->enable === 'true',
+                'img' => (string) $paytypeXml->img,
+                'min' => (float) $paytypeXml->min,
+                'max' => (float) $paytypeXml->max
+            ];
+        }
+        return $paytypes;
+    }
+
+
 }

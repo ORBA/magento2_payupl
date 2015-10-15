@@ -23,18 +23,27 @@ class DataGetter
     protected $_dateTime;
 
     /**
+     * @var \Orba\Payupl\Model\Session
+     */
+    protected $_session;
+
+    /**
      * @param \Orba\Payupl\Model\Order\ExtOrderId $extOrderIdHelper
      * @param \Orba\Payupl\Model\Client\Classic\Config $configHelper
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Orba\Payupl\Model\Session $session
      */
     public function __construct(
         \Orba\Payupl\Model\Order\ExtOrderId $extOrderIdHelper,
         \Orba\Payupl\Model\Client\Classic\Config $configHelper,
-        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
+        \Orba\Payupl\Model\Session $session
     )
     {
         $this->_extOrderIdHelper = $extOrderIdHelper;
         $this->_configHelper = $configHelper;
         $this->_dateTime = $dateTime;
+        $this->_session = $session;
     }
 
     /**
@@ -44,7 +53,7 @@ class DataGetter
     public function getBasicData(\Magento\Sales\Model\Order $order)
     {
         $incrementId = $order->getIncrementId();
-        return [
+        $data = [
             'amount' => $order->getGrandTotal() * 100,
             'desc' => __('Order # %1', [$incrementId]),
             'first_name' => $order->getCustomerFirstname(),
@@ -53,6 +62,12 @@ class DataGetter
             'session_id' => $this->_extOrderIdHelper->generate($order),
             'order_id' => $incrementId
         ];
+        $paytype = $this->_session->getPaytype();
+        if ($paytype) {
+            $data['pay_type'] = $paytype;
+            $this->_session->setPaytype(null);
+        }
+        return $data;
     }
 
     /**
@@ -95,6 +110,7 @@ class DataGetter
     {
         return md5(
             $data['pos_id'] .
+            (isset ($data['pay_type']) ? $data['pay_type'] : '') .
             $data['session_id'] .
             $data['pos_auth_key'] .
             $data['amount'] .

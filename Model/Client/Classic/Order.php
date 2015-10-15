@@ -288,4 +288,12 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
             ->setContents('OK');
         return $result;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPaytypes()
+    {
+        return $this->_methodCaller->call('getPaytypes');
+    }
 }
