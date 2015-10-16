@@ -12,7 +12,7 @@
     "type": "magento2-module",
     "version": "master",
     "dist": {
-        "url": "git@git.assembla.com:orba-magento-plugins.magento2-payupl.git",
+        "url": "git@github.com:ORBA/magento2_payupl.git",
         "type": "git"
     },
     "extra": {
