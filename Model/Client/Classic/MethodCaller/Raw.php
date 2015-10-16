@@ -16,6 +16,11 @@ class Raw implements RawInterface
     protected $_orderClient;
 
     /**
+     * @var SoapClient\Refund
+     */
+    protected $_refundClient;
+
+    /**
      * @var PaytypesClient
      */
     protected $_paytypesClient;
@@ -26,10 +31,12 @@ class Raw implements RawInterface
      */
     public function __construct(
         SoapClient\Order $orderClient,
+        SoapClient\Refund $refundClient,
         PaytypesClient $paytypesClient
     )
     {
         $this->_orderClient = $orderClient;
+        $this->_refundClient = $refundClient;
         $this->_paytypesClient = $paytypesClient;
     }
 
@@ -59,6 +66,9 @@ class Raw implements RawInterface
         ]);
     }
 
+    /**
+     * @return array
+     */
     public function getPaytypes()
     {
         $client = $this->_paytypesClient->getClient();
@@ -78,5 +88,27 @@ class Raw implements RawInterface
         return $paytypes;
     }
 
+    /**
+     * @param array $authData
+     * @return \stdClass
+     * @throws \Exception
+     */
+    public function refundGet(array $authData)
+    {
+        return $this->_refundClient->call('getRefunds', ['RefundAuth' => $authData]);
+    }
+
+    /**
+     * @param array $authData
+     * @param array $addData
+     * @return int
+     */
+    public function refundAdd(array $authData, array $addData)
+    {
+        return $this->_refundClient->call('addRefund', [
+            'RefundAuth' => $authData,
+            'RefundData' => $addData
+        ]);
+    }
 
 }

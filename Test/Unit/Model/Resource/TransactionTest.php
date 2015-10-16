@@ -114,7 +114,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
     {
         $payuplOrderId = 'ABC';
         $resultTableRow = null;
-        $this->_testGetStatusByPayuplOrderId($payuplOrderId, $resultTableRow);
+        $this->_testGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow);
         $this->assertFalse($this->_model->getStatusByPayuplOrderId($payuplOrderId));
     }
 
@@ -129,7 +129,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
                 ]
             ])
         ];
-        $this->_testGetStatusByPayuplOrderId($payuplOrderId, $resultTableRow);
+        $this->_testGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow);
         $this->assertEquals($status, $this->_model->getStatusByPayuplOrderId($payuplOrderId));
     }
 
@@ -154,6 +154,29 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         ];
         $this->_testGetLastTryByOrderId($orderId, $resultTableRow);
         $this->assertEquals($try, $this->_model->getLastTryByOrderId($orderId));
+    }
+
+    public function testGetExtOrderIdByPayuplOrderIdFail()
+    {
+        $payuplOrderId = 'ABC';
+        $resultTableRow = null;
+        $this->_testGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow);
+        $this->assertFalse($this->_model->getExtOrderIdByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testGetExtOrderIdByPayuplOrderIdSuccess()
+    {
+        $payuplOrderId = 'ABC';
+        $extOrderId = '123';
+        $resultTableRow = [
+            'additional_information' => serialize([
+                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
+                    'order_id' => $extOrderId
+                ]
+            ])
+        ];
+        $this->_testGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow);
+        $this->assertEquals($extOrderId, $this->_model->getExtOrderIdByPayuplOrderId($payuplOrderId));
     }
 
     /**
@@ -229,7 +252,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
     }
 
-    protected function _testGetStatusByPayuplOrderId($payuplOrderId, $resultTableRow)
+    protected function _testGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow)
     {
         $transactionTable = 'sales_payment_transaction';
         $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);

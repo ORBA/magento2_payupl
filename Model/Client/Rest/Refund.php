@@ -20,11 +20,6 @@ class Refund implements RefundInterface
     protected $_methodCaller;
 
     /**
-     * @var \Orba\Payupl\Logger\Logger
-     */
-    protected $_logger;
-
-    /**
      * @param Refund\DataValidator $dataValidator
      * @param MethodCaller $methodCaller
      */

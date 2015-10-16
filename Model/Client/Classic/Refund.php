@@ -10,11 +10,60 @@ use Orba\Payupl\Model\Client\RefundInterface;
 class Refund implements RefundInterface
 {
     /**
+     * @var Refund\DataValidator
+     */
+    protected $_dataValidator;
+
+    /**
+     * @var MethodCaller
+     */
+    protected $_methodCaller;
+
+    /**
+     * @var \Orba\Payupl\Model\Resource\Transaction
+     */
+    protected $_transactionResource;
+
+    /**
+     * @var Order\DataGetter
+     */
+    protected $_orderDataGetter;
+
+    /**
+     * @var \Orba\Payupl\Logger\Logger
+     */
+    protected $_logger;
+
+    /**
+     * @param Refund\DataValidator $dataValidator
+     * @param MethodCaller $methodCaller
+     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
+     * @param Order\DataGetter $orderDataGetter
+     */
+    public function __construct(
+        Refund\DataValidator $dataValidator,
+        MethodCaller $methodCaller,
+        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        Order\DataGetter $orderDataGetter,
+        \Orba\Payupl\Logger\Logger $logger
+    )
+    {
+        $this->_dataValidator = $dataValidator;
+        $this->_methodCaller = $methodCaller;
+        $this->_transactionResource = $transactionResource;
+        $this->_orderDataGetter = $orderDataGetter;
+        $this->_logger = $logger;
+    }
+
+    /**
      * @inheritDoc
      */
     public function validateCreate($orderId = '', $description = '', $amount = null)
     {
-        // TODO: Implement validateCreate() method.
+        return
+            $this->_dataValidator->validateEmpty($orderId) &&
+            $this->_dataValidator->validateEmpty($description) &&
+            $this->_dataValidator->validatePositiveInt($amount);
     }
 
     /**
@@ -22,6 +71,38 @@ class Refund implements RefundInterface
      */
     public function create($orderId = '', $description = '', $amount = null)
     {
-        // TODO: Implement create() method.
+        $realPayuplOrderId = $this->_transactionResource->getExtOrderIdByPayuplOrderId($orderId);
+        if ($realPayuplOrderId) {
+            $posId = $this->_orderDataGetter->getPosId();
+            $ts = $this->_orderDataGetter->getTs();
+            $sig = $this->_orderDataGetter->getSigForOrderRetrieve([
+                'pos_id' => $posId,
+                'session_id' => $realPayuplOrderId,
+                'ts' => $ts
+            ]);
+            $authData = [
+                'posId' => $posId,
+                'sessionId' => $realPayuplOrderId,
+                'ts' => $ts,
+                'sig' => $sig
+            ];
+            $getResult = $this->_methodCaller->call('refundGet', [$authData]);
+            if ($getResult) {
+                $createResult = $this->_methodCaller->call('refundAdd', [
+                    $authData,
+                    [
+                        'refundsHash' => $getResult->refsHash,
+                        'amount' => $amount,
+                        'desc' => $description,
+                        'autoData' => true
+                    ]
+                ]);
+                if ($createResult < 0) {
+                    $this->_logger->error('Refund error ' . $createResult . ' for transaction ' . $orderId);
+                }
+                return $createResult === 0;
+            }
+        }
+        return false;
     }
 }

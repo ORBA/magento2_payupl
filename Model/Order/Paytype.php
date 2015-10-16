@@ -17,6 +17,10 @@ class Paytype
      */
     protected $_scopeConfig;
 
+    /**
+     * @param \Orba\Payupl\Model\ClientFactory $clientFactory
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     */
     public function __construct(
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
@@ -26,10 +30,13 @@ class Paytype
         $this->_scopeConfig = $scopeConfig;
     }
 
-    public function getAllForCurrentQuote()
-    {
-    }
-
+    /**
+     * Returns false if paytypes are disabled in checkout or there is no method for paytypes in current API.
+     * Returns array of paytypes otherwise.
+     *
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return array|false
+     */
     public function getAllForQuote(\Magento\Quote\Api\Data\CartInterface $quote)
     {
         /**

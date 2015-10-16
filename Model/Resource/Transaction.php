@@ -95,12 +95,7 @@ class Transaction extends AbstractDb
      */
     public function getStatusByPayuplOrderId($payuplOrderId)
     {
-        $serializedAdditionalInformation = $this->_getOneFieldByAnother('additional_information', 'txn_id', $payuplOrderId);
-        if ($serializedAdditionalInformation) {
-            $additionalInformation = unserialize($serializedAdditionalInformation);
-            return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS]['status'];
-        }
-        return false;
+        return $this->_getAdditionalDataByPayuplOrderId($payuplOrderId, 'status');
     }
 
     /**
@@ -126,6 +121,15 @@ class Transaction extends AbstractDb
         return 0;
     }
 
+    /**
+     * @param string $payuplOrderId
+     * @return string|false
+     */
+    public function getExtOrderIdByPayuplOrderId($payuplOrderId)
+    {
+        return $this->_getAdditionalDataByPayuplOrderId($payuplOrderId, 'order_id');
+    }
+
     protected function _construct() {}
 
     /**
@@ -146,6 +150,21 @@ class Transaction extends AbstractDb
         $row = $adapter->fetchRow($select);
         if ($row) {
             return $row[$getFieldName];
+        }
+        return false;
+    }
+
+    /**
+     * @param string $payuplOrderId
+     * @param string $field
+     * @return mixed
+     */
+    protected function _getAdditionalDataByPayuplOrderId($payuplOrderId, $field)
+    {
+        $serializedAdditionalInformation = $this->_getOneFieldByAnother('additional_information', 'txn_id', $payuplOrderId);
+        if ($serializedAdditionalInformation) {
+            $additionalInformation = unserialize($serializedAdditionalInformation);
+            return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
         }
         return false;
     }

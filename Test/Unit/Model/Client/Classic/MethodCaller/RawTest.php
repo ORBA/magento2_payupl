@@ -20,15 +20,22 @@ class RawTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
+    protected $_refundClient;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $_paytypesClient;
 
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
         $this->_orderClient = $this->getMockBuilder(SoapClient\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_refundClient = $this->getMockBuilder(SoapClient\Refund::class)->disableOriginalConstructor()->getMock();
         $this->_paytypesClient = $this->getMockBuilder(PaytypesClient::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManager->getObject(Raw::class, [
             'orderClient' => $this->_orderClient,
+            'refundClient' => $this->_refundClient,
             'paytypesClient' => $this->_paytypesClient
         ]);
     }
@@ -89,6 +96,30 @@ class RawTest extends \PHPUnit_Framework_TestCase
         $client = $this->_getClientMock($xml);
         $this->_paytypesClient->expects($this->once())->method('getClient')->willReturn($client);
         $this->assertEquals($result, $this->_model->getPaytypes());
+    }
+
+    public function testRefundGetFail()
+    {
+        $authData = ['data'];
+        $exceptionMessage = 'Exception message';
+        $exception = new \Exception($exceptionMessage);
+        $this->_refundClient->expects($this->once())->method('call')->with(
+            $this->equalTo('getRefunds'),
+            $this->equalTo(['RefundAuth' => $authData])
+        )->willThrowException($exception);
+        $this->setExpectedException(\Exception::class, $exceptionMessage);
+        $this->_model->refundGet($authData);
+    }
+
+    public function testRefundGetSuccess()
+    {
+        $authData = ['data'];
+        $result = new \stdClass();
+        $this->_refundClient->expects($this->once())->method('call')->with(
+            $this->equalTo('getRefunds'),
+            $this->equalTo(['RefundAuth' => $authData])
+        )->willReturn($result);
+        $this->assertEquals($result, $this->_model->refundGet($authData));
     }
 
     /**

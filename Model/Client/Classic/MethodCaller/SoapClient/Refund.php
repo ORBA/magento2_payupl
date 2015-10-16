@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Client\Classic\MethodCaller\SoapClient;
 
-class Order extends \Zend\Soap\Client
+class Refund extends \Zend\Soap\Client
 {
     /**
      * @var int
