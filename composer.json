@@ -15,13 +15,11 @@
         "url": "git@github.com:ORBA/magento2_payupl.git",
         "type": "git"
     },
-    "extra": {
-        "map": [
-            [
-                "*",
-                "Orba/Payupl"
-            ]
-        ]
+    "autoload": {
+        "files": [ "registration.php" ],
+        "psr-4": {
+            "Orba\\Payupl\\": ""
+        }
     },
     "authors": [
         {
