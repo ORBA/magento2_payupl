@@ -15,29 +15,29 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_transactionFactory;
+    protected $_transactionRepository;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_orderHelper;
+    protected $_transactionResource;
 
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_transactionFactory = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment\TransactionFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
-        $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $this->_transactionRepository = $this->getMockBuilder(\Magento\Sales\Api\TransactionRepositoryInterface::class)->getMock();
+        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\ResourceModel\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManager->getObject(Service::class, [
-            'transactionFactory' => $this->_transactionFactory,
-            'orderHelper' => $this->_orderHelper
+            'transactionRepository' => $this->_transactionRepository,
+            'transactionResource' => $this->_transactionResource
         ]);
     }
 
     public function testUpdateStatusFailNotFound()
     {
         $payuplOrderId = 'ABC';
-        $this->_orderHelper->expects($this->once())->method('loadOrderByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn(false);
-        $this->setExpectedException(Exception::class, 'Transaction not found.');
+        $this->_transactionResource->expects($this->once())->method('getIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn(false);
+        $this->setExpectedException(Exception::class, 'Transaction ' . $payuplOrderId . ' not found.');
         $this->_model->updateStatus($payuplOrderId, 'COMPLETED');
     }
 
@@ -67,12 +67,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
      */
     protected function _getTransactionMockForUpdateStatus($payuplOrderId, $status)
     {
+        $id = 1;
         $transaction = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment\Transaction::class)->disableOriginalConstructor()->getMock();
-        $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->disableOriginalConstructor()->getMock();
-        $payment->expects($this->once())->method('getTransaction')->with($this->equalTo($payuplOrderId))->willReturn($transaction);
-        $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $order->expects($this->once())->method('getPayment')->willReturn($payment);
-        $this->_orderHelper->expects($this->once())->method('loadOrderByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn($order);
+        $this->_transactionResource->expects($this->once())->method('getIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn($id);
+        $this->_transactionRepository->expects($this->once())->method('get')->with($this->equalTo($id))->willReturn($transaction);
         $rawDetailsInfo = [
             'status' => 'OLD',
             'other' => 'data'

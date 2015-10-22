@@ -60,7 +60,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     protected $_methodCaller;
 
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
     protected $_transactionResource;
 
@@ -83,7 +83,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      * @param \Orba\Payupl\Logger\Logger $logger
      * @param Order\Notification $notificationHelper
      * @param MethodCaller $methodCaller
-     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
+     * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
      * @param Order\Processor $orderProcessor
      * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
      */
@@ -96,7 +96,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
         \Orba\Payupl\Logger\Logger $logger,
         Order\Notification $notificationHelper,
         MethodCaller $methodCaller,
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         Order\Processor $orderProcessor,
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
     )

@@ -8,7 +8,7 @@ namespace Orba\Payupl\Model\Order;
 class Validator
 {
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
     protected $_transactionResource;
 
@@ -18,7 +18,7 @@ class Validator
     protected $_customerSession;
 
     public function __construct(
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Magento\Customer\Model\Session $customerSession
     )
     {

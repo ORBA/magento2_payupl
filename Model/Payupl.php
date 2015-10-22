@@ -78,7 +78,7 @@ class Payupl extends AbstractMethod
      * @param \Magento\Payment\Model\Method\Logger $logger
      * @param \Magento\Framework\UrlInterface $urlBuilder
      * @param ClientFactory $clientFactory
-     * @param Resource\Transaction $transactionResource
+     * @param ResourceModel\Transaction $transactionResource
      * @param Order\Paytype $paytypeHelper
      * @param array $data
      */
@@ -92,7 +92,7 @@ class Payupl extends AbstractMethod
         \Magento\Payment\Model\Method\Logger $logger,
         \Magento\Framework\UrlInterface $urlBuilder,
         ClientFactory $clientFactory,
-        Resource\Transaction $transactionResource,
+        ResourceModel\Transaction $transactionResource,
         Order\Paytype $paytypeHelper,
         array $data = []
     ) {
@@ -120,7 +120,7 @@ class Payupl extends AbstractMethod
      * @param \Magento\Quote\Api\Data\CartInterface|null $quote
      * @return bool
      */
-    public function isAvailable($quote = null)
+    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
     {
         if (is_null($quote)) {
             return parent::isAvailable();

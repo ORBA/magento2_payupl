@@ -10,7 +10,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 class Payment extends AbstractHelper
 {
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
     protected $_transactionResource;
 
@@ -21,11 +21,11 @@ class Payment extends AbstractHelper
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
+     * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Orba\Payupl\Model\Order $orderHelper
     )
     {

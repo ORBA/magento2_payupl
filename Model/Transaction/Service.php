@@ -8,34 +8,44 @@ namespace Orba\Payupl\Model\Transaction;
 class Service
 {
     /**
-     * @var \Magento\Sales\Model\Order\Payment\TransactionFactory
+     * @var \Magento\Sales\Api\TransactionRepositoryInterface
      */
-    protected $_transactionFactory;
+    protected $_transactionRepository;
 
     /**
-     * @var \Orba\Payupl\Model\Order
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_orderHelper;
+    protected $_transactionResource;
 
+    /**
+     * @param \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
+     * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
+     */
     public function __construct(
-        \Magento\Sales\Model\Order\Payment\TransactionFactory $transactionFactory,
-        \Orba\Payupl\Model\Order $orderHelper
+        \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
     )
     {
-        $this->_transactionFactory = $transactionFactory;
-        $this->_orderHelper = $orderHelper;
+        $this->_transactionRepository = $transactionRepository;
+        $this->_transactionResource = $transactionResource;
     }
 
+    /**
+     * @param string $payuplOrderId
+     * @param string $status
+     * @param bool $close
+     * @throws Exception
+     */
     public function updateStatus($payuplOrderId, $status, $close = false)
     {
         /**
          * @var $transaction \Magento\Sales\Model\Order\Payment\Transaction
          */
-        $order = $this->_orderHelper->loadOrderByPayuplOrderId($payuplOrderId);
-        if (!$order) {
-            throw new Exception('Transaction not found.');
+        $id = $this->_transactionResource->getIdByPayuplOrderId($payuplOrderId);
+        if (!$id) {
+            throw new Exception('Transaction ' . $payuplOrderId . ' not found.');
         }
-        $transaction = $order->getPayment()->getTransaction($payuplOrderId);
+        $transaction = $this->_transactionRepository->get($id);
         if ($close) {
             $transaction->setIsClosed(1);
         }

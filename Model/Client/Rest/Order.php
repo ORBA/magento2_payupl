@@ -44,7 +44,7 @@ class Order implements OrderInterface
     protected $_rawResultFactory;
 
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
     protected $_transactionResource;
 
@@ -57,7 +57,7 @@ class Order implements OrderInterface
      * @param Order\DataValidator $dataValidator
      * @param Order\DataGetter $dataGetter
      * @param \Orba\Payupl\Model\Client\Rest\MethodCaller $methodCaller
-     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
+     * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
      * @param Order\Processor $orderProcessor
      * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
      * @param \Magento\Framework\App\RequestInterface $request
@@ -66,7 +66,7 @@ class Order implements OrderInterface
         Order\DataValidator $dataValidator,
         Order\DataGetter $dataGetter,
         MethodCaller $methodCaller,
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         Order\Processor $orderProcessor,
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
         \Magento\Framework\App\RequestInterface $request

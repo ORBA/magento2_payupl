@@ -28,7 +28,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
         $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
-        $this->_orderStatusCollectionFactory = $this->getMockBuilder(\Magento\Sales\Model\Resource\Order\Status\CollectionFactory::class)->disableOriginalConstructor()->getMock();
+        $this->_orderStatusCollectionFactory = $this->getMockBuilder(\Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManager->getObject(Config::class, [
             'orderStatusCollectionFactory' => $this->_orderStatusCollectionFactory,
             'scopeConfig' => $this->_scopeConfig

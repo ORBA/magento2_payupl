@@ -38,7 +38,7 @@ class Order
     protected $_orderValidator;
 
     /**
-     * @param Resource\Transaction $transactionResource
+     * @param ResourceModel\Transaction $transactionResource
      * @param Sales\OrderFactory $orderFactory
      * @param \Magento\Checkout\Model\Session\SuccessValidator $checkoutSuccessValidator
      * @param \Magento\Checkout\Model\Session $checkoutSession
@@ -46,7 +46,7 @@ class Order
      * @param Order\Validator $orderValidator
      */
     public function __construct(
-        Resource\Transaction $transactionResource,
+        ResourceModel\Transaction $transactionResource,
         Sales\OrderFactory $orderFactory,
         \Magento\Checkout\Model\Session\SuccessValidator $checkoutSuccessValidator,
         \Magento\Checkout\Model\Session $checkoutSession,

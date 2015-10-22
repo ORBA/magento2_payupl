@@ -62,7 +62,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
-        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\Resource\Transaction::class)->disableOriginalConstructor()->getMock();
+        $this->_transactionResource = $this->getMockBuilder(ResourceModel\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_orderFactory = $this->getMockBuilder(\Orba\Payupl\Model\Sales\OrderFactory::class)->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $this->_checkoutSuccessValidator = $this->getMockBuilder(\Magento\Checkout\Model\Session\SuccessValidator::class)->disableOriginalConstructor()->getMock();
         $this->_checkoutSession = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)->disableOriginalConstructor()->setMethods(['getLastOrderId'])->getMock();

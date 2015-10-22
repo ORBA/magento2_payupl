@@ -3,9 +3,8 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Resource;
+namespace Orba\Payupl\Model\ResourceModel;
 
-use Magento\Framework\DB\Adapter\Pdo\Mysql as Adapter;
 use Magento\Framework\DB\Select;
 use Orba\Payupl\Test\Util;
 
@@ -35,10 +34,10 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
         $this->_date = $this->getMockBuilder(\Magento\Framework\Stdlib\DateTime::class)->disableOriginalConstructor()->getMock();
-        $this->_resource = $this->getMockBuilder(\Magento\Framework\App\Resource::class)->disableOriginalConstructor()->getMock();
+        $this->_resource = $this->getMockBuilder(\Magento\Framework\App\ResourceConnection::class)->disableOriginalConstructor()->getMock();
         $this->_adapter = $this->getMockBuilder(\Magento\Framework\DB\Adapter\AdapterInterface::class)->getMockForAbstractClass();
         $this->_resource->expects($this->any())->method('getConnection')->willReturn($this->_adapter);
-        $context = $this->getMockBuilder(\Magento\Framework\Model\Resource\Db\Context::class)->disableOriginalConstructor()->getMock();
+        $context = $this->getMockBuilder(\Magento\Framework\Model\ResourceModel\Db\Context::class)->disableOriginalConstructor()->getMock();
         $context->expects($this->once())->method('getResources')->willReturn($this->_resource);
         $this->_model = $objectManager->getObject(Transaction::class, [
             'context' => $context,
@@ -179,6 +178,24 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($extOrderId, $this->_model->getExtOrderIdByPayuplOrderId($payuplOrderId));
     }
 
+    public function testGetIdByPayuplOrderIdFail()
+    {
+        $payuplOrderId = 'ABC';
+        $resultTableRow = null;
+        $this->_testGetIdByPayuplOrderId($payuplOrderId, $resultTableRow);
+        $this->assertFalse($this->_model->getIdByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testGetIdByPayuplOrderIdSuccess()
+    {
+        $payuplOrderId = 'ABC';
+        $resultTableRow = [
+            'transaction_id' => 1
+        ];
+        $this->_testGetIdByPayuplOrderId($payuplOrderId, $resultTableRow);
+        $this->assertEquals($resultTableRow['transaction_id'], $this->_model->getIdByPayuplOrderId($payuplOrderId));
+    }
+
     /**
      * @param $orderId
      * @param $resultTableRow
@@ -312,6 +329,24 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
             $this->equalTo('order')
         )->will($this->returnSelf());
         $select->expects($this->once())->method('order')->with($this->equalTo('transaction_id ' . \Zend_Db_Select::SQL_DESC))->will($this->returnSelf());
+        $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
+        $this->_adapter->expects($this->once())->method('select')->willReturn($select);
+        $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
+    }
+
+    protected function _testGetIdByPayuplOrderId($payuplOrderId, $resultTableRow)
+    {
+        $transactionTable = 'sales_payment_transaction';
+        $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);
+        $select = $this->getMockBuilder(Select::class)->disableOriginalConstructor()->getMock();
+        $select->expects($this->once())->method('from')->with(
+            $this->equalTo(['main_table' => $transactionTable]),
+            $this->equalTo(['transaction_id'])
+        )->will($this->returnSelf());
+        $select->expects($this->once())->method('where')->with(
+            $this->equalTo('txn_id = ?'),
+            $this->equalTo($payuplOrderId)
+        )->will($this->returnSelf());
         $select->expects($this->once())->method('limit')->with($this->equalTo(1))->will($this->returnSelf());
         $this->_adapter->expects($this->once())->method('select')->willReturn($select);
         $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);

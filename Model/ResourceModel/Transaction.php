@@ -3,10 +3,9 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 
-namespace Orba\Payupl\Model\Resource;
+namespace Orba\Payupl\Model\ResourceModel;
 
-use Magento\Framework\Model\Resource\Db\AbstractDb;
-use Orba\Payupl\Model\Transaction as Model;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class Transaction extends AbstractDb
 {
@@ -16,12 +15,12 @@ class Transaction extends AbstractDb
     protected $_date;
 
     /**
-     * @param \Magento\Framework\Model\Resource\Db\Context $context
+     * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
      * @param \Magento\Framework\Stdlib\DateTime $date
      * @param string|null $resourcePrefix
      */
     public function __construct(
-        \Magento\Framework\Model\Resource\Db\Context $context,
+        \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Magento\Framework\Stdlib\DateTime $date,
         $resourcePrefix = null
     )
@@ -39,7 +38,7 @@ class Transaction extends AbstractDb
      */
     public function getLastPayuplOrderIdByOrderId($orderId)
     {
-        $adapter = $this->getReadConnection();
+        $adapter = $this->getConnection();
         $select = $adapter->select()
             ->from(
                 ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
@@ -62,7 +61,7 @@ class Transaction extends AbstractDb
     public function checkIfNewestByPayuplOrderId($payuplOrderId)
     {
         $transactionTableName = $this->_resources->getTableName('sales_payment_transaction');
-        $adapter = $this->getReadConnection();
+        $adapter = $this->getConnection();
         $select = $adapter->select()
             ->from(
                 ['main_table' => $transactionTableName],
@@ -104,7 +103,7 @@ class Transaction extends AbstractDb
      */
     public function getLastTryByOrderId($orderId)
     {
-        $adapter = $this->getReadConnection();
+        $adapter = $this->getConnection();
         $select = $adapter->select()
             ->from(
                 ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
@@ -130,6 +129,15 @@ class Transaction extends AbstractDb
         return $this->_getAdditionalDataByPayuplOrderId($payuplOrderId, 'order_id');
     }
 
+    /**
+     * @param string $payuplOrderId
+     * @return int|false
+     */
+    public function getIdByPayuplOrderId($payuplOrderId)
+    {
+        return $this->_getOneFieldByAnother('transaction_id', 'txn_id', $payuplOrderId);
+    }
+
     protected function _construct() {}
 
     /**
@@ -140,7 +148,7 @@ class Transaction extends AbstractDb
      */
     protected function _getOneFieldByAnother($getFieldName, $byFieldName, $value)
     {
-        $adapter = $this->getReadConnection();
+        $adapter = $this->getConnection();
         $select = $adapter->select()
             ->from(
                 ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],

@@ -8,7 +8,7 @@ namespace Orba\Payupl\Model\Order;
 class ExtOrderId
 {
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
     protected $_transactionResource;
 
@@ -17,8 +17,12 @@ class ExtOrderId
      */
     protected $_dateTime;
 
+    /**
+     * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     */
     public function __construct(
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
     )
     {

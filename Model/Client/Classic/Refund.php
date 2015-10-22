@@ -20,7 +20,7 @@ class Refund implements RefundInterface
     protected $_methodCaller;
 
     /**
-     * @var \Orba\Payupl\Model\Resource\Transaction
+     * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
     protected $_transactionResource;
 
@@ -37,13 +37,13 @@ class Refund implements RefundInterface
     /**
      * @param Refund\DataValidator $dataValidator
      * @param MethodCaller $methodCaller
-     * @param \Orba\Payupl\Model\Resource\Transaction $transactionResource
+     * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
      * @param Order\DataGetter $orderDataGetter
      */
     public function __construct(
         Refund\DataValidator $dataValidator,
         MethodCaller $methodCaller,
-        \Orba\Payupl\Model\Resource\Transaction $transactionResource,
+        \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         Order\DataGetter $orderDataGetter,
         \Orba\Payupl\Logger\Logger $logger
     )

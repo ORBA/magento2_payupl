@@ -20,7 +20,7 @@ class Config extends \Magento\Sales\Model\Order\Config
 
     public function __construct(
         \Magento\Sales\Model\Order\StatusFactory $orderStatusFactory,
-        \Magento\Sales\Model\Resource\Order\Status\CollectionFactory $orderStatusCollectionFactory,
+        \Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory $orderStatusCollectionFactory,
         \Magento\Framework\App\State $state,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {

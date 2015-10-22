@@ -45,7 +45,7 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
         $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
         $this->_urlBuilder = $this->getMockBuilder(\Magento\Framework\UrlInterface::class)->getMock();
         $this->_clientFactory = $this->getMockBuilder(ClientFactory::class)->disableOriginalConstructor()->getMock();
-        $this->_transactionResource = $this->getMockBuilder(Resource\Transaction::class)->disableOriginalConstructor()->getMock();
+        $this->_transactionResource = $this->getMockBuilder(ResourceModel\Transaction::class)->disableOriginalConstructor()->getMock();
         $this->_paytypeHelper = $this->getMockBuilder(Order\Paytype::class)->disableOriginalConstructor()->getMock();
         $this->_model = $objectManagerHelper->getObject(
             Payupl::class,
