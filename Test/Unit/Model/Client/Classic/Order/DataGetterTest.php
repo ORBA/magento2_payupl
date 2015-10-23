@@ -204,9 +204,11 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     protected function _getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount)
     {
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
+        $billingAddress = $this->getMockBuilder(\Magento\Sales\Model\Order\Address::class)->disableOriginalConstructor()->getMock();
+        $billingAddress->expects($this->once())->method('getFirstname')->willReturn($firstName);
+        $billingAddress->expects($this->once())->method('getLastname')->willReturn($lastName);
+        $order->expects($this->once())->method('getBillingAddress')->willReturn($billingAddress);
         $order->expects($this->once())->method('getIncrementId')->willReturn($incrementId);
-        $order->expects($this->once())->method('getCustomerFirstname')->willReturn($firstName);
-        $order->expects($this->once())->method('getCustomerLastname')->willReturn($lastName);
         $order->expects($this->once())->method('getCustomerEmail')->willReturn($email);
         $order->expects($this->once())->method('getGrandTotal')->willReturn($amount);
         return $order;

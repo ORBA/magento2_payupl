@@ -25,21 +25,30 @@ class Start extends \Magento\Framework\App\Action\Action
     protected $_session;
 
     /**
+     * @var \Orba\Payupl\Logger\Logger
+     */
+    protected $_logger;
+
+    /**
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Orba\Payupl\Model\ClientFactory $clientFactory
      * @param \Orba\Payupl\Model\Order $orderHelper
+     * @param \Orba\Payupl\Model\Session $session
+     * @param \Orba\Payupl\Logger\Logger $logger
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Orba\Payupl\Model\Order $orderHelper,
-        \Orba\Payupl\Model\Session $session
+        \Orba\Payupl\Model\Session $session,
+        \Orba\Payupl\Logger\Logger $logger
     )
     {
         parent::__construct($context);
         $this->_clientFactory = $clientFactory;
         $this->_orderHelper = $orderHelper;
         $this->_session = $session;
+        $this->_logger = $logger;
     }
 
     /**
@@ -68,6 +77,7 @@ class Start extends \Magento\Framework\App\Action\Action
                     $this->_orderHelper->setNewOrderStatus($order);
                     $redirectUrl = $result['redirectUri'];
                 } catch (Exception $e) {
+                    $this->_logger->critical($e);
                     $redirectUrl = 'orba_payupl/payment/end';
                     $redirectParams = ['exception' => '1'];
                 }

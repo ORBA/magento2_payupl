@@ -53,11 +53,12 @@ class DataGetter
     public function getBasicData(\Magento\Sales\Model\Order $order)
     {
         $incrementId = $order->getIncrementId();
+        $billingAddress = $order->getBillingAddress();
         $data = [
             'amount' => $order->getGrandTotal() * 100,
             'desc' => __('Order # %1', [$incrementId]),
-            'first_name' => $order->getCustomerFirstname(),
-            'last_name' => $order->getCustomerLastname(),
+            'first_name' => $billingAddress->getFirstname(),
+            'last_name' => $billingAddress->getLastname(),
             'email' => $order->getCustomerEmail(),
             'session_id' => $this->_extOrderIdHelper->generate($order),
             'order_id' => $incrementId

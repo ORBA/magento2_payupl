@@ -40,6 +40,11 @@ class StartTest extends \PHPUnit_Framework_TestCase
      */
     protected $_session;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $_logger;
+
     public function setUp()
     {
         $this->_objectManager = new ObjectManager($this);
@@ -49,11 +54,13 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $context->expects($this->once())->method('getResultRedirectFactory')->willReturn($this->_resultRedirectFactory);
         $this->_orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()->getMock();
         $this->_session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->setMethods(['setLastOrderId'])->disableOriginalConstructor()->getMock();
+        $this->_logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()->getMock();
         $this->_controller = $this->_objectManager->getObject(Start::class, [
             'context' => $context,
             'clientFactory' => $this->_clientFactory,
             'orderHelper' => $this->_orderHelper,
-            'session' => $this->_session
+            'session' => $this->_session,
+            'logger' => $this->_logger
         ]);
     }
 
@@ -91,13 +98,9 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $this->_orderHelper->expects($this->once())->method('loadOrderById')->with($this->equalTo($orderId))->willReturn($order);
         $this->_orderHelper->expects($this->once())->method('canStartFirstPayment')->with($this->equalTo($order))->willReturn(true);
         $clientOrderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($order))->willReturn($orderData);
-        $response = [
-            'redirectUri' => 'http://redirect.url',
-            'orderId' => 'Z963D5JQR2230925GUEST000P01',
-            'extOrderId' => $orderData['extOrderId']
-        ];
-        $exception = new Exception();
+        $exception = new Exception('Message');
         $client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))->willThrowException($exception);
+        $this->_logger->expects($this->once())->method('critical')->with($exception);
         $resultRedirect = $this->getMockBuilder(\Magento\Framework\Controller\Result\Redirect::class)->disableOriginalConstructor()->getMock();
         $resultRedirect->expects($this->once())->method('setPath')->with(
             $this->equalTo('orba_payupl/payment/end'),

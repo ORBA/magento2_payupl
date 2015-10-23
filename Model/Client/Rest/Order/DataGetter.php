@@ -20,7 +20,7 @@ class DataGetter
     protected $_configHelper;
 
     /**
-     * @var DataGetter\ExtOrderId
+     * @var \Orba\Payupl\Model\Order\ExtOrderId
      */
     protected $_extOrderIdHelper;
 
