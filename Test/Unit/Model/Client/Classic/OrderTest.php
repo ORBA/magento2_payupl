@@ -328,6 +328,14 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($response, $this->_model->getPaytypes());
     }
 
+    public function testGetStatusDescription()
+    {
+        $this->assertFalse($this->_model->getStatusDescription('invalid'));
+        $statusDescription = $this->_model->getStatusDescription(0);
+        $this->assertInternalType('string', $statusDescription);
+        $this->assertNotEmpty($statusDescription);
+    }
+
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */

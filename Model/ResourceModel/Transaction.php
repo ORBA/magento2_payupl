@@ -103,21 +103,7 @@ class Transaction extends AbstractDb
      */
     public function getLastTryByOrderId($orderId)
     {
-        $adapter = $this->getConnection();
-        $select = $adapter->select()
-            ->from(
-                ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
-                ['additional_information']
-            )->where('order_id = ?', $orderId)
-            ->where('txn_type = ?', 'order')
-            ->order('transaction_id ' . \Zend_Db_Select::SQL_DESC)
-            ->limit(1);
-        $row = $adapter->fetchRow($select);
-        if ($row) {
-            $additionalInformation = unserialize($row['additional_information']);
-            return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS]['try'];
-        }
-        return 0;
+        return $this->_getLastAdditionalDataFieldByOrderId($orderId, 'try', 0);
     }
 
     /**
@@ -136,6 +122,15 @@ class Transaction extends AbstractDb
     public function getIdByPayuplOrderId($payuplOrderId)
     {
         return $this->_getOneFieldByAnother('transaction_id', 'txn_id', $payuplOrderId);
+    }
+
+    /**
+     * @param int $orderId
+     * @return string|false
+     */
+    public function getLastStatusByOrderId($orderId)
+    {
+        return $this->_getLastAdditionalDataFieldByOrderId($orderId, 'status', false);
     }
 
     protected function _construct() {}
@@ -175,5 +170,30 @@ class Transaction extends AbstractDb
             return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
         }
         return false;
+    }
+
+    /**
+     * @param $orderId
+     * @param $field
+     * @param $valueIfNotFound
+     * @return mixed
+     */
+    protected function _getLastAdditionalDataFieldByOrderId($orderId, $field, $valueIfNotFound)
+    {
+        $adapter = $this->getConnection();
+        $select = $adapter->select()
+            ->from(
+                ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
+                ['additional_information']
+            )->where('order_id = ?', $orderId)
+            ->where('txn_type = ?', 'order')
+            ->order('transaction_id ' . \Zend_Db_Select::SQL_DESC)
+            ->limit(1);
+        $row = $adapter->fetchRow($select);
+        if ($row) {
+            $additionalInformation = unserialize($row['additional_information']);
+            return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
+        }
+        return $valueIfNotFound;
     }
 }

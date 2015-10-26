@@ -136,7 +136,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
     {
         $orderId = 1;
         $resultTableRow = null;
-        $this->_testGetLastTryByOrderId($orderId, $resultTableRow);
+        $this->_testGetLastByOrderId($orderId, $resultTableRow);
         $this->assertEquals(0, $this->_model->getLastTryByOrderId($orderId));
     }
 
@@ -151,7 +151,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
                 ]
             ])
         ];
-        $this->_testGetLastTryByOrderId($orderId, $resultTableRow);
+        $this->_testGetLastByOrderId($orderId, $resultTableRow);
         $this->assertEquals($try, $this->_model->getLastTryByOrderId($orderId));
     }
 
@@ -194,6 +194,29 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         ];
         $this->_testGetIdByPayuplOrderId($payuplOrderId, $resultTableRow);
         $this->assertEquals($resultTableRow['transaction_id'], $this->_model->getIdByPayuplOrderId($payuplOrderId));
+    }
+
+    public function testGetLastStatusByOrderFail()
+    {
+        $orderId = 1;
+        $resultTableRow = null;
+        $this->_testGetLastByOrderId($orderId, $resultTableRow);
+        $this->assertFalse($this->_model->getLastStatusByOrderId($orderId));
+    }
+
+    public function testGetLastStatusByOrderSuccess()
+    {
+        $orderId = 1;
+        $status = 'status';
+        $resultTableRow = [
+            'additional_information' => serialize([
+                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
+                    'status' => $status
+                ]
+            ])
+        ];
+        $this->_testGetLastByOrderId($orderId, $resultTableRow);
+        $this->assertEquals($status, $this->_model->getLastStatusByOrderId($orderId));
     }
 
     /**
@@ -311,7 +334,7 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         $this->_adapter->expects($this->once())->method('fetchRow')->with($this->equalTo($select))->willReturn($resultTableRow);
     }
 
-    protected function _testGetLastTryByOrderId($orderId, $resultTableRow)
+    protected function _testGetLastByOrderId($orderId, $resultTableRow)
     {
         $transactionTable = 'sales_payment_transaction';
         $this->_resource->expects($this->once())->method('getTableName')->with($transactionTable)->willReturn($transactionTable);

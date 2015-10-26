@@ -118,4 +118,10 @@ interface OrderInterface
      * @return false|array
      */
     public function getPaytypes();
+
+    /**
+     * @param mixed $status
+     * @return string
+     */
+    public function getStatusDescription($status);
 }

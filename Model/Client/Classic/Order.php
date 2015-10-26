@@ -20,6 +20,21 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     const STATUS_ERROR              = 888;
 
     /**
+     * @var string[]
+     */
+    protected $_statusDescription = [
+        self::STATUS_PRE_NEW => 'New',
+        self::STATUS_NEW => 'New',
+        self::STATUS_CANCELLED => 'Cancelled',
+        self::STATUS_REJECTED => 'Rejected',
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_WAITING => 'Waiting for acceptance',
+        self::STATUS_REJECTED_CANCELLED => 'Rejected',
+        self::STATUS_COMPLETED => 'Completed',
+        self::STATUS_ERROR => 'Error'
+    ];
+
+    /**
      * @var Order\DataValidator
      */
     protected $_dataValidator;
@@ -295,5 +310,16 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     public function getPaytypes()
     {
         return $this->_methodCaller->call('getPaytypes');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getStatusDescription($status)
+    {
+        if (isset($this->_statusDescription[$status])) {
+            return (string) __($this->_statusDescription[$status]);
+        }
+        return false;
     }
 }
