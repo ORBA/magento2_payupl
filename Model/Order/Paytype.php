@@ -54,6 +54,8 @@ class Paytype
         foreach ($paytypes as $key => $paytype) {
             if (!$paytype['enable'] || $total < $paytype['min'] || $total > $paytype['max']) {
                 unset ($paytypes[$key]);
+            } else {
+                $paytypes[$key]['id'] = 'orba-payupl-paytype-' . $paytype['type'];
             }
         }
         return $paytypes;

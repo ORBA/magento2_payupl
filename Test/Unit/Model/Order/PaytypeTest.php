@@ -76,7 +76,7 @@ class PaytypeTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
         $quote->expects($this->once())->method('getGrandTotal')->willReturn('10.99');
-        $this->assertEquals([$paytype], $this->_model->getAllForQuote($quote));
+        $this->assertEquals($this->_getPaytypeResultArray($paytype), $this->_model->getAllForQuote($quote));
     }
 
     public function testGetAllForQuoteTooLowTotal()
@@ -97,7 +97,7 @@ class PaytypeTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
         $quote->expects($this->once())->method('getGrandTotal')->willReturn('0.49');
-        $this->assertEquals([$paytype], $this->_model->getAllForQuote($quote));
+        $this->assertEquals($this->_getPaytypeResultArray($paytype), $this->_model->getAllForQuote($quote));
     }
 
     public function testGetAllForQuoteTooHighTotal()
@@ -118,7 +118,7 @@ class PaytypeTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
         $quote->expects($this->once())->method('getGrandTotal')->willReturn('1000.01');
-        $this->assertEquals([$paytype], $this->_model->getAllForQuote($quote));
+        $this->assertEquals($this->_getPaytypeResultArray($paytype), $this->_model->getAllForQuote($quote));
     }
 
     /**
@@ -163,5 +163,14 @@ class PaytypeTest extends \PHPUnit_Framework_TestCase
             $this->equalTo(\Orba\Payupl\Model\Payupl::XML_PATH_PAYTYPES_IN_CHECKOUT),
             $this->equalTo('store')
         )->willReturn($paytypesFlag);
+    }
+
+    /**
+     * @param $paytype
+     * @return array
+     */
+    protected function _getPaytypeResultArray($paytype)
+    {
+        return [$paytype + ['id' => 'orba-payupl-paytype-' . $paytype['type']]];
     }
 }
