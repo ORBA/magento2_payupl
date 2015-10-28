@@ -11,7 +11,7 @@
                 <active>0</active>
                 <title>Payu.pl</title>
                 <classic_api>1</classic_api>
-                <order_status_new>pending_payment</order_status_new>
+                <order_status_new>pending_payupl</order_status_new>
                 <order_status_holded>holded</order_status_holded>
                 <order_status_processing>processing</order_status_processing>
                 <model>Orba\Payupl\Model\Payupl</model>
