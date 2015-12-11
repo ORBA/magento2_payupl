@@ -161,7 +161,7 @@ class PayuplTest extends \PHPUnit_Framework_TestCase
     protected function _getQuoteMock()
     {
         return $this->getMockBuilder(\Magento\Quote\Api\Data\CartInterface::class)
-            ->setMethods(['getStoreId'])
+            ->setMethods(['getStoreId', 'getShippingAddress'])
             ->getMockForAbstractClass();
     }
 
