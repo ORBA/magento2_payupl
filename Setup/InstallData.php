@@ -26,7 +26,8 @@ class InstallData implements InstallDataInterface
         $connection->insert($setup->getTable('sales_order_status_state'), [
             'status' =>  'pending_payupl',
             'state' => 'pending_payment',
-            'is_default' => 0
+            'is_default' => 0,
+            'visible_on_front' => 1
         ]);
     }
 }
