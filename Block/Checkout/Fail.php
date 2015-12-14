@@ -10,7 +10,7 @@ class Fail extends \Magento\Checkout\Block\Onepage\Success
     /**
      * @var \Orba\Payupl\Helper\Payment
      */
-    protected $_paymentHelper;
+    protected $paymentHelper;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -27,7 +27,7 @@ class Fail extends \Magento\Checkout\Block\Onepage\Success
             $httpContext,
             $data
         );
-        $this->_paymentHelper = $paymentHelper;
+        $this->paymentHelper = $paymentHelper;
     }
 
     /**
@@ -41,9 +41,9 @@ class Fail extends \Magento\Checkout\Block\Onepage\Success
     {
         $orderId = $this->_checkoutSession->getLastOrderId();
         if ($orderId) {
-            $repeatPaymentUrl = $this->_paymentHelper->getRepeatPaymentUrl($orderId);
+            $repeatPaymentUrl = $this->paymentHelper->getRepeatPaymentUrl($orderId);
             if (!$repeatPaymentUrl) {
-                return $this->_paymentHelper->getStartPaymentUrl($orderId);
+                return $this->paymentHelper->getStartPaymentUrl($orderId);
             }
             return $repeatPaymentUrl;
         }

@@ -12,27 +12,27 @@ class Refund implements RefundInterface
     /**
      * @var Refund\DataValidator
      */
-    protected $_dataValidator;
+    protected $dataValidator;
 
     /**
      * @var MethodCaller
      */
-    protected $_methodCaller;
+    protected $methodCaller;
 
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var Order\DataGetter
      */
-    protected $_orderDataGetter;
+    protected $orderDataGetter;
 
     /**
      * @var \Orba\Payupl\Logger\Logger
      */
-    protected $_logger;
+    protected $logger;
 
     /**
      * @param Refund\DataValidator $dataValidator
@@ -46,13 +46,12 @@ class Refund implements RefundInterface
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         Order\DataGetter $orderDataGetter,
         \Orba\Payupl\Logger\Logger $logger
-    )
-    {
-        $this->_dataValidator = $dataValidator;
-        $this->_methodCaller = $methodCaller;
-        $this->_transactionResource = $transactionResource;
-        $this->_orderDataGetter = $orderDataGetter;
-        $this->_logger = $logger;
+    ) {
+        $this->dataValidator = $dataValidator;
+        $this->methodCaller = $methodCaller;
+        $this->transactionResource = $transactionResource;
+        $this->orderDataGetter = $orderDataGetter;
+        $this->logger = $logger;
     }
 
     /**
@@ -61,9 +60,9 @@ class Refund implements RefundInterface
     public function validateCreate($orderId = '', $description = '', $amount = null)
     {
         return
-            $this->_dataValidator->validateEmpty($orderId) &&
-            $this->_dataValidator->validateEmpty($description) &&
-            $this->_dataValidator->validatePositiveInt($amount);
+            $this->dataValidator->validateEmpty($orderId) &&
+            $this->dataValidator->validateEmpty($description) &&
+            $this->dataValidator->validatePositiveInt($amount);
     }
 
     /**
@@ -71,11 +70,11 @@ class Refund implements RefundInterface
      */
     public function create($orderId = '', $description = '', $amount = null)
     {
-        $realPayuplOrderId = $this->_transactionResource->getExtOrderIdByPayuplOrderId($orderId);
+        $realPayuplOrderId = $this->transactionResource->getExtOrderIdByPayuplOrderId($orderId);
         if ($realPayuplOrderId) {
-            $posId = $this->_orderDataGetter->getPosId();
-            $ts = $this->_orderDataGetter->getTs();
-            $sig = $this->_orderDataGetter->getSigForOrderRetrieve([
+            $posId = $this->orderDataGetter->getPosId();
+            $ts = $this->orderDataGetter->getTs();
+            $sig = $this->orderDataGetter->getSigForOrderRetrieve([
                 'pos_id' => $posId,
                 'session_id' => $realPayuplOrderId,
                 'ts' => $ts
@@ -86,9 +85,9 @@ class Refund implements RefundInterface
                 'ts' => $ts,
                 'sig' => $sig
             ];
-            $getResult = $this->_methodCaller->call('refundGet', [$authData]);
+            $getResult = $this->methodCaller->call('refundGet', [$authData]);
             if ($getResult) {
-                $createResult = $this->_methodCaller->call('refundAdd', [
+                $createResult = $this->methodCaller->call('refundAdd', [
                     $authData,
                     [
                         'refundsHash' => $getResult->refsHash,
@@ -98,7 +97,7 @@ class Refund implements RefundInterface
                     ]
                 ]);
                 if ($createResult < 0) {
-                    $this->_logger->error('Refund error ' . $createResult . ' for transaction ' . $orderId);
+                    $this->logger->error('Refund error ' . $createResult . ' for transaction ' . $orderId);
                 }
                 return $createResult === 0;
             }

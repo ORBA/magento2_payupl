@@ -16,8 +16,7 @@ class Classic extends \Orba\Payupl\Model\Client
         Classic\Config $configHelper,
         Classic\Order $orderHelper,
         Classic\Refund $refundHelper
-    )
-    {
+    ) {
         parent::__construct(
             $configHelper,
             $orderHelper,

@@ -10,14 +10,14 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 class DataValidatorTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Orba\Payupl\Model\Client\Rest\Order\DataValidator
+     * @var DataValidator
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var array
      */
-    protected $_exemplaryBasicData = [
+    protected $exemplaryBasicData = [
         'description' => 'New order',
         'currencyCode' => 'PLN',
         'totalAmount' => 999,
@@ -28,7 +28,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @var array
      */
-    protected $_exemplaryProductData = [
+    protected $exemplaryProductData = [
         'name' => 'Product',
         'unitPrice' => 999,
         'quantity' => 1.5
@@ -37,7 +37,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @var array
      */
-    protected $_exemplaryStatusUpdateData = [
+    protected $exemplaryStatusUpdateData = [
         'orderId' => '123456',
         'orderStatus' => 'COMPLETED'
     ];
@@ -45,7 +45,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @var array
      */
-    protected $_validStatusUpdateOrderStatuses = [
+    protected $validStatusUpdateOrderStatuses = [
         'COMPLETED',
         'REJECTED'
     ];
@@ -53,7 +53,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_model = $objectManagerHelper->getObject(
+        $this->model = $objectManagerHelper->getObject(
             DataValidator::class,
             []
         );
@@ -61,17 +61,17 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateBasicDataSuccess()
     {
-        $data = $this->_getExemplaryBasicData();
-        $this->assertTrue($this->_model->validateBasicData($data));
+        $data = $this->getExemplaryBasicData();
+        $this->assertTrue($this->model->validateBasicData($data));
     }
 
     public function testValidateBasicDataFail()
     {
-        $data = $this->_getExemplaryBasicData();
+        $data = $this->getExemplaryBasicData();
         $failCount = 0;
         foreach ($data as $key => $value) {
             $missingData = array_diff_key($data, [$key => $value]);
-            if (!$this->_model->validateBasicData($missingData)) {
+            if (!$this->model->validateBasicData($missingData)) {
                 $failCount++;
             }
         }
@@ -80,20 +80,20 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateProductsDataSuccess()
     {
-        $data = $this->_getExemplaryProductsData();
-        $this->assertTrue($this->_model->validateProductsData($data));
+        $data = $this->getExemplaryProductsData();
+        $this->assertTrue($this->model->validateProductsData($data));
     }
 
     public function testValidateProductsDataFailInvalidQuantity()
     {
-        $data = $this->_getExemplaryProductsData();
+        $data = $this->getExemplaryProductsData();
         $data['products'][0]['quantity'] = 'string';
-        $this->assertFalse($this->_model->validateProductsData($data));
+        $this->assertFalse($this->model->validateProductsData($data));
     }
 
     public function testValidateProductsDataFailMissingData()
     {
-        $productData = $this->_getExemplaryProductData();
+        $productData = $this->getExemplaryProductData();
         $failCount = 0;
         foreach ($productData as $key => $value) {
             $missingProductData = array_diff_key($productData, [$key => $value]);
@@ -102,7 +102,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
                     $missingProductData
                 ]
             ];
-            if (!$this->_model->validateProductsData($missingData)) {
+            if (!$this->model->validateProductsData($missingData)) {
                 $failCount++;
             }
         }
@@ -111,17 +111,17 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateStatusUpdateDataSuccess()
     {
-        $data = $this->_getExemplaryStatusUpdateData();
-        $this->assertTrue($this->_model->validateStatusUpdateData($data));
+        $data = $this->getExemplaryStatusUpdateData();
+        $this->assertTrue($this->model->validateStatusUpdateData($data));
     }
 
     public function testValidateStatusUpdateDataFailMissingKey()
     {
-        $data = $this->_getExemplaryStatusUpdateData();
+        $data = $this->getExemplaryStatusUpdateData();
         $failCount = 0;
         foreach ($data as $key => $value) {
             $missingData = array_diff_key($data, [$key => $value]);
-            if (!$this->_model->validateStatusUpdateData($missingData)) {
+            if (!$this->model->validateStatusUpdateData($missingData)) {
                 $failCount++;
             }
         }
@@ -130,40 +130,40 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateStatusUpdateDataOrderStatus()
     {
-        $data = $this->_getExemplaryStatusUpdateData();
-        $validStatuses = $this->_getValidStatusUpdateOrderStatuses();
+        $data = $this->getExemplaryStatusUpdateData();
+        $validStatuses = $this->getValidStatusUpdateOrderStatuses();
         foreach ($validStatuses as $validStatus) {
             $data['orderStatus'] = $validStatus;
-            $this->assertTrue($this->_model->validateStatusUpdateData($data));
+            $this->assertTrue($this->model->validateStatusUpdateData($data));
         }
         $data['orderStatus'] = 'INVALID_STATUS';
-        $this->assertFalse($this->_model->validateStatusUpdateData($data));
+        $this->assertFalse($this->model->validateStatusUpdateData($data));
     }
 
     /**
      * @return array
      */
-    protected function _getExemplaryBasicData()
+    protected function getExemplaryBasicData()
     {
-        return $this->_exemplaryBasicData;
+        return $this->exemplaryBasicData;
     }
 
     /**
      * @return array
      */
-    protected function _getExemplaryProductData()
+    protected function getExemplaryProductData()
     {
-        return $this->_exemplaryProductData;
+        return $this->exemplaryProductData;
     }
 
     /**
      * @return array
      */
-    protected function _getExemplaryProductsData()
+    protected function getExemplaryProductsData()
     {
         $data = [
             'products' => [
-                $this->_getExemplaryProductData()
+                $this->getExemplaryProductData()
             ]
         ];
         return $data;
@@ -172,16 +172,16 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    protected function _getExemplaryStatusUpdateData()
+    protected function getExemplaryStatusUpdateData()
     {
-        return $this->_exemplaryStatusUpdateData;
+        return $this->exemplaryStatusUpdateData;
     }
 
     /**
      * @return array
      */
-    protected function _getValidStatusUpdateOrderStatuses()
+    protected function getValidStatusUpdateOrderStatuses()
     {
-        return $this->_validStatusUpdateOrderStatuses;
+        return $this->validStatusUpdateOrderStatuses;
     }
 }

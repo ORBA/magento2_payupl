@@ -12,22 +12,22 @@ class Notify extends \Magento\Framework\App\Action\Action
     /**
      * @var \Magento\Framework\App\Action\Context
      */
-    protected $_context;
+    protected $context;
 
     /**
      * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
      * @var \Magento\Framework\Controller\Result\ForwardFactory
      */
-    protected $_resultForwardFactory;
+    protected $resultForwardFactory;
 
     /**
      * @var \Orba\Payupl\Logger\Logger
      */
-    protected $_logger;
+    protected $logger;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -40,13 +40,12 @@ class Notify extends \Magento\Framework\App\Action\Action
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory,
         \Orba\Payupl\Logger\Logger $logger
-    )
-    {
+    ) {
         parent::__construct($context);
-        $this->_context = $context;
-        $this->_clientFactory = $clientFactory;
-        $this->_resultForwardFactory = $resultForwardFactory;
-        $this->_logger = $logger;
+        $this->context = $context;
+        $this->clientFactory = $clientFactory;
+        $this->resultForwardFactory = $resultForwardFactory;
+        $this->logger = $logger;
     }
 
     public function execute()
@@ -54,21 +53,25 @@ class Notify extends \Magento\Framework\App\Action\Action
         /**
          * @var $client \Orba\Payupl\Model\Client
          */
-        $request = $this->_context->getRequest();
+        $request = $this->context->getRequest();
         try {
-            $client = $this->_clientFactory->create();
+            $client = $this->clientFactory->create();
             $response = $client->orderConsumeNotification($request);
             $clientOrderHelper = $client->getOrderHelper();
             if ($clientOrderHelper->canProcessNotification($response['payuplOrderId'])) {
-                return $clientOrderHelper->processNotification($response['payuplOrderId'], $response['status'], $response['amount']);
+                return $clientOrderHelper->processNotification(
+                    $response['payuplOrderId'],
+                    $response['status'],
+                    $response['amount']
+                );
             }
         } catch (Exception $e) {
-            $this->_logger->critical($e);
+            $this->logger->critical($e);
         }
         /**
          * @var $resultForward \Magento\Framework\Controller\Result\Forward
          */
-        $resultForward = $this->_resultForwardFactory->create();
+        $resultForward = $this->resultForwardFactory->create();
         $resultForward->forward('noroute');
         return $resultForward;
     }

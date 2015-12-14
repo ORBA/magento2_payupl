@@ -10,20 +10,19 @@ class Validator
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var \Magento\Customer\Model\Session
      */
-    protected $_customerSession;
+    protected $customerSession;
 
     public function __construct(
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Magento\Customer\Model\Session $customerSession
-    )
-    {
-        $this->_transactionResource = $transactionResource;
-        $this->_customerSession = $customerSession;
+    ) {
+        $this->transactionResource = $transactionResource;
+        $this->customerSession = $customerSession;
     }
 
     /**
@@ -32,7 +31,7 @@ class Validator
      */
     public function validateNoTransactions(\Magento\Sales\Model\Order $order)
     {
-        return $this->_transactionResource->getLastPayuplOrderIdByOrderId($order->getId()) === false;
+        return $this->transactionResource->getLastPayuplOrderIdByOrderId($order->getId()) === false;
     }
 
     /**
@@ -63,9 +62,13 @@ class Validator
      */
     public function validateCustomer(\Magento\Sales\Model\Order $order)
     {
-        return $order->getCustomerId() === $this->_customerSession->getCustomerId();
+        return $order->getCustomerId() === $this->customerSession->getCustomerId();
     }
 
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return bool
+     */
     public function validateNotPaid(\Magento\Sales\Model\Order $order)
     {
         return !$order->getTotalPaid();

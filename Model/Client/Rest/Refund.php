@@ -12,12 +12,12 @@ class Refund implements RefundInterface
     /**
      * @var Refund\DataValidator
      */
-    protected $_dataValidator;
+    protected $dataValidator;
 
     /**
      * @var MethodCaller
      */
-    protected $_methodCaller;
+    protected $methodCaller;
 
     /**
      * @param Refund\DataValidator $dataValidator
@@ -26,10 +26,9 @@ class Refund implements RefundInterface
     public function __construct(
         Refund\DataValidator $dataValidator,
         MethodCaller $methodCaller
-    )
-    {
-        $this->_dataValidator = $dataValidator;
-        $this->_methodCaller = $methodCaller;
+    ) {
+        $this->dataValidator = $dataValidator;
+        $this->methodCaller = $methodCaller;
     }
 
     /**
@@ -38,9 +37,9 @@ class Refund implements RefundInterface
     public function validateCreate($orderId = '', $description = '', $amount = null)
     {
         return
-            $this->_dataValidator->validateEmpty($orderId) &&
-            $this->_dataValidator->validateEmpty($description) &&
-            (is_null($amount) ? true : $this->_dataValidator->validatePositiveInt($amount));
+            $this->dataValidator->validateEmpty($orderId) &&
+            $this->dataValidator->validateEmpty($description) &&
+            (is_null($amount) ? true : $this->dataValidator->validatePositiveInt($amount));
     }
 
     /**
@@ -48,6 +47,6 @@ class Refund implements RefundInterface
      */
     public function create($orderId = '', $description = '', $amount = null)
     {
-        return (bool) ($this->_methodCaller->call('refundCreate', [$orderId, $description, $amount]));
+        return (bool) ($this->methodCaller->call('refundCreate', [$orderId, $description, $amount]));
     }
 }

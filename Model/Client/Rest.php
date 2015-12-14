@@ -16,8 +16,7 @@ class Rest extends \Orba\Payupl\Model\Client
         Rest\Config $configHelper,
         Rest\Order $orderHelper,
         Rest\Refund $refundHelper
-    )
-    {
+    ) {
         parent::__construct(
             $configHelper,
             $orderHelper,

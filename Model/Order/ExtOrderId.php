@@ -10,12 +10,12 @@ class ExtOrderId
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
-    protected $_dateTime;
+    protected $dateTime;
 
     /**
      * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
@@ -24,10 +24,9 @@ class ExtOrderId
     public function __construct(
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
-    )
-    {
-        $this->_transactionResource = $transactionResource;
-        $this->_dateTime = $dateTime;
+    ) {
+        $this->transactionResource = $transactionResource;
+        $this->dateTime = $dateTime;
     }
 
     /**
@@ -36,7 +35,7 @@ class ExtOrderId
      */
     public function generate(\Magento\Sales\Model\Order $order)
     {
-        $try = $this->_transactionResource->getLastTryByOrderId($order->getId()) + 1;
-        return $order->getIncrementId() . ':' . $this->_dateTime->timestamp() . ':' . $try;
+        $try = $this->transactionResource->getLastTryByOrderId($order->getId()) + 1;
+        return $order->getIncrementId() . ':' . $this->dateTime->timestamp() . ':' . $try;
     }
 }

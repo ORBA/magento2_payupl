@@ -12,17 +12,17 @@ class Notification
     /**
      * @var \Orba\Payupl\Model\Client\Classic\Config
      */
-    protected $_configHelper;
+    protected $configHelper;
 
     /**
      * @param \Orba\Payupl\Model\Client\Classic\Config $configHelper
      */
     public function __construct(
         \Orba\Payupl\Model\Client\Classic\Config $configHelper
-    )
-    {
-        $this->_configHelper = $configHelper;
+    ) {
+        $this->configHelper = $configHelper;
     }
+
     public function getPayuplOrderId($request)
     {
         if (!$request->isPost()) {
@@ -32,7 +32,7 @@ class Notification
         $ts = $request->getParam('ts');
         $posId = $request->getParam('pos_id');
         $sessionId = $request->getParam('session_id');
-        $secondKeyMd5 = $this->_configHelper->getConfig('second_key_md5');
+        $secondKeyMd5 = $this->configHelper->getConfig('second_key_md5');
         if (md5($posId . $sessionId . $ts . $secondKeyMd5) === $sig) {
             return $sessionId;
         }

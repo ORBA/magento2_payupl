@@ -19,7 +19,7 @@ class Raw implements RawInterface
     public function call($methodName, array $args = [])
     {
         $result = call_user_func_array([$this, $methodName], $args);
-        return $this->_getResponse($result);
+        return $this->getResponse($result);
     }
 
     /**
@@ -89,7 +89,7 @@ class Raw implements RawInterface
      * @return \stdClass
      * @throws Exception
      */
-    protected function _getResponse($result)
+    protected function getResponse($result)
     {
         $response = $result->getResponse();
         if (isset($response->status)) {

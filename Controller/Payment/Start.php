@@ -12,22 +12,22 @@ class Start extends \Magento\Framework\App\Action\Action
     /**
      * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
      * @var \Orba\Payupl\Model\Order
      */
-    protected $_orderHelper;
+    protected $orderHelper;
 
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @var \Orba\Payupl\Logger\Logger
      */
-    protected $_logger;
+    protected $logger;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -42,13 +42,12 @@ class Start extends \Magento\Framework\App\Action\Action
         \Orba\Payupl\Model\Order $orderHelper,
         \Orba\Payupl\Model\Session $session,
         \Orba\Payupl\Logger\Logger $logger
-    )
-    {
+    ) {
         parent::__construct($context);
-        $this->_clientFactory = $clientFactory;
-        $this->_orderHelper = $orderHelper;
-        $this->_session = $session;
-        $this->_logger = $logger;
+        $this->clientFactory = $clientFactory;
+        $this->orderHelper = $orderHelper;
+        $this->session = $session;
+        $this->logger = $logger;
     }
 
     /**
@@ -64,24 +63,29 @@ class Start extends \Magento\Framework\App\Action\Action
         $resultRedirect = $this->resultRedirectFactory->create();
         $redirectUrl = 'checkout/cart';
         $redirectParams = [];
-        $orderId = $this->_orderHelper->getOrderIdForPaymentStart();
+        $orderId = $this->orderHelper->getOrderIdForPaymentStart();
         if ($orderId) {
-            $order = $this->_orderHelper->loadOrderById($orderId);
-            if ($this->_orderHelper->canStartFirstPayment($order)) {
+            $order = $this->orderHelper->loadOrderById($orderId);
+            if ($this->orderHelper->canStartFirstPayment($order)) {
                 try {
-                    $client = $this->_clientFactory->create();
+                    $client = $this->clientFactory->create();
                     $clientOrderHelper = $client->getOrderHelper();
                     $orderData = $clientOrderHelper->getDataForOrderCreate($order);
                     $result = $client->orderCreate($orderData);
-                    $this->_orderHelper->addNewOrderTransaction($order, $result['orderId'], $result['extOrderId'], $clientOrderHelper->getNewStatus());
-                    $this->_orderHelper->setNewOrderStatus($order);
+                    $this->orderHelper->addNewOrderTransaction(
+                        $order,
+                        $result['orderId'],
+                        $result['extOrderId'],
+                        $clientOrderHelper->getNewStatus()
+                    );
+                    $this->orderHelper->setNewOrderStatus($order);
                     $redirectUrl = $result['redirectUri'];
                 } catch (Exception $e) {
-                    $this->_logger->critical($e);
+                    $this->logger->critical($e);
                     $redirectUrl = 'orba_payupl/payment/end';
                     $redirectParams = ['exception' => '1'];
                 }
-                $this->_session->setLastOrderId($orderId);
+                $this->session->setLastOrderId($orderId);
             }
         }
         $resultRedirect->setPath($redirectUrl, $redirectParams);

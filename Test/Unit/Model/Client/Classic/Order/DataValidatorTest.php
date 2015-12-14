@@ -12,12 +12,12 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @var DataValidator
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var array
      */
-    protected $_exemplaryBasicData = [
+    protected $exemplaryBasicData = [
         'amount' => 999,
         'desc' => 'Description',
         'first_name' => 'Jan',
@@ -30,7 +30,7 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_model = $objectManagerHelper->getObject(
+        $this->model = $objectManagerHelper->getObject(
             DataValidator::class,
             []
         );
@@ -38,17 +38,17 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateBasicDataSuccess()
     {
-        $data = $this->_getExemplaryBasicData();
-        $this->assertTrue($this->_model->validateBasicData($data));
+        $data = $this->getExemplaryBasicData();
+        $this->assertTrue($this->model->validateBasicData($data));
     }
 
     public function testValidateBasicDataFail()
     {
-        $data = $this->_getExemplaryBasicData();
+        $data = $this->getExemplaryBasicData();
         $failCount = 0;
         foreach ($data as $key => $value) {
             $missingData = array_diff_key($data, [$key => $value]);
-            if (!$this->_model->validateBasicData($missingData)) {
+            if (!$this->model->validateBasicData($missingData)) {
                 $failCount++;
             }
         }
@@ -58,8 +58,8 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    protected function _getExemplaryBasicData()
+    protected function getExemplaryBasicData()
     {
-        return $this->_exemplaryBasicData;
+        return $this->exemplaryBasicData;
     }
 }

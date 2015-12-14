@@ -12,17 +12,17 @@ class DataGetter
     /**
      * @var \Magento\Framework\UrlInterface
      */
-    protected $_urlBuilder;
+    protected $urlBuilder;
 
     /**
      * @var Config
      */
-    protected $_configHelper;
+    protected $configHelper;
 
     /**
      * @var \Orba\Payupl\Model\Order\ExtOrderId
      */
-    protected $_extOrderIdHelper;
+    protected $extOrderIdHelper;
 
     /**
      * @param \Magento\Framework\View\Context $context
@@ -32,11 +32,10 @@ class DataGetter
         \Magento\Framework\View\Context $context,
         Config $configHelper,
         \Orba\Payupl\Model\Order\ExtOrderId $extOrderIdHelper
-    )
-    {
-        $this->_urlBuilder = $context->getUrlBuilder();
-        $this->_configHelper = $configHelper;
-        $this->_extOrderIdHelper = $extOrderIdHelper;
+    ) {
+        $this->urlBuilder = $context->getUrlBuilder();
+        $this->configHelper = $configHelper;
+        $this->extOrderIdHelper = $extOrderIdHelper;
     }
 
     /**
@@ -44,7 +43,7 @@ class DataGetter
      */
     public function getContinueUrl()
     {
-        return $this->_urlBuilder->getUrl('orba_payupl/payment/end');
+        return $this->urlBuilder->getUrl('orba_payupl/payment/end');
     }
 
     /**
@@ -52,7 +51,7 @@ class DataGetter
      */
     public function getNotifyUrl()
     {
-        return $this->_urlBuilder->getUrl('orba_payupl/payment/notify');
+        return $this->urlBuilder->getUrl('orba_payupl/payment/notify');
     }
 
     /**
@@ -68,7 +67,7 @@ class DataGetter
      */
     public function getMerchantPosId()
     {
-        return $this->_configHelper->getConfig('merchant_pos_id');
+        return $this->configHelper->getConfig('merchant_pos_id');
     }
 
     /**
@@ -81,7 +80,7 @@ class DataGetter
         return [
             'currencyCode' => $order->getOrderCurrencyCode(),
             'totalAmount' => $order->getGrandTotal() * 100,
-            'extOrderId' => $this->_extOrderIdHelper->generate($order),
+            'extOrderId' => $this->extOrderIdHelper->generate($order),
             'description' => __('Order # %1', [$incrementId]),
         ];
     }

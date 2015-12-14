@@ -10,12 +10,12 @@ class Processor
     /**
      * @var \Orba\Payupl\Model\Order
      */
-    protected $_orderHelper;
+    protected $orderHelper;
 
     /**
      * @var \Orba\Payupl\Model\Transaction\Service
      */
-    protected $_transactionService;
+    protected $transactionService;
 
     /**
      * @param \Orba\Payupl\Model\Order $orderHelper
@@ -24,10 +24,9 @@ class Processor
     public function __construct(
         \Orba\Payupl\Model\Order $orderHelper,
         \Orba\Payupl\Model\Transaction\Service $transactionService
-    )
-    {
-        $this->_orderHelper = $orderHelper;
-        $this->_transactionService = $transactionService;
+    ) {
+        $this->orderHelper = $orderHelper;
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -38,7 +37,7 @@ class Processor
      */
     public function processOld($payuplOrderId, $status, $close = false)
     {
-        $this->_transactionService->updateStatus($payuplOrderId, $status, $close);
+        $this->transactionService->updateStatus($payuplOrderId, $status, $close);
     }
 
     /**
@@ -48,7 +47,7 @@ class Processor
      */
     public function processPending($payuplOrderId, $status)
     {
-        $this->_transactionService->updateStatus($payuplOrderId, $status);
+        $this->transactionService->updateStatus($payuplOrderId, $status);
     }
 
     /**
@@ -59,9 +58,9 @@ class Processor
      */
     public function processHolded($payuplOrderId, $status)
     {
-        $order = $this->_loadOrderByPayuplOrderId($payuplOrderId);
-        $this->_orderHelper->setHoldedOrderStatus($order, $status);
-        $this->_transactionService->updateStatus($payuplOrderId, $status, true);
+        $order = $this->loadOrderByPayuplOrderId($payuplOrderId);
+        $this->orderHelper->setHoldedOrderStatus($order, $status);
+        $this->transactionService->updateStatus($payuplOrderId, $status, true);
     }
 
     /**
@@ -72,7 +71,7 @@ class Processor
      */
     public function processWaiting($payuplOrderId, $status)
     {
-        $this->_transactionService->updateStatus($payuplOrderId, $status);
+        $this->transactionService->updateStatus($payuplOrderId, $status);
     }
 
     /**
@@ -84,19 +83,19 @@ class Processor
      */
     public function processCompleted($payuplOrderId, $status, $amount)
     {
-        $order = $this->_loadOrderByPayuplOrderId($payuplOrderId);
-        $this->_orderHelper->completePayment($order, $amount, $payuplOrderId);
-        $this->_transactionService->updateStatus($payuplOrderId, $status, true);
+        $order = $this->loadOrderByPayuplOrderId($payuplOrderId);
+        $this->orderHelper->completePayment($order, $amount, $payuplOrderId);
+        $this->transactionService->updateStatus($payuplOrderId, $status, true);
     }
 
     /**
      * @param string $payuplOrderId
-     * @return \Magento\Sales\Model\Order
+     * @return \Orba\Payupl\Model\Sales\Order
      * @throws Exception
      */
-    protected function _loadOrderByPayuplOrderId($payuplOrderId)
+    protected function loadOrderByPayuplOrderId($payuplOrderId)
     {
-        $order = $this->_orderHelper->loadOrderByPayuplOrderId($payuplOrderId);
+        $order = $this->orderHelper->loadOrderByPayuplOrderId($payuplOrderId);
         if (!$order) {
             throw new Exception('Order not found.');
         }

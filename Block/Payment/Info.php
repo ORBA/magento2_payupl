@@ -10,12 +10,12 @@ class Info extends \Magento\Payment\Block\Info
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
@@ -28,11 +28,10 @@ class Info extends \Magento\Payment\Block\Info
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         array $data = []
-    )
-    {
+    ) {
         parent::__construct($context, $data);
-        $this->_transactionResource = $transactionResource;
-        $this->_clientFactory = $clientFactory;
+        $this->transactionResource = $transactionResource;
+        $this->clientFactory = $clientFactory;
     }
 
     protected function _prepareLayout()
@@ -48,8 +47,8 @@ class Info extends \Magento\Payment\Block\Info
          */
         $transport = parent::_prepareSpecificInformation($transport);
         $orderId = $this->getInfo()->getParentId();
-        $status = $this->_transactionResource->getLastStatusByOrderId($orderId);
-        $client = $this->_clientFactory->create();
+        $status = $this->transactionResource->getLastStatusByOrderId($orderId);
+        $client = $this->clientFactory->create();
         $statusDescription = $client->getOrderHelper()->getStatusDescription($status);
         $transport->setData((string) __('Status'), $statusDescription);
         return $transport;

@@ -12,12 +12,12 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \Orba\Payupl\Model\Client\DataValidator
      */
-    protected $_model;
+    protected $model;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_model = $objectManagerHelper->getObject(
+        $this->model = $objectManagerHelper->getObject(
             \Orba\Payupl\Model\Client\DataValidator::class,
             []
         );
@@ -25,30 +25,30 @@ class DataValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateEmpty()
     {
-        $this->assertFalse($this->_model->validateEmpty(null));
-        $this->assertFalse($this->_model->validateEmpty(false));
-        $this->assertFalse($this->_model->validateEmpty(''));
-        $this->assertFalse($this->_model->validateEmpty([]));
-        $this->assertTrue($this->_model->validateEmpty(true));
-        $this->assertTrue($this->_model->validateEmpty('notempty'));
-        $this->assertTrue($this->_model->validateEmpty(['notempty' => true]));
+        $this->assertFalse($this->model->validateEmpty(null));
+        $this->assertFalse($this->model->validateEmpty(false));
+        $this->assertFalse($this->model->validateEmpty(''));
+        $this->assertFalse($this->model->validateEmpty([]));
+        $this->assertTrue($this->model->validateEmpty(true));
+        $this->assertTrue($this->model->validateEmpty('notempty'));
+        $this->assertTrue($this->model->validateEmpty(['notempty' => true]));
     }
 
     public function testValidatePositiveInt()
     {
-        $this->assertFalse($this->_model->validatePositiveInt('string'));
-        $this->assertFalse($this->_model->validatePositiveInt(0));
-        $this->assertFalse($this->_model->validatePositiveInt(-100));
-        $this->assertTrue($this->_model->validatePositiveInt(100));
-        $this->assertFalse($this->_model->validatePositiveInt(100.99));
+        $this->assertFalse($this->model->validatePositiveInt('string'));
+        $this->assertFalse($this->model->validatePositiveInt(0));
+        $this->assertFalse($this->model->validatePositiveInt(-100));
+        $this->assertTrue($this->model->validatePositiveInt(100));
+        $this->assertFalse($this->model->validatePositiveInt(100.99));
     }
 
     public function testValidatePositiveFloat()
     {
-        $this->assertFalse($this->_model->validatePositiveFloat('string'));
-        $this->assertFalse($this->_model->validatePositiveFloat(0));
-        $this->assertFalse($this->_model->validatePositiveFloat(-100));
-        $this->assertTrue($this->_model->validatePositiveFloat(100));
-        $this->assertTrue($this->_model->validatePositiveFloat(100.99));
+        $this->assertFalse($this->model->validatePositiveFloat('string'));
+        $this->assertFalse($this->model->validatePositiveFloat(0));
+        $this->assertFalse($this->model->validatePositiveFloat(-100));
+        $this->assertTrue($this->model->validatePositiveFloat(100));
+        $this->assertTrue($this->model->validatePositiveFloat(100.99));
     }
 }

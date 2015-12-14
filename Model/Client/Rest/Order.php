@@ -21,7 +21,7 @@ class Order implements OrderInterface
     /**
      * @var string[]
      */
-    protected $_statusDescription = [
+    protected $statusDescription = [
         self::STATUS_NEW => 'New',
         self::STATUS_PENDING => 'Pending',
         self::STATUS_WAITING => 'Waiting for acceptance',
@@ -33,37 +33,37 @@ class Order implements OrderInterface
     /**
      * @var Order\DataValidator
      */
-    protected $_dataValidator;
+    protected $dataValidator;
 
     /**
      * @var Order\DataGetter
      */
-    protected $_dataGetter;
+    protected $dataGetter;
 
     /**
      * @var MethodCaller
      */
-    protected $_methodCaller;
+    protected $methodCaller;
 
     /**
      * @var Order\Processor
      */
-    protected $_orderProcessor;
+    protected $orderProcessor;
 
     /**
      * @var \Magento\Framework\Controller\Result\RawFactory
      */
-    protected $_rawResultFactory;
+    protected $rawResultFactory;
 
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var \Magento\Framework\App\RequestInterface
      */
-    protected $_request;
+    protected $request;
 
     /**
      * @param Order\DataValidator $dataValidator
@@ -82,15 +82,14 @@ class Order implements OrderInterface
         Order\Processor $orderProcessor,
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
         \Magento\Framework\App\RequestInterface $request
-    )
-    {
-        $this->_dataValidator = $dataValidator;
-        $this->_dataGetter = $dataGetter;
-        $this->_methodCaller = $methodCaller;
-        $this->_transactionResource = $transactionResource;
-        $this->_orderProcessor = $orderProcessor;
-        $this->_rawResultFactory = $rawResultFactory;
-        $this->_request = $request;
+    ) {
+        $this->dataValidator = $dataValidator;
+        $this->dataGetter = $dataGetter;
+        $this->methodCaller = $methodCaller;
+        $this->transactionResource = $transactionResource;
+        $this->orderProcessor = $orderProcessor;
+        $this->rawResultFactory = $rawResultFactory;
+        $this->request = $request;
     }
 
     /**
@@ -99,9 +98,9 @@ class Order implements OrderInterface
     public function validateCreate(array $data = [])
     {
         return
-            $this->_dataValidator->validateEmpty($data) &&
-            $this->_dataValidator->validateBasicData($data) &&
-            $this->_dataValidator->validateProductsData($data);
+            $this->dataValidator->validateEmpty($data) &&
+            $this->dataValidator->validateBasicData($data) &&
+            $this->dataValidator->validateProductsData($data);
     }
 
     /**
@@ -109,7 +108,7 @@ class Order implements OrderInterface
      */
     public function validateRetrieve($payuplOrderId)
     {
-        return $this->_dataValidator->validateEmpty($payuplOrderId);
+        return $this->dataValidator->validateEmpty($payuplOrderId);
     }
 
     /**
@@ -117,7 +116,7 @@ class Order implements OrderInterface
      */
     public function validateCancel($payuplOrderId)
     {
-        return $this->_dataValidator->validateEmpty($payuplOrderId);
+        return $this->dataValidator->validateEmpty($payuplOrderId);
     }
 
     /**
@@ -126,8 +125,8 @@ class Order implements OrderInterface
     public function validateStatusUpdate(array $data = [])
     {
         return
-            $this->_dataValidator->validateEmpty($data) &&
-            $this->_dataValidator->validateStatusUpdateData($data);
+            $this->dataValidator->validateEmpty($data) &&
+            $this->dataValidator->validateStatusUpdateData($data);
     }
 
     /**
@@ -137,10 +136,10 @@ class Order implements OrderInterface
     public function addSpecialDataToOrder(array $data = [])
     {
         return array_merge($data, [
-            'continueUrl' => $this->_dataGetter->getContinueUrl(),
-            'notifyUrl' => $this->_dataGetter->getNotifyUrl(),
-            'customerIp' => $this->_dataGetter->getCustomerIp(),
-            'merchantPosId' => $this->_dataGetter->getMerchantPosId()
+            'continueUrl' => $this->dataGetter->getContinueUrl(),
+            'notifyUrl' => $this->dataGetter->getNotifyUrl(),
+            'customerIp' => $this->dataGetter->getCustomerIp(),
+            'merchantPosId' => $this->dataGetter->getMerchantPosId()
         ]);
     }
 
@@ -152,7 +151,7 @@ class Order implements OrderInterface
         /**
          * @var $result \OpenPayU_Result
          */
-        $response = $this->_methodCaller->call('orderCreate', [$data]);
+        $response = $this->methodCaller->call('orderCreate', [$data]);
         if ($response) {
             return [
                 'orderId' => $response->orderId,
@@ -168,7 +167,7 @@ class Order implements OrderInterface
      */
     public function retrieve($payuplOrderId)
     {
-        $response = $this->_methodCaller->call('orderRetrieve', [$payuplOrderId]);
+        $response = $this->methodCaller->call('orderRetrieve', [$payuplOrderId]);
         if ($response) {
             return [
                 'status' => $response->orders[0]->status,
@@ -183,7 +182,7 @@ class Order implements OrderInterface
      */
     public function cancel($payuplOrderId)
     {
-        return (bool) ($this->_methodCaller->call('orderCancel', [$payuplOrderId]));
+        return (bool) ($this->methodCaller->call('orderCancel', [$payuplOrderId]));
     }
 
     /**
@@ -191,7 +190,7 @@ class Order implements OrderInterface
      */
     public function statusUpdate(array $data = [])
     {
-        return (bool) ($this->_methodCaller->call('orderStatusUpdate', [$data]));
+        return (bool) ($this->methodCaller->call('orderStatusUpdate', [$data]));
     }
 
     /**
@@ -202,7 +201,7 @@ class Order implements OrderInterface
         if (!$request->isPost()) {
             throw new \Orba\Payupl\Model\Client\Exception('POST request is required.');
         }
-        $response = $this->_methodCaller->call('orderConsumeNotification', [$request->getContent()]);
+        $response = $this->methodCaller->call('orderConsumeNotification', [$request->getContent()]);
         if ($response) {
             return [
                 'payuplOrderId' => $response->order->orderId,
@@ -218,16 +217,16 @@ class Order implements OrderInterface
      */
     public function getDataForOrderCreate(\Magento\Sales\Model\Order $order)
     {
-        $data = ['products' => $this->_dataGetter->getProductsData($order)];
-        $shippingData = $this->_dataGetter->getShippingData($order);
+        $data = ['products' => $this->dataGetter->getProductsData($order)];
+        $shippingData = $this->dataGetter->getShippingData($order);
         if ($shippingData) {
             $data['products'][] = $shippingData;
         }
-        $buyerData = $this->_dataGetter->getBuyerData($order);
+        $buyerData = $this->dataGetter->getBuyerData($order);
         if ($buyerData) {
             $data['buyer'] = $buyerData;
         }
-        $basicData = $this->_dataGetter->getBasicData($order);
+        $basicData = $this->dataGetter->getBasicData($order);
         return array_merge($basicData, $data);
     }
 
@@ -244,7 +243,7 @@ class Order implements OrderInterface
      */
     public function paymentSuccessCheck()
     {
-        return is_null($this->_request->getParam('error'));
+        return is_null($this->request->getParam('error'));
     }
 
     /**
@@ -252,7 +251,10 @@ class Order implements OrderInterface
      */
     public function canProcessNotification($payuplOrderId)
     {
-        return !in_array($this->_transactionResource->getStatusByPayuplOrderId($payuplOrderId), [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+        return !in_array(
+            $this->transactionResource->getStatusByPayuplOrderId($payuplOrderId),
+            [self::STATUS_COMPLETED, self::STATUS_CANCELLED]
+        );
     }
 
     /**
@@ -263,9 +265,9 @@ class Order implements OrderInterface
         /**
          * @var $result \Magento\Framework\Controller\Result\Raw
          */
-        $newest = $this->_transactionResource->checkIfNewestByPayuplOrderId($payuplOrderId);
-        $this->_orderProcessor->processStatusChange($payuplOrderId, $status, $amount, $newest);
-        $result = $this->_rawResultFactory->create();
+        $newest = $this->transactionResource->checkIfNewestByPayuplOrderId($payuplOrderId);
+        $this->orderProcessor->processStatusChange($payuplOrderId, $status, $amount, $newest);
+        $result = $this->rawResultFactory->create();
         $result->setHttpResponseCode(200);
         return $result;
     }
@@ -283,8 +285,8 @@ class Order implements OrderInterface
      */
     public function getStatusDescription($status)
     {
-        if (isset($this->_statusDescription[$status])) {
-            return (string) __($this->_statusDescription[$status]);
+        if (isset($this->statusDescription[$status])) {
+            return (string) __($this->statusDescription[$status]);
         }
         return false;
     }

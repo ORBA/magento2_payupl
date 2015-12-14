@@ -12,37 +12,37 @@ class End extends \Magento\Framework\App\Action\Action
     /**
      * @var \Magento\Checkout\Model\Session\SuccessValidator
      */
-    protected $_successValidator;
+    protected $successValidator;
 
     /**
      * @var \Magento\Checkout\Model\Session
      */
-    protected $_checkoutSession;
+    protected $checkoutSession;
 
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
      * @var \Magento\Framework\App\Action\Context
      */
-    protected $_context;
+    protected $context;
 
     /**
      * @var \Orba\Payupl\Model\Order
      */
-    protected $_orderHelper;
+    protected $orderHelper;
 
     /**
      * @var \Orba\Payupl\Logger\Logger
      */
-    protected $_logger;
+    protected $logger;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -61,16 +61,15 @@ class End extends \Magento\Framework\App\Action\Action
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Orba\Payupl\Model\Order $orderHelper,
         \Orba\Payupl\Logger\Logger $logger
-    )
-    {
+    ) {
         parent::__construct($context);
-        $this->_context = $context;
-        $this->_successValidator = $successValidator;
-        $this->_checkoutSession = $checkoutSession;
-        $this->_session = $session;
-        $this->_clientFactory = $clientFactory;
-        $this->_orderHelper = $orderHelper;
-        $this->_logger = $logger;
+        $this->context = $context;
+        $this->successValidator = $successValidator;
+        $this->checkoutSession = $checkoutSession;
+        $this->session = $session;
+        $this->clientFactory = $clientFactory;
+        $this->orderHelper = $orderHelper;
+        $this->logger = $logger;
     }
 
     /**
@@ -84,29 +83,25 @@ class End extends \Magento\Framework\App\Action\Action
         $resultRedirect = $this->resultRedirectFactory->create();
         $redirectUrl = '/';
         try {
-            if ($this->_successValidator->isValid()) {
+            if ($this->successValidator->isValid()) {
                 $redirectUrl = 'orba_payupl/payment/error';
-                $this->_session->setLastOrderId(null);
-                $clientOrderHelper = $this->_getClientOrderHelper();
-                if (
-                    $this->_orderHelper->paymentSuccessCheck() &&
-                    $clientOrderHelper->paymentSuccessCheck()
-                ) {
+                $this->session->setLastOrderId(null);
+                $clientOrderHelper = $this->getClientOrderHelper();
+                if ($this->orderHelper->paymentSuccessCheck() && $clientOrderHelper->paymentSuccessCheck()) {
                     $redirectUrl = 'checkout/onepage/success';
                 }
 
-            } else if ($this->_session->getLastOrderId()) {
-                $redirectUrl = 'orba_payupl/payment/repeat_error';
-                $clientOrderHelper = $this->_getClientOrderHelper();
-                if (
-                    $this->_orderHelper->paymentSuccessCheck() &&
-                    $clientOrderHelper->paymentSuccessCheck()
-                ) {
-                    $redirectUrl = 'orba_payupl/payment/repeat_success';
+            } else {
+                if ($this->session->getLastOrderId()) {
+                    $redirectUrl = 'orba_payupl/payment/repeat_error';
+                    $clientOrderHelper = $this->getClientOrderHelper();
+                    if ($this->orderHelper->paymentSuccessCheck() && $clientOrderHelper->paymentSuccessCheck()) {
+                        $redirectUrl = 'orba_payupl/payment/repeat_success';
+                    }
                 }
             }
         } catch (Exception $e) {
-            $this->_logger->critical($e);
+            $this->logger->critical($e);
         }
         $resultRedirect->setPath($redirectUrl);
         return $resultRedirect;
@@ -115,8 +110,8 @@ class End extends \Magento\Framework\App\Action\Action
     /**
      * @return \Orba\Payupl\Model\Client\OrderInterface
      */
-    protected function _getClientOrderHelper()
+    protected function getClientOrderHelper()
     {
-        return $this->_clientFactory->create()->getOrderHelper();
+        return $this->clientFactory->create()->getOrderHelper();
     }
 }

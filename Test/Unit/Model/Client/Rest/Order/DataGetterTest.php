@@ -12,44 +12,46 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     /**
      * @var DataGetter
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_urlBuilder;
+    protected $urlBuilder;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_configHelper;
+    protected $configHelper;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_extOrderIdHelper;
+    protected $extOrderIdHelper;
 
     /**
      * @var \Magento\Framework\View\Context
      */
-    protected $_context;
+    protected $context;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
-        $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Rest\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)->disableOriginalConstructor()->getMock();
-        $this->_context = $objectManagerHelper->getObject(
+        $this->urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
+        $this->configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Rest\Config::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->_urlBuilder]
+            ['urlBuilder' => $this->urlBuilder]
         );
-        $this->_model = $objectManagerHelper->getObject(
+        $this->model = $objectManagerHelper->getObject(
             DataGetter::class,
             [
-                'context' => $this->_context,
-                'configHelper' => $this->_configHelper,
-                'extOrderIdHelper' => $this->_extOrderIdHelper
+                'context' => $this->context,
+                'configHelper' => $this->configHelper,
+                'extOrderIdHelper' => $this->extOrderIdHelper
             ]
         );
     }
@@ -59,8 +61,8 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $path = 'orba_payupl/payment/end';
         $baseUrl = 'http://example.com/';
         $url = $baseUrl . $path;
-        $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
-        $this->assertEquals($url, $this->_model->getContinueUrl());
+        $this->urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
+        $this->assertEquals($url, $this->model->getContinueUrl());
     }
 
     public function testNotifyUrl()
@@ -68,22 +70,23 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $path = 'orba_payupl/payment/notify';
         $baseUrl = 'http://example.com/';
         $url = $baseUrl . $path;
-        $this->_urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
-        $this->assertEquals($url, $this->_model->getNotifyUrl());
+        $this->urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
+        $this->assertEquals($url, $this->model->getNotifyUrl());
     }
 
     public function testCustomerIp()
     {
         $ip = '127.0.0.1';
         $_SERVER['REMOTE_ADDR'] = $ip;
-        $this->assertEquals($ip, $this->_model->getCustomerIp());
+        $this->assertEquals($ip, $this->model->getCustomerIp());
     }
 
     public function testMerchantPosId()
     {
         $merchantPosId = '123456';
-        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('merchant_pos_id'))->willReturn($merchantPosId);
-        $this->assertEquals($merchantPosId, $this->_model->getMerchantPosId());
+        $this->configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('merchant_pos_id'))
+            ->willReturn($merchantPosId);
+        $this->assertEquals($merchantPosId, $this->model->getMerchantPosId());
     }
 
     public function testGetBasicData()
@@ -97,13 +100,14 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $order->expects($this->once())->method('getIncrementId')->willReturn($incrementId);
         $order->expects($this->once())->method('getOrderCurrencyCode')->willReturn($currency);
         $order->expects($this->once())->method('getGrandTotal')->willReturn($amount);
-        $this->_extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))->willReturn($extOrderId);
+        $this->extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))
+            ->willReturn($extOrderId);
         $this->assertEquals([
             'currencyCode' => $currency,
             'totalAmount' => $amount * 100,
             'extOrderId' => $extOrderId,
             'description' => $description,
-        ], $this->_model->getBasicData($order));
+        ], $this->model->getBasicData($order));
     }
 
     public function testGetProductsData()
@@ -112,7 +116,8 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $price = '5.4900';
         $quantity = '1.5';
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $orderItem = $this->getMockBuilder(\Magento\Sales\Api\Data\OrderItemInterface::class)->getMockForAbstractClass();
+        $orderItem = $this->getMockBuilder(\Magento\Sales\Api\Data\OrderItemInterface::class)
+            ->getMockForAbstractClass();
         $orderItem->expects($this->once())->method('getName')->willReturn($name);
         $orderItem->expects($this->once())->method('getPriceInclTax')->willReturn($price);
         $orderItem->expects($this->once())->method('getQtyOrdered')->willReturn($quantity);
@@ -120,7 +125,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             $orderItem
         ];
         $order->expects($this->once())->method('getAllVisibleItems')->willReturn($orderItems);
-        $productsData = $this->_model->getProductsData($order);
+        $productsData = $this->model->getProductsData($order);
         $this->assertEquals([
             [
                 'name' => $name,
@@ -135,7 +140,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     {
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
         $order->expects($this->once())->method('getShippingMethod')->willReturn(null);
-        $this->assertNull($this->_model->getShippingData($order));
+        $this->assertNull($this->model->getShippingData($order));
     }
 
     public function testGetShippingDataMethodSetFree()
@@ -145,7 +150,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
         $order->expects($this->once())->method('getShippingMethod')->willReturn($shippingMethod);
         $order->expects($this->once())->method('getShippingInclTax')->willReturn($shippingAmount);
-        $this->assertNull($this->_model->getShippingData($order));
+        $this->assertNull($this->model->getShippingData($order));
     }
 
     public function testGetShippingDataMethodSet()
@@ -161,14 +166,14 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             'name' => __('Shipping Method') . ': ' . $shippingDescription,
             'unitPrice' => $shippingAmount * 100,
             'quantity' => 1
-        ], $this->_model->getShippingData($order));
+        ], $this->model->getShippingData($order));
     }
 
     public function testGetBuyerDataNoAddress()
     {
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
         $order->expects($this->once())->method('getBillingAddress')->willReturn(null);
-        $this->assertEquals(null, $this->_model->getBuyerData($order));
+        $this->assertEquals(null, $this->model->getBuyerData($order));
     }
 
     public function testGetBuyerData()
@@ -178,7 +183,8 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $firstname = 'Jan';
         $lastname = 'Kowalski';
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $orderAddress = $this->getMockBuilder(\Magento\Sales\Api\Data\OrderAddressInterface::class)->getMockForAbstractClass();
+        $orderAddress = $this->getMockBuilder(\Magento\Sales\Api\Data\OrderAddressInterface::class)
+            ->getMockForAbstractClass();
         $orderAddress->expects($this->once())->method('getEmail')->willReturn($email);
         $orderAddress->expects($this->once())->method('getTelephone')->willReturn($phone);
         $orderAddress->expects($this->once())->method('getFirstname')->willReturn($firstname);
@@ -189,6 +195,6 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             'phone' => $phone,
             'firstName' => $firstname,
             'lastName' => $lastname
-        ], $this->_model->getBuyerData($order));
+        ], $this->model->getBuyerData($order));
     }
 }

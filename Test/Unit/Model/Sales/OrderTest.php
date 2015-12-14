@@ -10,16 +10,16 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     /**
      * @var Order
      */
-    protected $_model;
+    protected $model;
 
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_model = $objectManager->getObject(Order::class, []);
+        $this->model = $objectManager->getObject(Order::class, []);
     }
 
     public function testGetConfig()
     {
-        $this->assertInstanceOf(Order\Config::class, $this->_model->getConfig());
+        $this->assertInstanceOf(Order\Config::class, $this->model->getConfig());
     }
 }

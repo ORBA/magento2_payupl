@@ -12,7 +12,7 @@ class Transaction extends AbstractDb
     /**
      * @var \Magento\Framework\Stdlib\DateTime
      */
-    protected $_date;
+    protected $date;
 
     /**
      * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
@@ -23,13 +23,12 @@ class Transaction extends AbstractDb
         \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Magento\Framework\Stdlib\DateTime $date,
         $resourcePrefix = null
-    )
-    {
+    ) {
         parent::__construct(
             $context,
             $resourcePrefix
         );
-        $this->_date = $date;
+        $this->date = $date;
     }
 
     /**
@@ -85,7 +84,7 @@ class Transaction extends AbstractDb
      */
     public function getOrderIdByPayuplOrderId($payuplOrderId)
     {
-        return $this->_getOneFieldByAnother('order_id', 'txn_id', $payuplOrderId);
+        return $this->getOneFieldByAnother('order_id', 'txn_id', $payuplOrderId);
     }
 
     /**
@@ -94,7 +93,7 @@ class Transaction extends AbstractDb
      */
     public function getStatusByPayuplOrderId($payuplOrderId)
     {
-        return $this->_getAdditionalDataByPayuplOrderId($payuplOrderId, 'status');
+        return $this->getAdditionalDataByPayuplOrderId($payuplOrderId, 'status');
     }
 
     /**
@@ -103,7 +102,7 @@ class Transaction extends AbstractDb
      */
     public function getLastTryByOrderId($orderId)
     {
-        return $this->_getLastAdditionalDataFieldByOrderId($orderId, 'try', 0);
+        return $this->getLastAdditionalDataFieldByOrderId($orderId, 'try', 0);
     }
 
     /**
@@ -112,7 +111,7 @@ class Transaction extends AbstractDb
      */
     public function getExtOrderIdByPayuplOrderId($payuplOrderId)
     {
-        return $this->_getAdditionalDataByPayuplOrderId($payuplOrderId, 'order_id');
+        return $this->getAdditionalDataByPayuplOrderId($payuplOrderId, 'order_id');
     }
 
     /**
@@ -121,7 +120,7 @@ class Transaction extends AbstractDb
      */
     public function getIdByPayuplOrderId($payuplOrderId)
     {
-        return $this->_getOneFieldByAnother('transaction_id', 'txn_id', $payuplOrderId);
+        return $this->getOneFieldByAnother('transaction_id', 'txn_id', $payuplOrderId);
     }
 
     /**
@@ -130,10 +129,13 @@ class Transaction extends AbstractDb
      */
     public function getLastStatusByOrderId($orderId)
     {
-        return $this->_getLastAdditionalDataFieldByOrderId($orderId, 'status', false);
+        return $this->getLastAdditionalDataFieldByOrderId($orderId, 'status', false);
     }
 
-    protected function _construct() {}
+    protected function _construct()
+    {
+
+    }
 
     /**
      * @param string $getFieldName
@@ -141,7 +143,7 @@ class Transaction extends AbstractDb
      * @param mixed $value
      * @return mixed|false
      */
-    protected function _getOneFieldByAnother($getFieldName, $byFieldName, $value)
+    protected function getOneFieldByAnother($getFieldName, $byFieldName, $value)
     {
         $adapter = $this->getConnection();
         $select = $adapter->select()
@@ -162,9 +164,13 @@ class Transaction extends AbstractDb
      * @param string $field
      * @return mixed
      */
-    protected function _getAdditionalDataByPayuplOrderId($payuplOrderId, $field)
+    protected function getAdditionalDataByPayuplOrderId($payuplOrderId, $field)
     {
-        $serializedAdditionalInformation = $this->_getOneFieldByAnother('additional_information', 'txn_id', $payuplOrderId);
+        $serializedAdditionalInformation = $this->getOneFieldByAnother(
+            'additional_information',
+            'txn_id',
+            $payuplOrderId
+        );
         if ($serializedAdditionalInformation) {
             $additionalInformation = unserialize($serializedAdditionalInformation);
             return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
@@ -178,7 +184,7 @@ class Transaction extends AbstractDb
      * @param $valueIfNotFound
      * @return mixed
      */
-    protected function _getLastAdditionalDataFieldByOrderId($orderId, $field, $valueIfNotFound)
+    protected function getLastAdditionalDataFieldByOrderId($orderId, $field, $valueIfNotFound)
     {
         $adapter = $this->getConnection();
         $select = $adapter->select()

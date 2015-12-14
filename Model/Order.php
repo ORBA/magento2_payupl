@@ -8,34 +8,34 @@ namespace Orba\Payupl\Model;
 class Order
 {
     /**
-     * @var Resource\Transaction
+     * @var ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
-     * @var \Magento\Sales\Model\OrderFactory
+     * @var Sales\OrderFactory
      */
-    protected $_orderFactory;
+    protected $orderFactory;
 
     /**
      * @var \Magento\Checkout\Model\Session\SuccessValidator
      */
-    protected $_checkoutSuccessValidator;
+    protected $checkoutSuccessValidator;
 
     /**
      * @var \Magento\Checkout\Model\Session
      */
-    protected $_checkoutSession;
+    protected $checkoutSession;
 
     /**
      * @var \Magento\Framework\App\RequestInterface
      */
-    protected $_request;
+    protected $request;
 
     /**
      * @var Order\Validator
      */
-    protected $_orderValidator;
+    protected $orderValidator;
 
     /**
      * @param ResourceModel\Transaction $transactionResource
@@ -52,14 +52,13 @@ class Order
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\App\RequestInterface $request,
         Order\Validator $orderValidator
-    )
-    {
-        $this->_transactionResource = $transactionResource;
-        $this->_orderFactory = $orderFactory;
-        $this->_checkoutSuccessValidator = $checkoutSuccessValidator;
-        $this->_checkoutSession = $checkoutSession;
-        $this->_request = $request;
-        $this->_orderValidator = $orderValidator;
+    ) {
+        $this->transactionResource = $transactionResource;
+        $this->orderFactory = $orderFactory;
+        $this->checkoutSuccessValidator = $checkoutSuccessValidator;
+        $this->checkoutSession = $checkoutSession;
+        $this->request = $request;
+        $this->orderValidator = $orderValidator;
     }
 
     /**
@@ -70,14 +69,18 @@ class Order
      * @param string $payuplExternalOrderId
      * @param string $status
      */
-    public function addNewOrderTransaction(\Magento\Sales\Model\Order $order, $payuplOrderId, $payuplExternalOrderId, $status)
-    {
+    public function addNewOrderTransaction(
+        \Magento\Sales\Model\Order $order,
+        $payuplOrderId,
+        $payuplExternalOrderId,
+        $status
+    ) {
         $orderId = $order->getId();
         $payment = $order->getPayment();
         $payment->setTransactionId($payuplOrderId);
         $payment->setTransactionAdditionalInfo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, [
             'order_id' => $payuplExternalOrderId,
-            'try' => $this->_transactionResource->getLastTryByOrderId($orderId) + 1,
+            'try' => $this->transactionResource->getLastTryByOrderId($orderId) + 1,
             'status' => $status
         ]);
         $payment->setIsTransactionClosed(0);
@@ -95,7 +98,7 @@ class Order
         /**
          * @var $order Sales\Order
          */
-        $order = $this->_orderFactory->create();
+        $order = $this->orderFactory->create();
         $order->load($orderId);
         if ($order->getId()) {
             return $order;
@@ -109,7 +112,7 @@ class Order
      */
     public function loadOrderByPayuplOrderId($payuplOrderId)
     {
-        $orderId = $this->_transactionResource->getOrderIdByPayuplOrderId($payuplOrderId);
+        $orderId = $this->transactionResource->getOrderIdByPayuplOrderId($payuplOrderId);
         if ($orderId) {
             return $this->loadOrderById($orderId);
         }
@@ -169,10 +172,10 @@ class Order
      */
     public function getOrderIdForPaymentStart()
     {
-        if ($this->_checkoutSuccessValidator->isValid()) {
-            return $this->_checkoutSession->getLastOrderId();
+        if ($this->checkoutSuccessValidator->isValid()) {
+            return $this->checkoutSession->getLastOrderId();
         }
-        $orderId = $this->_request->getParam('id');
+        $orderId = $this->request->getParam('id');
         if ($orderId) {
             return $orderId;
         }
@@ -193,10 +196,10 @@ class Order
     public function canStartFirstPayment(\Magento\Sales\Model\Order $order)
     {
         return
-            $this->_orderValidator->validateCustomer($order) &&
-            $this->_orderValidator->validateNoTransactions($order) &&
-            $this->_orderValidator->validatePaymentMethod($order) &&
-            $this->_orderValidator->validateState($order);
+            $this->orderValidator->validateCustomer($order) &&
+            $this->orderValidator->validateNoTransactions($order) &&
+            $this->orderValidator->validatePaymentMethod($order) &&
+            $this->orderValidator->validateState($order);
     }
 
     /**
@@ -206,11 +209,11 @@ class Order
     public function canRepeatPayment(\Magento\Sales\Model\Order $order)
     {
         return
-            $this->_orderValidator->validateCustomer($order) &&
-            $this->_orderValidator->validatePaymentMethod($order) &&
-            $this->_orderValidator->validateState($order) &&
-            $this->_orderValidator->validateNotPaid($order) &&
-            !$this->_orderValidator->validateNoTransactions($order);
+            $this->orderValidator->validateCustomer($order) &&
+            $this->orderValidator->validatePaymentMethod($order) &&
+            $this->orderValidator->validateState($order) &&
+            $this->orderValidator->validateNotPaid($order) &&
+            !$this->orderValidator->validateNoTransactions($order);
     }
 
     /**
@@ -218,6 +221,6 @@ class Order
      */
     public function paymentSuccessCheck()
     {
-        return is_null($this->_request->getParam('exception'));
+        return is_null($this->request->getParam('exception'));
     }
 }

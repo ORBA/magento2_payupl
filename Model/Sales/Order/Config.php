@@ -16,7 +16,7 @@ class Config extends \Magento\Sales\Model\Order\Config
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
-    protected $_scopeConfig;
+    protected $scopeConfig;
 
     public function __construct(
         \Magento\Sales\Model\Order\StatusFactory $orderStatusFactory,
@@ -29,7 +29,7 @@ class Config extends \Magento\Sales\Model\Order\Config
             $orderStatusCollectionFactory,
             $state
         );
-        $this->_scopeConfig = $scopeConfig;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -42,11 +42,11 @@ class Config extends \Magento\Sales\Model\Order\Config
     {
         switch ($state) {
             case Order::STATE_PENDING_PAYMENT:
-                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_NEW, 'store');
+                return $this->scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_NEW, 'store');
             case Order::STATE_HOLDED:
-                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_HOLDED, 'store');
+                return $this->scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_HOLDED, 'store');
             case Order::STATE_PROCESSING:
-                return $this->_scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_PROCESSING, 'store');
+                return $this->scopeConfig->getValue(self::XML_PATH_ORDER_STATUS_PROCESSING, 'store');
         }
         return parent::getStateDefaultStatus($state);
     }

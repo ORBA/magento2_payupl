@@ -13,13 +13,12 @@ class Processor
     /**
      * @var \Orba\Payupl\Model\Order\Processor
      */
-    protected $_orderProcessor;
+    protected $orderProcessor;
 
     public function __construct(
         \Orba\Payupl\Model\Order\Processor $orderProcessor
-    )
-    {
-        $this->_orderProcessor = $orderProcessor;
+    ) {
+        $this->orderProcessor = $orderProcessor;
     }
 
     /**
@@ -41,7 +40,8 @@ class Processor
             Order::STATUS_REJECTED_CANCELLED,
             Order::STATUS_COMPLETED,
             Order::STATUS_ERROR
-        ])) {
+        ])
+        ) {
             throw new Exception('Invalid status.');
         }
         if (!$newest) {
@@ -50,25 +50,25 @@ class Processor
                 Order::STATUS_REJECTED,
                 Order::STATUS_COMPLETED
             ]);
-            $this->_orderProcessor->processOld($payuplOrderId, $status, $close);
+            $this->orderProcessor->processOld($payuplOrderId, $status, $close);
             return true;
         }
         switch ($status) {
             case Order::STATUS_NEW:
             case Order::STATUS_PENDING:
-                $this->_orderProcessor->processPending($payuplOrderId, $status);
+                $this->orderProcessor->processPending($payuplOrderId, $status);
                 return true;
             case Order::STATUS_CANCELLED:
             case Order::STATUS_REJECTED:
             case Order::STATUS_REJECTED_CANCELLED:
             case Order::STATUS_ERROR:
-                $this->_orderProcessor->processHolded($payuplOrderId, $status);
+                $this->orderProcessor->processHolded($payuplOrderId, $status);
                 return true;
             case Order::STATUS_WAITING:
-                $this->_orderProcessor->processWaiting($payuplOrderId, $status);
+                $this->orderProcessor->processWaiting($payuplOrderId, $status);
                 return true;
             case Order::STATUS_COMPLETED:
-                $this->_orderProcessor->processCompleted($payuplOrderId, $status, $amount);
+                $this->orderProcessor->processCompleted($payuplOrderId, $status, $amount);
                 return true;
         }
     }

@@ -10,12 +10,12 @@ class Success extends \Magento\Framework\App\Action\Action
     /**
      * @var \Magento\Framework\View\Result\PageFactory
      */
-    protected $_resultPageFactory;
+    protected $resultPageFactory;
 
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -26,18 +26,17 @@ class Success extends \Magento\Framework\App\Action\Action
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Orba\Payupl\Model\Session $session
-    )
-    {
-        $this->_resultPageFactory = $resultPageFactory;
-        $this->_session = $session;
+    ) {
+        $this->resultPageFactory = $resultPageFactory;
+        $this->session = $session;
         parent::__construct($context);
     }
 
     public function execute()
     {
-        if ($this->_session->getLastOrderId()) {
-            $this->_session->setLastOrderId(null);
-            $resultPage = $this->_resultPageFactory->create();
+        if ($this->session->getLastOrderId()) {
+            $this->session->setLastOrderId(null);
+            $resultPage = $this->resultPageFactory->create();
             $resultPage->getConfig()->getTitle()->set(__('Thank you for your payment!'));
             return $resultPage;
         } else {

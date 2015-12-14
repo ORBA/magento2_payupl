@@ -10,7 +10,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     /**
      * @var array
      */
-    protected $_requiredProductKeys = [
+    protected $requiredProductKeys = [
         'name',
         'unitPrice',
         'quantity'
@@ -19,7 +19,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     /**
      * @var array
      */
-    protected $_requiredBasicKeys = [
+    protected $requiredBasicKeys = [
         'description',
         'currencyCode',
         'totalAmount',
@@ -30,7 +30,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     /**
      * @var array
      */
-    protected $_requiredStatusUpdateKeys = [
+    protected $requiredStatusUpdateKeys = [
         'orderId',
         'orderStatus'
     ];
@@ -49,7 +49,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
      */
     public function validateBasicData(array $data = [])
     {
-        foreach ($this->_getRequiredBasicKeys() as $key) {
+        foreach ($this->getRequiredBasicKeys() as $key) {
             if (!isset($data[$key]) || empty($data[$key])) {
                 return false;
             }
@@ -64,7 +64,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     public function validateProductsData(array $data = [])
     {
         if (isset($data['products']) && !empty($data['products'])) {
-            $requiredProductKeys = $this->_getRequiredProductKeys();
+            $requiredProductKeys = $this->getRequiredProductKeys();
             foreach ($data['products'] as $productData) {
                 foreach ($requiredProductKeys as $key) {
                     if (!isset($productData[$key]) || $productData[$key] === '') {
@@ -85,12 +85,12 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
      */
     public function validateStatusUpdateData($data)
     {
-        foreach ($this->_getRequiredStatusUpdateKeys() as $key) {
+        foreach ($this->getRequiredStatusUpdateKeys() as $key) {
             if (!isset($data[$key]) || empty($data[$key])) {
                 return false;
             }
         }
-        $validStatuses = $this->_getValidStatusUpdateOrderStatuses();
+        $validStatuses = $this->getValidStatusUpdateOrderStatuses();
         if (!in_array($data['orderStatus'], $validStatuses)) {
             return false;
         }
@@ -100,33 +100,32 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     /**
      * @return array
      */
-    protected function _getRequiredBasicKeys()
+    protected function getRequiredBasicKeys()
     {
-        return $this->_requiredBasicKeys;
+        return $this->requiredBasicKeys;
     }
 
     /**
      * @return array
      */
-    protected function _getRequiredProductKeys()
+    protected function getRequiredProductKeys()
     {
-        return $this->_requiredProductKeys;
+        return $this->requiredProductKeys;
     }
 
     /**
      * @return array
      */
-    protected function _getRequiredStatusUpdateKeys()
+    protected function getRequiredStatusUpdateKeys()
     {
-        return $this->_requiredStatusUpdateKeys;
+        return $this->requiredStatusUpdateKeys;
     }
 
     /**
      * @return array
      */
-    protected function _getValidStatusUpdateOrderStatuses()
+    protected function getValidStatusUpdateOrderStatuses()
     {
         return $this->validStatusUpdateOrderStatuses;
     }
-
 }

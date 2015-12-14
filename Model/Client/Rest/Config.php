@@ -14,16 +14,15 @@ class Config implements ConfigInterface
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
-    protected $_scopeConfig;
+    protected $scopeConfig;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-    )
-    {
-        $this->_scopeConfig = $scopeConfig;
+    ) {
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -33,13 +32,13 @@ class Config implements ConfigInterface
     public function setConfig()
     {
         \OpenPayU_Configuration::setEnvironment('secure');
-        $merchantPosId = $this->_scopeConfig->getValue(Payupl::XML_PATH_POS_ID, 'store');
+        $merchantPosId = $this->scopeConfig->getValue(Payupl::XML_PATH_POS_ID, 'store');
         if ($merchantPosId) {
             \OpenPayU_Configuration::setMerchantPosId($merchantPosId);
         } else {
             throw new Exception('Merchant POS ID is empty.');
         }
-        $signatureKey = $this->_scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5, 'store');
+        $signatureKey = $this->scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5, 'store');
         if ($signatureKey) {
             \OpenPayU_Configuration::setSignatureKey($signatureKey);
         } else {
@@ -63,5 +62,4 @@ class Config implements ConfigInterface
         }
         return $config;
     }
-
 }

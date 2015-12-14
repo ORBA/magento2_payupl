@@ -12,17 +12,17 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @var \Magento\Payment\Helper\Data
      */
-    protected $_paymentHelper;
+    protected $paymentHelper;
 
     /**
      * @var Order\Paytype
      */
-    protected $_paytypeHelper;
+    protected $paytypeHelper;
 
     /**
      * @var \Magento\Checkout\Model\Session
      */
-    protected $_checkoutSession;
+    protected $checkoutSession;
 
     /**
      * @param \Magento\Payment\Helper\Data $paymentHelper
@@ -31,11 +31,10 @@ class ConfigProvider implements ConfigProviderInterface
         \Magento\Payment\Helper\Data $paymentHelper,
         Order\Paytype $paytypeHelper,
         \Magento\Checkout\Model\Session $checkoutSession
-    )
-    {
-        $this->_paymentHelper = $paymentHelper;
-        $this->_paytypeHelper = $paytypeHelper;
-        $this->_checkoutSession = $checkoutSession;
+    ) {
+        $this->paymentHelper = $paymentHelper;
+        $this->paytypeHelper = $paytypeHelper;
+        $this->checkoutSession = $checkoutSession;
     }
 
     /**
@@ -47,15 +46,15 @@ class ConfigProvider implements ConfigProviderInterface
          * @var $payment Payupl
          */
         $config = [];
-        $payment = $this->_paymentHelper->getMethodInstance(Payupl::CODE);
+        $payment = $this->paymentHelper->getMethodInstance(Payupl::CODE);
         if ($payment->isAvailable()) {
             $redirectUrl = $payment->getCheckoutRedirectUrl();
-            $quote = $this->_checkoutSession->getQuote();
+            $quote = $this->checkoutSession->getQuote();
             $config = [
                 'payment' => [
                     'orbaPayupl' => [
                         'redirectUrl' => $redirectUrl,
-                        'paytypes' => $this->_paytypeHelper->getAllForQuote($quote)
+                        'paytypes' => $this->paytypeHelper->getAllForQuote($quote)
                     ]
                 ]
             ];

@@ -10,21 +10,23 @@ class ErrorTest extends \PHPUnit_Framework_TestCase
     /**
      * @var Error
      */
-    protected $_controller;
+    protected $controller;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_resultPageFactory;
+    protected $resultPageFactory;
 
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $context = $this->getMockBuilder(\Magento\Framework\App\Action\Context::class)->disableOriginalConstructor()->getMock();
-        $this->_resultPageFactory = $this->getMockBuilder(\Magento\Framework\View\Result\PageFactory::class)->disableOriginalConstructor()->getMock();
-        $this->_controller = $objectManager->getObject(Error::class, [
+        $context = $this->getMockBuilder(\Magento\Framework\App\Action\Context::class)->disableOriginalConstructor()
+            ->getMock();
+        $this->resultPageFactory = $this->getMockBuilder(\Magento\Framework\View\Result\PageFactory::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->controller = $objectManager->getObject(Error::class, [
             'context' => $context,
-            'resultPageFactory' => $this->_resultPageFactory
+            'resultPageFactory' => $this->resultPageFactory
         ]);
     }
 
@@ -36,7 +38,7 @@ class ErrorTest extends \PHPUnit_Framework_TestCase
         $config->expects($this->once())->method('getTitle')->willReturn($title);
         $page = $this->getMockBuilder('Magento\Framework\View\Result\Page')->disableOriginalConstructor()->getMock();
         $page->expects($this->once())->method('getConfig')->willReturn($config);
-        $this->_resultPageFactory->expects($this->once())->method('create')->willReturn($page);
-        $this->assertEquals($page, $this->_controller->execute());
+        $this->resultPageFactory->expects($this->once())->method('create')->willReturn($page);
+        $this->assertEquals($page, $this->controller->execute());
     }
 }

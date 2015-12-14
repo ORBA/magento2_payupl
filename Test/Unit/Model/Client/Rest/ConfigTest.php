@@ -16,13 +16,14 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     /**
      * @var Config
      */
-    protected $_model;
+    protected $model;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)->getMock();
-        $this->_model = $objectManagerHelper->getObject(
+        $this->_scopeConfig = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)
+            ->getMock();
+        $this->model = $objectManagerHelper->getObject(
             Config::class,
             [
                 'scopeConfig' => $this->_scopeConfig
@@ -32,7 +33,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConfigWhole()
     {
-        $result = $this->_model->getConfig();
+        $result = $this->model->getConfig();
         $this->assertInternalType('array', $result);
         $this->assertArrayHasKey('merchant_pos_id', $result);
         $this->assertArrayHasKey('signature_key', $result);
@@ -41,8 +42,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testGetConfigByKey()
     {
         $key = 'merchant_pos_id';
-        $resultWhole = $this->_model->getConfig();
-        $result = $this->_model->getConfig($key);
+        $resultWhole = $this->model->getConfig();
+        $result = $this->model->getConfig($key);
         $this->assertEquals($resultWhole[$key], $result);
     }
 
@@ -50,10 +51,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $merchantPosId = self::EXEMPLARY_MERCHANT_POS_ID;
         $signatureKey = self::EXEMPLARY_SIGNATURE_KEY;
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn($merchantPosId);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn($signatureKey);
-        $this->assertTrue($this->_model->setConfig());
-        $this->assertEquals($this->_model->getConfig(), [
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')
+            ->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn($merchantPosId);
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')
+            ->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn($signatureKey);
+        $this->assertTrue($this->model->setConfig());
+        $this->assertEquals($this->model->getConfig(), [
             'merchant_pos_id' => $merchantPosId,
             'signature_key' => $signatureKey
         ]);
@@ -61,16 +64,20 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testSetConfigMerchantPosIdEmpty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')
+            ->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Merchant POS ID is empty.');
-        $this->_model->setConfig();
+        $this->model->setConfig();
     }
 
     public function testSetConfigSignatureKeyEmpty()
     {
-        $this->_scopeConfig->expects($this->at(0))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
-        $this->_scopeConfig->expects($this->at(1))->method('getValue')->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn('');
+        $this->_scopeConfig->expects($this->at(0))->method('getValue')
+            ->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))
+            ->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
+        $this->_scopeConfig->expects($this->at(1))->method('getValue')
+            ->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn('');
         $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Signature key is empty.');
-        $this->_model->setConfig();
+        $this->model->setConfig();
     }
 }

@@ -10,33 +10,33 @@ class RawTest extends \PHPUnit_Framework_TestCase
     /**
      * @var Raw
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_orderClient;
+    protected $orderClient;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_refundClient;
+    protected $refundClient;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_paytypesClient;
+    protected $paytypesClient;
 
     public function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_orderClient = $this->getMockBuilder(SoapClient\Order::class)->disableOriginalConstructor()->getMock();
-        $this->_refundClient = $this->getMockBuilder(SoapClient\Refund::class)->disableOriginalConstructor()->getMock();
-        $this->_paytypesClient = $this->getMockBuilder(PaytypesClient::class)->disableOriginalConstructor()->getMock();
-        $this->_model = $objectManager->getObject(Raw::class, [
-            'orderClient' => $this->_orderClient,
-            'refundClient' => $this->_refundClient,
-            'paytypesClient' => $this->_paytypesClient
+        $this->orderClient = $this->getMockBuilder(SoapClient\Order::class)->disableOriginalConstructor()->getMock();
+        $this->refundClient = $this->getMockBuilder(SoapClient\Refund::class)->disableOriginalConstructor()->getMock();
+        $this->paytypesClient = $this->getMockBuilder(PaytypesClient::class)->disableOriginalConstructor()->getMock();
+        $this->model = $objectManager->getObject(Raw::class, [
+            'orderClient' => $this->orderClient,
+            'refundClient' => $this->refundClient,
+            'paytypesClient' => $this->paytypesClient
         ]);
     }
 
@@ -48,7 +48,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
         $sig = 'DEF';
         $exceptionMessage = 'Exception message';
         $exception = new \Exception($exceptionMessage);
-        $this->_orderClient->expects($this->once())->method('call')->with(
+        $this->orderClient->expects($this->once())->method('call')->with(
             $this->equalTo('get'),
             $this->equalTo([
                 'posId' => $posId,
@@ -58,7 +58,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
             ])
         )->willThrowException($exception);
         $this->setExpectedException(\Exception::class, $exceptionMessage);
-        $this->_model->orderRetrieve($posId, $sessionId, $ts, $sig);
+        $this->model->orderRetrieve($posId, $sessionId, $ts, $sig);
     }
 
     public function testOrderRetrieveSuccess()
@@ -68,7 +68,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
         $ts = '123';
         $sig = 'DEF';
         $result = new \stdClass();
-        $this->_orderClient->expects($this->once())->method('call')->with(
+        $this->orderClient->expects($this->once())->method('call')->with(
             $this->equalTo('get'),
             $this->equalTo([
                 'posId' => $posId,
@@ -77,25 +77,29 @@ class RawTest extends \PHPUnit_Framework_TestCase
                 'sig' => $sig
             ])
         )->willReturn($result);
-        $this->assertEquals($result, $this->_model->orderRetrieve($posId, $sessionId, $ts, $sig));
+        $this->assertEquals($result, $this->model->orderRetrieve($posId, $sessionId, $ts, $sig));
     }
 
     public function testGetPaytypesWithDisabled()
     {
-        $xml = '<paytypes><paytype><type>t</type><name>płatnosc testowa</name><enable>false</enable><img>https://secure.payu.com/static/images/paytype/on-t.gif</img><min>0.50</min><max>1000.00</max></paytype></paytypes>';
-        $result = $this->_getExemplaryPaytypeData(false);
-        $client = $this->_getClientMock($xml);
-        $this->_paytypesClient->expects($this->once())->method('getClient')->willReturn($client);
-        $this->assertEquals($result, $this->_model->getPaytypes());
+        $xml = '<paytypes><paytype><type>t</type><name>płatnosc testowa</name><enable>false</enable>
+            <img>https://secure.payu.com/static/images/paytype/on-t.gif</img><min>0.50</min><max>1000.00</max>
+            </paytype></paytypes>';
+        $result = $this->getExemplaryPaytypeData(false);
+        $client = $this->getClientMock($xml);
+        $this->paytypesClient->expects($this->once())->method('getClient')->willReturn($client);
+        $this->assertEquals($result, $this->model->getPaytypes());
     }
 
     public function testGetPaytypesWithEnabled()
     {
-        $xml = '<paytypes><paytype><type>t</type><name>płatnosc testowa</name><enable>true</enable><img>https://secure.payu.com/static/images/paytype/on-t.gif</img><min>0.50</min><max>1000.00</max></paytype></paytypes>';
-        $result = $this->_getExemplaryPaytypeData(true);
-        $client = $this->_getClientMock($xml);
-        $this->_paytypesClient->expects($this->once())->method('getClient')->willReturn($client);
-        $this->assertEquals($result, $this->_model->getPaytypes());
+        $xml = '<paytypes><paytype><type>t</type><name>płatnosc testowa</name><enable>true</enable>
+            <img>https://secure.payu.com/static/images/paytype/on-t.gif</img><min>0.50</min><max>1000.00</max>
+            </paytype></paytypes>';
+        $result = $this->getExemplaryPaytypeData(true);
+        $client = $this->getClientMock($xml);
+        $this->paytypesClient->expects($this->once())->method('getClient')->willReturn($client);
+        $this->assertEquals($result, $this->model->getPaytypes());
     }
 
     public function testRefundGetFail()
@@ -103,30 +107,30 @@ class RawTest extends \PHPUnit_Framework_TestCase
         $authData = ['data'];
         $exceptionMessage = 'Exception message';
         $exception = new \Exception($exceptionMessage);
-        $this->_refundClient->expects($this->once())->method('call')->with(
+        $this->refundClient->expects($this->once())->method('call')->with(
             $this->equalTo('getRefunds'),
             $this->equalTo(['RefundAuth' => $authData])
         )->willThrowException($exception);
         $this->setExpectedException(\Exception::class, $exceptionMessage);
-        $this->_model->refundGet($authData);
+        $this->model->refundGet($authData);
     }
 
     public function testRefundGetSuccess()
     {
         $authData = ['data'];
         $result = new \stdClass();
-        $this->_refundClient->expects($this->once())->method('call')->with(
+        $this->refundClient->expects($this->once())->method('call')->with(
             $this->equalTo('getRefunds'),
             $this->equalTo(['RefundAuth' => $authData])
         )->willReturn($result);
-        $this->assertEquals($result, $this->_model->refundGet($authData));
+        $this->assertEquals($result, $this->model->refundGet($authData));
     }
 
     /**
      * @param $enable
      * @return array
      */
-    protected function _getExemplaryPaytypeData($enable)
+    protected function getExemplaryPaytypeData($enable)
     {
         return [
             [
@@ -144,7 +148,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
      * @param $xml
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getClientMock($xml)
+    protected function getClientMock($xml)
     {
         $client = $this->getMockBuilder(\Zend\Http\Client::class)->disableOriginalConstructor()->getMock();
         $client->expects($this->once())->method('send');
@@ -153,5 +157,4 @@ class RawTest extends \PHPUnit_Framework_TestCase
         $client->expects($this->once())->method('getResponse')->willReturn($response);
         return $client;
     }
-
 }

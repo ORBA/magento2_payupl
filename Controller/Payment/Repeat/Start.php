@@ -12,17 +12,17 @@ class Start extends \Magento\Framework\App\Action\Action
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
      * @var \Orba\Payupl\Model\Order
      */
-    protected $_orderHelper;
+    protected $orderHelper;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -35,12 +35,11 @@ class Start extends \Magento\Framework\App\Action\Action
         \Orba\Payupl\Model\Session $session,
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Orba\Payupl\Model\Order $orderHelper
-    )
-    {
+    ) {
         parent::__construct($context);
-        $this->_session = $session;
-        $this->_clientFactory = $clientFactory;
-        $this->_orderHelper = $orderHelper;
+        $this->session = $session;
+        $this->clientFactory = $clientFactory;
+        $this->orderHelper = $orderHelper;
     }
 
     /**
@@ -52,22 +51,22 @@ class Start extends \Magento\Framework\App\Action\Action
          * @var $clientOrderHelper \Orba\Payupl\Model\Client\OrderInterface
          */
         $resultRedirect = $this->resultRedirectFactory->create();
-        $orderId = $this->_session->getLastOrderId();
+        $orderId = $this->session->getLastOrderId();
         $redirectParams = [];
         if ($orderId) {
             try {
-                $client = $this->_clientFactory->create();
+                $client = $this->clientFactory->create();
                 $clientOrderHelper = $client->getOrderHelper();
-                $order = $this->_orderHelper->loadOrderById($orderId);
+                $order = $this->orderHelper->loadOrderById($orderId);
                 $orderData = $clientOrderHelper->getDataForOrderCreate($order);
                 $result = $client->orderCreate($orderData);
-                $this->_orderHelper->addNewOrderTransaction(
+                $this->orderHelper->addNewOrderTransaction(
                     $order,
                     $result['orderId'],
                     $result['extOrderId'],
                     $clientOrderHelper->getNewStatus()
                 );
-                $this->_orderHelper->setNewOrderStatus($order);
+                $this->orderHelper->setNewOrderStatus($order);
                 $redirectUrl = $result['redirectUri'];
             } catch (Exception $e) {
                 $redirectUrl = 'orba_payupl/payment/end';

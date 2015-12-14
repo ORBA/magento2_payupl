@@ -12,64 +12,67 @@ class RefundTest extends \PHPUnit_Framework_TestCase
     /**
      * @var Refund
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_dataValidator;
+    protected $dataValidator;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_methodCaller;
+    protected $methodCaller;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_orderDataGetter;
+    protected $orderDataGetter;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_logger;
+    protected $logger;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_dataValidator = $this->getMockBuilder(Refund\DataValidator::class)->getMock();
-        $this->_methodCaller = $this->getMockBuilder(MethodCaller::class)->disableOriginalConstructor()->getMock();
-        $this->_transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\ResourceModel\Transaction::class)->disableOriginalConstructor()->getMock();
-        $this->_orderDataGetter = $this->getMockBuilder(Order\DataGetter::class)->disableOriginalConstructor()->getMock();
-        $this->_logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()->getMock();
-        $this->_model = $objectManagerHelper->getObject(
+        $this->dataValidator = $this->getMockBuilder(Refund\DataValidator::class)->getMock();
+        $this->methodCaller = $this->getMockBuilder(MethodCaller::class)->disableOriginalConstructor()->getMock();
+        $this->transactionResource = $this->getMockBuilder(\Orba\Payupl\Model\ResourceModel\Transaction::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->orderDataGetter = $this->getMockBuilder(Order\DataGetter::class)->disableOriginalConstructor()
+            ->getMock();
+        $this->logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()
+            ->getMock();
+        $this->model = $objectManagerHelper->getObject(
             Refund::class,
             [
-                'dataValidator' => $this->_dataValidator,
-                'methodCaller' => $this->_methodCaller,
-                'transactionResource' => $this->_transactionResource,
-                'orderDataGetter' => $this->_orderDataGetter,
-                'logger' => $this->_logger
+                'dataValidator' => $this->dataValidator,
+                'methodCaller' => $this->methodCaller,
+                'transactionResource' => $this->transactionResource,
+                'orderDataGetter' => $this->orderDataGetter,
+                'logger' => $this->logger
             ]
         );
     }
 
     public function testValidateCreateFailedEmptyOrderId()
     {
-        $this->_dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
-        $this->assertFalse($this->_model->validateCreate('', '', 0));
+        $this->dataValidator->expects($this->once())->method('validateEmpty')->willReturn(false);
+        $this->assertFalse($this->model->validateCreate('', '', 0));
     }
 
     public function testValidateCreateFailedEmptyDescription()
     {
         $orderId = '123456';
-        $this->_dataValidator->method('validateEmpty')->will($this->onConsecutiveCalls(true, false));
-        $this->assertFalse($this->_model->validateCreate($orderId, '', 0));
+        $this->dataValidator->method('validateEmpty')->will($this->onConsecutiveCalls(true, false));
+        $this->assertFalse($this->model->validateCreate($orderId, '', 0));
     }
 
     public function testValidateCreateFailedInvalidAmount()
@@ -77,17 +80,17 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $orderId = '123456';
         $description = 'Description';
         $amount = 'invalid';
-        $this->_expectNotEmptyOrderIdAndDescription($orderId, $description);
-        $this->_dataValidator->expects($this->once())->method('validatePositiveInt')->willReturn(false);
-        $this->assertFalse($this->_model->validateCreate($orderId, $description, $amount));
+        $this->expectNotEmptyOrderIdAndDescription($orderId, $description);
+        $this->dataValidator->expects($this->once())->method('validatePositiveInt')->willReturn(false);
+        $this->assertFalse($this->model->validateCreate($orderId, $description, $amount));
     }
 
     public function testValidateCreateFailedNoAmount()
     {
         $orderId = '123456';
         $description = 'Description';
-        $this->_expectNotEmptyOrderIdAndDescription($orderId, $description);
-        $this->assertFalse($this->_model->validateCreate($orderId, $description));
+        $this->expectNotEmptyOrderIdAndDescription($orderId, $description);
+        $this->assertFalse($this->model->validateCreate($orderId, $description));
     }
 
     public function testValidateCreateSuccessWithAmount()
@@ -95,9 +98,10 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $orderId = '123456';
         $description = 'Description';
         $amount = 100;
-        $this->_expectNotEmptyOrderIdAndDescription($orderId, $description);
-        $this->_dataValidator->expects($this->once())->method('validatePositiveInt')->with($this->equalTo($amount))->willReturn(true);
-        $this->assertTrue($this->_model->validateCreate($orderId, $description, $amount));
+        $this->expectNotEmptyOrderIdAndDescription($orderId, $description);
+        $this->dataValidator->expects($this->once())->method('validatePositiveInt')->with($this->equalTo($amount))
+            ->willReturn(true);
+        $this->assertTrue($this->model->validateCreate($orderId, $description, $amount));
     }
 
     public function testCreateFailExtOrderIdNotFound()
@@ -105,8 +109,9 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $payuplOrderId = '123456';
         $description = 'Description';
         $amount = 100;
-        $this->_transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn(false);
-        $this->assertFalse($this->_model->create($payuplOrderId, $description, $amount));
+        $this->transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')
+            ->with($this->equalTo($payuplOrderId))->willReturn(false);
+        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
     }
 
     public function testCreateFailGet()
@@ -118,20 +123,21 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $posId = '987654';
         $ts = 123;
         $sig = 'abc123';
-        $authData = $this->_getAuthData($posId, $realPayuplOrderId, $ts, $sig);
-        $this->_transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn($realPayuplOrderId);
-        $this->_orderDataGetter->expects($this->once())->method('getPosId')->willReturn($posId);
-        $this->_orderDataGetter->expects($this->once())->method('getTs')->willReturn($ts);
-        $this->_orderDataGetter->expects($this->once())->method('getSigForOrderRetrieve')->with($this->equalTo([
+        $authData = $this->getAuthData($posId, $realPayuplOrderId, $ts, $sig);
+        $this->transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')
+            ->with($this->equalTo($payuplOrderId))->willReturn($realPayuplOrderId);
+        $this->orderDataGetter->expects($this->once())->method('getPosId')->willReturn($posId);
+        $this->orderDataGetter->expects($this->once())->method('getTs')->willReturn($ts);
+        $this->orderDataGetter->expects($this->once())->method('getSigForOrderRetrieve')->with($this->equalTo([
             'pos_id' => $posId,
             'session_id' => $realPayuplOrderId,
             'ts' => $ts
         ]))->willReturn($sig);
-        $this->_methodCaller->expects($this->once())->method('call')->with(
+        $this->methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('refundGet'),
             $this->equalTo([$authData])
         )->willReturn(false);
-        $this->assertFalse($this->_model->create($payuplOrderId, $description, $amount));
+        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
     }
 
     public function testCreateFailAdd()
@@ -139,8 +145,8 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $payuplOrderId = '123456';
         $description = 'Description';
         $amount = 100;
-        $this->_expectRefundAddResult($amount, $description, $payuplOrderId, false);
-        $this->assertFalse($this->_model->create($payuplOrderId, $description, $amount));
+        $this->expectRefundAddResult($amount, $description, $payuplOrderId, false);
+        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
     }
 
     public function testCreateFailStatus()
@@ -149,9 +155,10 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $description = 'Description';
         $amount = 100;
         $error = -5;
-        $this->_expectRefundAddResult($amount, $description, $payuplOrderId, $error);
-        $this->_logger->expects($this->once())->method('error')->with('Refund error ' . $error . ' for transaction ' . $payuplOrderId);
-        $this->assertFalse($this->_model->create($payuplOrderId, $description, $amount));
+        $this->expectRefundAddResult($amount, $description, $payuplOrderId, $error);
+        $this->logger->expects($this->once())->method('error')
+            ->with('Refund error ' . $error . ' for transaction ' . $payuplOrderId);
+        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
     }
 
     public function testCreateSuccess()
@@ -159,17 +166,17 @@ class RefundTest extends \PHPUnit_Framework_TestCase
         $payuplOrderId = '123456';
         $description = 'Description';
         $amount = 100;
-        $this->_expectRefundAddResult($amount, $description, $payuplOrderId, 0);
-        $this->assertTrue($this->_model->create($payuplOrderId, $description, $amount));
+        $this->expectRefundAddResult($amount, $description, $payuplOrderId, 0);
+        $this->assertTrue($this->model->create($payuplOrderId, $description, $amount));
     }
 
     /**
      * @param string $orderId
      * @param string $description
      */
-    protected function _expectNotEmptyOrderIdAndDescription($orderId, $description)
+    protected function expectNotEmptyOrderIdAndDescription($orderId, $description)
     {
-        $this->_dataValidator->method('validateEmpty')->withConsecutive(
+        $this->dataValidator->method('validateEmpty')->withConsecutive(
             [$this->equalTo($orderId)],
             [$this->equalTo($description)]
         )->will($this->onConsecutiveCalls(true, true));
@@ -182,7 +189,7 @@ class RefundTest extends \PHPUnit_Framework_TestCase
      * @param $sig
      * @return array
      */
-    protected function _getAuthData($posId, $realPayuplOrderId, $ts, $sig)
+    protected function getAuthData($posId, $realPayuplOrderId, $ts, $sig)
     {
         return [
             'posId' => $posId,
@@ -196,7 +203,7 @@ class RefundTest extends \PHPUnit_Framework_TestCase
      * @param $refsHash
      * @return object
      */
-    protected function _getGetResult($refsHash)
+    protected function getGetResult($refsHash)
     {
         return (object)[
             'refsHash' => $refsHash
@@ -209,7 +216,7 @@ class RefundTest extends \PHPUnit_Framework_TestCase
      * @param $description
      * @return array
      */
-    protected function _getAddData($refsHash, $amount, $description)
+    protected function getAddData($refsHash, $amount, $description)
     {
         return [
             'refundsHash' => $refsHash,
@@ -225,32 +232,32 @@ class RefundTest extends \PHPUnit_Framework_TestCase
      * @param $payuplOrderId
      * @param $value
      */
-    protected function _expectRefundAddResult($amount, $description, $payuplOrderId, $value)
+    protected function expectRefundAddResult($amount, $description, $payuplOrderId, $value)
     {
         $realPayuplOrderId = '345678';
         $posId = '987654';
         $ts = 123;
         $sig = 'abc123';
-        $authData = $this->_getAuthData($posId, $realPayuplOrderId, $ts, $sig);
+        $authData = $this->getAuthData($posId, $realPayuplOrderId, $ts, $sig);
         $refsHash = 'abc';
-        $getResult = $this->_getGetResult($refsHash);
-        $addData = $this->_getAddData($refsHash, $amount, $description);
-        $this->_transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')->with($this->equalTo($payuplOrderId))->willReturn($realPayuplOrderId);
-        $this->_orderDataGetter->expects($this->once())->method('getPosId')->willReturn($posId);
-        $this->_orderDataGetter->expects($this->once())->method('getTs')->willReturn($ts);
-        $this->_orderDataGetter->expects($this->once())->method('getSigForOrderRetrieve')->with($this->equalTo([
+        $getResult = $this->getGetResult($refsHash);
+        $addData = $this->getAddData($refsHash, $amount, $description);
+        $this->transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')
+            ->with($this->equalTo($payuplOrderId))->willReturn($realPayuplOrderId);
+        $this->orderDataGetter->expects($this->once())->method('getPosId')->willReturn($posId);
+        $this->orderDataGetter->expects($this->once())->method('getTs')->willReturn($ts);
+        $this->orderDataGetter->expects($this->once())->method('getSigForOrderRetrieve')->with($this->equalTo([
             'pos_id' => $posId,
             'session_id' => $realPayuplOrderId,
             'ts' => $ts
         ]))->willReturn($sig);
-        $this->_methodCaller->expects($this->at(0))->method('call')->with(
+        $this->methodCaller->expects($this->at(0))->method('call')->with(
             $this->equalTo('refundGet'),
             $this->equalTo([$authData])
         )->willReturn($getResult);
-        $this->_methodCaller->expects($this->at(1))->method('call')->with(
+        $this->methodCaller->expects($this->at(1))->method('call')->with(
             $this->equalTo('refundAdd'),
             $this->equalTo([$authData, $addData])
         )->willReturn($value);
     }
-
 }

@@ -10,16 +10,15 @@ class Plugin
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @param \Orba\Payupl\Model\Session $session
      */
     public function __construct(
         \Orba\Payupl\Model\Session $session
-    )
-    {
-        $this->_session = $session;
+    ) {
+        $this->session = $session;
     }
 
     /**
@@ -33,11 +32,10 @@ class Plugin
         \Magento\Checkout\Model\PaymentInformationManagement $subject,
         $cartId,
         \Magento\Quote\Api\Data\PaymentInterface $paymentMethod
-    )
-    {
+    ) {
         if ($paymentMethod->getMethod() === \Orba\Payupl\Model\Payupl::CODE) {
             $additionalData = $paymentMethod->getAdditionalData();
-            $this->_session->setPaytype(isset($additionalData['paytype']) ? $additionalData['paytype'] : null);
+            $this->session->setPaytype(isset($additionalData['paytype']) ? $additionalData['paytype'] : null);
         }
     }
 }

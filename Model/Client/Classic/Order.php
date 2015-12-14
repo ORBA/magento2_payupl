@@ -22,7 +22,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     /**
      * @var string[]
      */
-    protected $_statusDescription = [
+    protected $statusDescription = [
         self::STATUS_PRE_NEW => 'New',
         self::STATUS_NEW => 'New',
         self::STATUS_CANCELLED => 'Cancelled',
@@ -37,57 +37,57 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     /**
      * @var Order\DataValidator
      */
-    protected $_dataValidator;
+    protected $dataValidator;
 
     /**
      * @var Order\DataGetter
      */
-    protected $_dataGetter;
+    protected $dataGetter;
 
     /**
      * @var \Magento\Framework\UrlInterface
      */
-    protected $_urlBuilder;
+    protected $urlBuilder;
 
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @var \Magento\Framework\App\RequestInterface
      */
-    protected $_request;
+    protected $request;
 
     /**
      * @var \Orba\Payupl\Logger\Logger
      */
-    protected $_logger;
+    protected $logger;
 
     /**
      * @var Order\Notification
      */
-    protected $_notificationHelper;
+    protected $notificationHelper;
 
     /**
      * @var MethodCaller
      */
-    protected $_methodCaller;
+    protected $methodCaller;
 
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var Order\Processor
      */
-    protected $_orderProcessor;
+    protected $orderProcessor;
 
     /**
      * @var \Magento\Framework\Controller\Result\RawFactory
      */
-    protected $_rawResultFactory;
+    protected $rawResultFactory;
 
     /**
      * @param \Magento\Framework\View\Context $context
@@ -114,19 +114,18 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         Order\Processor $orderProcessor,
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
-    )
-    {
-        $this->_urlBuilder = $context->getUrlBuilder();
-        $this->_dataValidator = $dataValidator;
-        $this->_dataGetter = $dataGetter;
-        $this->_session = $session;
-        $this->_request = $request;
-        $this->_logger = $logger;
-        $this->_notificationHelper = $notificationHelper;
-        $this->_methodCaller = $methodCaller;
-        $this->_transactionResource = $transactionResource;
-        $this->_orderProcessor = $orderProcessor;
-        $this->_rawResultFactory = $rawResultFactory;
+    ) {
+        $this->urlBuilder = $context->getUrlBuilder();
+        $this->dataValidator = $dataValidator;
+        $this->dataGetter = $dataGetter;
+        $this->session = $session;
+        $this->request = $request;
+        $this->logger = $logger;
+        $this->notificationHelper = $notificationHelper;
+        $this->methodCaller = $methodCaller;
+        $this->transactionResource = $transactionResource;
+        $this->orderProcessor = $orderProcessor;
+        $this->rawResultFactory = $rawResultFactory;
     }
 
     /**
@@ -135,8 +134,8 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
     public function validateCreate(array $data = [])
     {
         return
-            $this->_dataValidator->validateEmpty($data) &&
-            $this->_dataValidator->validateBasicData($data);
+            $this->dataValidator->validateEmpty($data) &&
+            $this->dataValidator->validateBasicData($data);
     }
 
     /**
@@ -144,7 +143,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function validateRetrieve($payuplOrderId)
     {
-        return $this->_dataValidator->validateEmpty($payuplOrderId);
+        return $this->dataValidator->validateEmpty($payuplOrderId);
     }
 
     /**
@@ -152,7 +151,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function validateCancel($payuplOrderId)
     {
-        return $this->_dataValidator->validateEmpty($payuplOrderId);
+        return $this->dataValidator->validateEmpty($payuplOrderId);
     }
 
     /**
@@ -168,11 +167,11 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function create(array $data)
     {
-        $this->_session->setOrderCreateData($data);
+        $this->session->setOrderCreateData($data);
         return [
             'orderId' => md5($data['session_id']),
             'extOrderId' => $data['session_id'],
-            'redirectUri' => $this->_urlBuilder->getUrl('orba_payupl/classic/form')
+            'redirectUri' => $this->urlBuilder->getUrl('orba_payupl/classic/form')
         ];
     }
 
@@ -181,14 +180,14 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function retrieve($payuplOrderId)
     {
-        $posId = $this->_dataGetter->getPosId();
-        $ts = $this->_dataGetter->getTs();
-        $sig = $this->_dataGetter->getSigForOrderRetrieve([
+        $posId = $this->dataGetter->getPosId();
+        $ts = $this->dataGetter->getTs();
+        $sig = $this->dataGetter->getSigForOrderRetrieve([
             'pos_id' => $posId,
             'session_id' => $payuplOrderId,
             'ts' => $ts
         ]);
-        $result = $this->_methodCaller->call('orderRetrieve', [
+        $result = $this->methodCaller->call('orderRetrieve', [
             $posId,
             $payuplOrderId,
             $ts,
@@ -224,7 +223,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function consumeNotification(\Magento\Framework\App\Request\Http $request)
     {
-        $payuplOrderId = $this->_notificationHelper->getPayuplOrderId($request);
+        $payuplOrderId = $this->notificationHelper->getPayuplOrderId($request);
         $orderData = $this->retrieve($payuplOrderId);
         if ($orderData) {
             return [
@@ -241,7 +240,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function getDataForOrderCreate(\Magento\Sales\Model\Order $order)
     {
-        return $this->_dataGetter->getBasicData($order);
+        return $this->dataGetter->getBasicData($order);
     }
 
     /**
@@ -249,11 +248,11 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function addSpecialDataToOrder(array $data = [])
     {
-        $data['pos_id'] = $this->_dataGetter->getPosId();
-        $data['pos_auth_key'] = $this->_dataGetter->getPosAuthKey();
-        $data['client_ip'] = $this->_dataGetter->getClientIp();
-        $data['ts'] = $this->_dataGetter->getTs();
-        $data['sig'] = $this->_dataGetter->getSigForOrderCreate($data);
+        $data['pos_id'] = $this->dataGetter->getPosId();
+        $data['pos_auth_key'] = $this->dataGetter->getPosAuthKey();
+        $data['client_ip'] = $this->dataGetter->getClientIp();
+        $data['ts'] = $this->dataGetter->getTs();
+        $data['sig'] = $this->dataGetter->getSigForOrderCreate($data);
         return $data;
     }
 
@@ -270,10 +269,10 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function paymentSuccessCheck()
     {
-        $errorCode = $this->_request->getParam('error');
+        $errorCode = $this->request->getParam('error');
         if ($errorCode) {
-            $extOrderId = $this->_request->getParam('session_id');
-            $this->_logger->error('Payment error ' . $errorCode . ' for transaction ' . $extOrderId . '.');
+            $extOrderId = $this->request->getParam('session_id');
+            $this->logger->error('Payment error ' . $errorCode . ' for transaction ' . $extOrderId . '.');
             return false;
         }
         return true;
@@ -284,7 +283,10 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function canProcessNotification($payuplOrderId)
     {
-        return !in_array($this->_transactionResource->getStatusByPayuplOrderId($payuplOrderId), [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+        return !in_array(
+            $this->transactionResource->getStatusByPayuplOrderId($payuplOrderId),
+            [self::STATUS_COMPLETED, self::STATUS_CANCELLED]
+        );
     }
 
     /**
@@ -295,9 +297,9 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
         /**
          * @var $result \Magento\Framework\Controller\Result\Raw
          */
-        $newest = $this->_transactionResource->checkIfNewestByPayuplOrderId($payuplOrderId);
-        $this->_orderProcessor->processStatusChange($payuplOrderId, $status, $amount, $newest);
-        $result = $this->_rawResultFactory->create();
+        $newest = $this->transactionResource->checkIfNewestByPayuplOrderId($payuplOrderId);
+        $this->orderProcessor->processStatusChange($payuplOrderId, $status, $amount, $newest);
+        $result = $this->rawResultFactory->create();
         $result
             ->setHttpResponseCode(200)
             ->setContents('OK');
@@ -309,7 +311,7 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function getPaytypes()
     {
-        return $this->_methodCaller->call('getPaytypes');
+        return $this->methodCaller->call('getPaytypes');
     }
 
     /**
@@ -317,8 +319,8 @@ class Order implements \Orba\Payupl\Model\Client\OrderInterface
      */
     public function getStatusDescription($status)
     {
-        if (isset($this->_statusDescription[$status])) {
-            return (string) __($this->_statusDescription[$status]);
+        if (isset($this->statusDescription[$status])) {
+            return (string) __($this->statusDescription[$status]);
         }
         return false;
     }

@@ -10,22 +10,22 @@ class DataGetter
     /**
      * @var \Orba\Payupl\Model\Order\ExtOrderId
      */
-    protected $_extOrderIdHelper;
+    protected $extOrderIdHelper;
 
     /**
      * @var \Orba\Payupl\Model\Client\Classic\Config
      */
-    protected $_configHelper;
+    protected $configHelper;
 
     /**
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
-    protected $_dateTime;
+    protected $dateTime;
 
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     /**
      * @param \Orba\Payupl\Model\Order\ExtOrderId $extOrderIdHelper
@@ -38,12 +38,11 @@ class DataGetter
         \Orba\Payupl\Model\Client\Classic\Config $configHelper,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
         \Orba\Payupl\Model\Session $session
-    )
-    {
-        $this->_extOrderIdHelper = $extOrderIdHelper;
-        $this->_configHelper = $configHelper;
-        $this->_dateTime = $dateTime;
-        $this->_session = $session;
+    ) {
+        $this->extOrderIdHelper = $extOrderIdHelper;
+        $this->configHelper = $configHelper;
+        $this->dateTime = $dateTime;
+        $this->session = $session;
     }
 
     /**
@@ -60,13 +59,13 @@ class DataGetter
             'first_name' => $billingAddress->getFirstname(),
             'last_name' => $billingAddress->getLastname(),
             'email' => $order->getCustomerEmail(),
-            'session_id' => $this->_extOrderIdHelper->generate($order),
+            'session_id' => $this->extOrderIdHelper->generate($order),
             'order_id' => $incrementId
         ];
-        $paytype = $this->_session->getPaytype();
+        $paytype = $this->session->getPaytype();
         if ($paytype) {
             $data['pay_type'] = $paytype;
-            $this->_session->setPaytype(null);
+            $this->session->setPaytype(null);
         }
         return $data;
     }
@@ -76,7 +75,7 @@ class DataGetter
      */
     public function getPosId()
     {
-        return $this->_configHelper->getConfig('pos_id');
+        return $this->configHelper->getConfig('pos_id');
     }
 
     /**
@@ -84,7 +83,7 @@ class DataGetter
      */
     public function getPosAuthKey()
     {
-        return $this->_configHelper->getConfig('pos_auth_key');
+        return $this->configHelper->getConfig('pos_auth_key');
     }
 
     /**
@@ -100,7 +99,7 @@ class DataGetter
      */
     public function getTs()
     {
-        return $this->_dateTime->timestamp();
+        return $this->dateTime->timestamp();
     }
 
     /**
@@ -111,7 +110,7 @@ class DataGetter
     {
         return md5(
             $data['pos_id'] .
-            (isset ($data['pay_type']) ? $data['pay_type'] : '') .
+            (isset($data['pay_type']) ? $data['pay_type'] : '') .
             $data['session_id'] .
             $data['pos_auth_key'] .
             $data['amount'] .
@@ -122,7 +121,7 @@ class DataGetter
             $data['email'] .
             $data['client_ip'] .
             $data['ts'] .
-            $this->_configHelper->getConfig('key_md5')
+            $this->configHelper->getConfig('key_md5')
         );
     }
 
@@ -136,7 +135,7 @@ class DataGetter
             $data['pos_id'] .
             $data['session_id'] .
             $data['ts'] .
-            $this->_configHelper->getConfig('key_md5')
+            $this->configHelper->getConfig('key_md5')
         );
     }
 }

@@ -35,8 +35,7 @@ class Order extends \Magento\Sales\Model\Order
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
-    )
-    {
+    ) {
         parent::__construct(
             $context,
             $registry,

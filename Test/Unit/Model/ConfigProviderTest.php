@@ -12,52 +12,56 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
     /**
      * @var ObjectManager
      */
-    protected $_objectManager;
+    protected $objectManager;
 
     /**
      * @var \Magento\Payment\Helper\Data
      */
-    protected $_paymentHelper;
+    protected $paymentHelper;
 
     /**
      * @var ConfigProvider
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var Payupl
      */
-    protected $_paymentInstance;
+    protected $paymentInstance;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_paytypeHelper;
+    protected $paytypeHelper;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_checkoutSession;
+    protected $checkoutSession;
 
     public function setUp()
     {
-        $this->_objectManager = new ObjectManager($this);
-        $this->_paymentHelper = $this->getMockBuilder(\Magento\Payment\Helper\Data::class)->disableOriginalConstructor()->getMock();
-        $this->_paytypeHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\Paytype::class)->disableOriginalConstructor()->getMock();
-        $this->_checkoutSession = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)->disableOriginalConstructor()->getMock();
-        $this->_model = $this->_objectManager->getObject(ConfigProvider::class, [
-            'paymentHelper' => $this->_paymentHelper,
-            'paytypeHelper' => $this->_paytypeHelper,
-            'checkoutSession' => $this->_checkoutSession
+        $this->objectManager = new ObjectManager($this);
+        $this->paymentHelper = $this->getMockBuilder(\Magento\Payment\Helper\Data::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->paytypeHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\Paytype::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->checkoutSession = $this->getMockBuilder(\Magento\Checkout\Model\Session::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->model = $this->objectManager->getObject(ConfigProvider::class, [
+            'paymentHelper' => $this->paymentHelper,
+            'paytypeHelper' => $this->paytypeHelper,
+            'checkoutSession' => $this->checkoutSession
         ]);
     }
 
     public function testGetConfigUnavailable()
     {
-        $paymentMethodMock = $this->_getPaymentMethodMock();
+        $paymentMethodMock = $this->getPaymentMethodMock();
         $paymentMethodMock->expects($this->once())->method('isAvailable')->willReturn(false);
-        $this->_paymentHelper->expects($this->once())->method('getMethodInstance')->with($this->equalTo('orba_payupl'))->willReturn($paymentMethodMock);
-        $this->assertEquals([], $this->_model->getConfig());
+        $this->paymentHelper->expects($this->once())->method('getMethodInstance')
+            ->with($this->equalTo('orba_payupl'))->willReturn($paymentMethodMock);
+        $this->assertEquals([], $this->model->getConfig());
     }
 
     public function testGetConfigAvailable()
@@ -72,20 +76,22 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
                 ]
             ]
         ];
-        $paymentMethodMock = $this->_getPaymentMethodMock();
+        $paymentMethodMock = $this->getPaymentMethodMock();
         $paymentMethodMock->expects($this->once())->method('isAvailable')->willReturn(true);
         $paymentMethodMock->expects($this->once())->method('getCheckoutRedirectUrl')->willReturn($redirectUrl);
-        $this->_paymentHelper->expects($this->once())->method('getMethodInstance')->with($this->equalTo('orba_payupl'))->willReturn($paymentMethodMock);
+        $this->paymentHelper->expects($this->once())->method('getMethodInstance')->with($this->equalTo('orba_payupl'))
+            ->willReturn($paymentMethodMock);
         $quote = $this->getMockBuilder(\Magento\Quote\Api\Data\CartInterface::class)->getMock();
-        $this->_checkoutSession->expects($this->once())->method('getQuote')->willReturn($quote);
-        $this->_paytypeHelper->expects($this->once())->method('getAllForQuote')->with($this->equalTo($quote))->willReturn($paytypes);
-        $this->assertEquals($expectedConfig, $this->_model->getConfig());
+        $this->checkoutSession->expects($this->once())->method('getQuote')->willReturn($quote);
+        $this->paytypeHelper->expects($this->once())->method('getAllForQuote')->with($this->equalTo($quote))
+            ->willReturn($paytypes);
+        $this->assertEquals($expectedConfig, $this->model->getConfig());
     }
 
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getPaymentMethodMock()
+    protected function getPaymentMethodMock()
     {
         return $this->getMockBuilder(Payupl::class)
             ->setMethods([

@@ -10,21 +10,20 @@ class PaytypesClient
     /**
      * @var \Orba\Payupl\Model\Client\Classic\Config
      */
-    protected $_configHelper;
+    protected $configHelper;
 
     /**
      * @var \Zend\Http\Client
      */
-    protected $_client;
+    protected $client;
 
     /**
      * @param \Orba\Payupl\Model\Client\Classic\Config $configHelper
      */
     public function __construct(
         \Orba\Payupl\Model\Client\Classic\Config $configHelper
-    )
-    {
-        $this->_configHelper = $configHelper;
+    ) {
+        $this->configHelper = $configHelper;
     }
 
     /**
@@ -32,12 +31,12 @@ class PaytypesClient
      */
     public function getClient()
     {
-        if (!$this->_client) {
-            $posId = $this->_configHelper->getConfig('pos_id');
-            $keyMd5 = $this->_configHelper->getConfig('key_md5');
+        if (!$this->client) {
+            $posId = $this->configHelper->getConfig('pos_id');
+            $keyMd5 = $this->configHelper->getConfig('key_md5');
             $url = 'https://secure.payu.com/paygw/UTF/xml/' . $posId . '/' . substr($keyMd5, 0, 2) . '/paytype.xml';
-            $this->_client = new \Zend\Http\Client($url, ['adapter' => 'Zend\Http\Client\Adapter\Curl']);
+            $this->client = new \Zend\Http\Client($url, ['adapter' => 'Zend\Http\Client\Adapter\Curl']);
         }
-        return $this->_client;
+        return $this->client;
     }
 }

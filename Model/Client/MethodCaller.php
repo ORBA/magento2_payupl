@@ -27,8 +27,7 @@ class MethodCaller implements MethodCallerInterface
     public function __construct(
         MethodCaller\RawInterface $rawMethod,
         \Orba\Payupl\Logger\Logger $logger
-    )
-    {
+    ) {
         $this->_rawMethod = $rawMethod;
         $this->_logger = $logger;
     }

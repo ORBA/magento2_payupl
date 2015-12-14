@@ -10,12 +10,12 @@ class Paytype
     /**
      * @var \Orba\Payupl\Model\ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
-    protected $_scopeConfig;
+    protected $scopeConfig;
 
     /**
      * @param \Orba\Payupl\Model\ClientFactory $clientFactory
@@ -24,10 +24,9 @@ class Paytype
     public function __construct(
         \Orba\Payupl\Model\ClientFactory $clientFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-    )
-    {
-        $this->_clientFactory = $clientFactory;
-        $this->_scopeConfig = $scopeConfig;
+    ) {
+        $this->clientFactory = $clientFactory;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -42,10 +41,10 @@ class Paytype
         /**
          * @var $client \Orba\Payupl\Model\Client
          */
-        if (!$this->_scopeConfig->isSetFlag(\Orba\Payupl\Model\Payupl::XML_PATH_PAYTYPES_IN_CHECKOUT, 'store')) {
+        if (!$this->scopeConfig->isSetFlag(\Orba\Payupl\Model\Payupl::XML_PATH_PAYTYPES_IN_CHECKOUT, 'store')) {
             return false;
         }
-        $client = $this->_clientFactory->create();
+        $client = $this->clientFactory->create();
         $paytypes = $client->getPaytypes();
         if ($paytypes === false) {
             return false;
@@ -53,7 +52,7 @@ class Paytype
         $total = $quote->getGrandTotal();
         foreach ($paytypes as $key => $paytype) {
             if (!$paytype['enable'] || $total < $paytype['min'] || $total > $paytype['max']) {
-                unset ($paytypes[$key]);
+                unset($paytypes[$key]);
             } else {
                 $paytypes[$key]['id'] = 'orba-payupl-paytype-' . $paytype['type'];
             }

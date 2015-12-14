@@ -10,8 +10,7 @@ class MethodCaller extends \Orba\Payupl\Model\Client\MethodCaller
     public function __construct(
         MethodCaller\Raw $rawMethod,
         \Orba\Payupl\Logger\Logger $logger
-    )
-    {
+    ) {
         parent::__construct(
             $rawMethod,
             $logger

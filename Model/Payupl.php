@@ -51,22 +51,22 @@ class Payupl extends AbstractMethod
     /**
      * @var \Magento\Framework\UrlInterface
      */
-    protected $_urlBuilder;
+    protected $urlBuilder;
 
     /**
      * @var ClientFactory
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
     /**
-     * @var Resource\Transaction
+     * @var ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @var Order\Paytype
      */
-    protected $_paytypeHelper;
+    protected $paytypeHelper;
 
     /**
      * @param \Magento\Framework\Model\Context $context
@@ -108,10 +108,10 @@ class Payupl extends AbstractMethod
             null,
             $data
         );
-        $this->_urlBuilder = $urlBuilder;
-        $this->_clientFactory = $clientFactory;
-        $this->_transactionResource = $transactionResource;
-        $this->_paytypeHelper = $paytypeHelper;
+        $this->urlBuilder = $urlBuilder;
+        $this->clientFactory = $clientFactory;
+        $this->transactionResource = $transactionResource;
+        $this->paytypeHelper = $paytypeHelper;
     }
 
     /**
@@ -127,8 +127,8 @@ class Payupl extends AbstractMethod
         } else {
             return
                 parent::isAvailable($quote) &&
-                $this->_isShippingMethodAllowed($quote->getShippingAddress()->getShippingMethod()) &&
-                $this->_paytypeHelper->getAllForQuote($quote) !== [];
+                $this->isShippingMethodAllowed($quote->getShippingAddress()->getShippingMethod()) &&
+                $this->paytypeHelper->getAllForQuote($quote) !== [];
         }
     }
 
@@ -137,17 +137,22 @@ class Payupl extends AbstractMethod
      */
     public function getCheckoutRedirectUrl()
     {
-        return $this->_urlBuilder->getUrl('orba_payupl/payment/start');
+        return $this->urlBuilder->getUrl('orba_payupl/payment/start');
     }
 
+    /**
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     * @param float $amount
+     * @return $this
+     */
     public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
         /**
          * @var $order \Magento\Sales\Model\Order
          */
         $order = $payment->getOrder();
-        $payuplOrderId = $this->_transactionResource->getLastPayuplOrderIdByOrderId($order->getId());
-        $client = $this->_clientFactory->create();
+        $payuplOrderId = $this->transactionResource->getLastPayuplOrderIdByOrderId($order->getId());
+        $client = $this->clientFactory->create();
         $client->refundCreate($payuplOrderId, __('Refund for order # %1', $order->getIncrementId()), $amount * 100);
         return $this;
     }
@@ -156,7 +161,7 @@ class Payupl extends AbstractMethod
      * @param null|string $shippingMethod
      * @return bool
      */
-    protected function _isShippingMethodAllowed($shippingMethod)
+    protected function isShippingMethodAllowed($shippingMethod)
     {
         if ($shippingMethod) {
             $allowedCarriers = explode(',', $this->getConfigData('allowed_carriers'));

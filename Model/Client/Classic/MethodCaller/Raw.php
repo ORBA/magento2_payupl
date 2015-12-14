@@ -11,19 +11,19 @@ use Orba\Payupl\Model\Client\MethodCaller\RawInterface;
 class Raw implements RawInterface
 {
     /**
-     * @var RawClientInterface
+     * @var SoapClient\Order
      */
-    protected $_orderClient;
+    protected $orderClient;
 
     /**
      * @var SoapClient\Refund
      */
-    protected $_refundClient;
+    protected $refundClient;
 
     /**
      * @var PaytypesClient
      */
-    protected $_paytypesClient;
+    protected $paytypesClient;
 
     /**
      * @param SoapClient\Order $orderClient
@@ -33,11 +33,10 @@ class Raw implements RawInterface
         SoapClient\Order $orderClient,
         SoapClient\Refund $refundClient,
         PaytypesClient $paytypesClient
-    )
-    {
-        $this->_orderClient = $orderClient;
-        $this->_refundClient = $refundClient;
-        $this->_paytypesClient = $paytypesClient;
+    ) {
+        $this->orderClient = $orderClient;
+        $this->refundClient = $refundClient;
+        $this->paytypesClient = $paytypesClient;
     }
 
     /**
@@ -58,7 +57,7 @@ class Raw implements RawInterface
      */
     public function orderRetrieve($posId, $sessionId, $ts, $sig)
     {
-        return $this->_orderClient->call('get', [
+        return $this->orderClient->call('get', [
             'posId' => $posId,
             'sessionId' => $sessionId,
             'ts' => $ts,
@@ -71,18 +70,18 @@ class Raw implements RawInterface
      */
     public function getPaytypes()
     {
-        $client = $this->_paytypesClient->getClient();
+        $client = $this->paytypesClient->getClient();
         $client->send();
         $xml = new \SimpleXMLElement($client->getResponse()->getBody());
         $paytypes = [];
         foreach ($xml as $paytypeXml) {
             $paytypes[] = [
-                'type' => (string) $paytypeXml->type,
-                'name' => (string) $paytypeXml->name,
-                'enable' => (string) $paytypeXml->enable === 'true',
-                'img' => (string) $paytypeXml->img,
-                'min' => (float) $paytypeXml->min,
-                'max' => (float) $paytypeXml->max
+                'type' => (string)$paytypeXml->type,
+                'name' => (string)$paytypeXml->name,
+                'enable' => (string)$paytypeXml->enable === 'true',
+                'img' => (string)$paytypeXml->img,
+                'min' => (float)$paytypeXml->min,
+                'max' => (float)$paytypeXml->max
             ];
         }
         return $paytypes;
@@ -95,7 +94,7 @@ class Raw implements RawInterface
      */
     public function refundGet(array $authData)
     {
-        return $this->_refundClient->call('getRefunds', ['RefundAuth' => $authData]);
+        return $this->refundClient->call('getRefunds', ['RefundAuth' => $authData]);
     }
 
     /**
@@ -105,10 +104,9 @@ class Raw implements RawInterface
      */
     public function refundAdd(array $authData, array $addData)
     {
-        return $this->_refundClient->call('addRefund', [
+        return $this->refundClient->call('addRefund', [
             'RefundAuth' => $authData,
             'RefundData' => $addData
         ]);
     }
-
 }

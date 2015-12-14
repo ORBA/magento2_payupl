@@ -10,12 +10,12 @@ class Service
     /**
      * @var \Magento\Sales\Api\TransactionRepositoryInterface
      */
-    protected $_transactionRepository;
+    protected $transactionRepository;
 
     /**
      * @var \Orba\Payupl\Model\ResourceModel\Transaction
      */
-    protected $_transactionResource;
+    protected $transactionResource;
 
     /**
      * @param \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
@@ -24,10 +24,9 @@ class Service
     public function __construct(
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
-    )
-    {
-        $this->_transactionRepository = $transactionRepository;
-        $this->_transactionResource = $transactionResource;
+    ) {
+        $this->transactionRepository = $transactionRepository;
+        $this->transactionResource = $transactionResource;
     }
 
     /**
@@ -41,15 +40,17 @@ class Service
         /**
          * @var $transaction \Magento\Sales\Model\Order\Payment\Transaction
          */
-        $id = $this->_transactionResource->getIdByPayuplOrderId($payuplOrderId);
+        $id = $this->transactionResource->getIdByPayuplOrderId($payuplOrderId);
         if (!$id) {
             throw new Exception('Transaction ' . $payuplOrderId . ' not found.');
         }
-        $transaction = $this->_transactionRepository->get($id);
+        $transaction = $this->transactionRepository->get($id);
         if ($close) {
             $transaction->setIsClosed(1);
         }
-        $rawDetailsInfo = $transaction->getAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS);
+        $rawDetailsInfo = $transaction->getAdditionalInformation(
+            \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
+        );
         $rawDetailsInfo['status'] = $status;
         $transaction
             ->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $rawDetailsInfo)

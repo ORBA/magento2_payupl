@@ -13,23 +13,29 @@ class MethodCallerTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_rawMethod;
+    protected $rawMethod;
 
     /**
      * @var MethodCaller
      */
-    protected $_model;
+    protected $model;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $logger;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_rawMethod = $this->getMockBuilder(MethodCaller\RawInterface::class)->getMockForAbstractClass();
-        $this->_logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()->getMock();
-        $this->_model = $objectManagerHelper->getObject(
+        $this->rawMethod = $this->getMockBuilder(MethodCaller\RawInterface::class)->getMockForAbstractClass();
+        $this->logger = $this->getMockBuilder(\Orba\Payupl\Logger\Logger::class)->disableOriginalConstructor()
+            ->getMock();
+        $this->model = $objectManagerHelper->getObject(
             MethodCaller::class,
             [
-                'rawMethod' => $this->_rawMethod,
-                'logger' => $this->_logger
+                'rawMethod' => $this->rawMethod,
+                'logger' => $this->logger
             ]
         );
     }
@@ -39,12 +45,12 @@ class MethodCallerTest extends \PHPUnit_Framework_TestCase
         $methodName = 'method';
         $args = ['args'];
         $exception = new \Exception();
-        $this->_rawMethod->expects($this->once())->method('call')->with(
+        $this->rawMethod->expects($this->once())->method('call')->with(
             $this->equalTo($methodName),
             $this->equalTo($args)
         )->will($this->throwException($exception));
-        $this->_logger->expects($this->once())->method('critical')->with($exception);
-        $this->assertFalse($this->_model->call($methodName, $args));
+        $this->logger->expects($this->once())->method('critical')->with($exception);
+        $this->assertFalse($this->model->call($methodName, $args));
     }
 
     public function testSuccess()
@@ -52,10 +58,10 @@ class MethodCallerTest extends \PHPUnit_Framework_TestCase
         $methodName = 'method';
         $args = ['args'];
         $result = $this->getMockBuilder(\OpenPayU_Result::class)->getMock();
-        $this->_rawMethod->expects($this->once())->method('call')->with(
+        $this->rawMethod->expects($this->once())->method('call')->with(
             $this->equalTo($methodName),
             $this->equalTo($args)
         )->willReturn($result);
-        $this->assertEquals($result, $this->_model->call($methodName, $args));
+        $this->assertEquals($result, $this->model->call($methodName, $args));
     }
 }

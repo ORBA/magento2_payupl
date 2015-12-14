@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2015 Orba Sp. z o.o. (http://orba.pl)
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../Magento/Config/etc/system_file.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="payment">
             <group id="orba_payupl" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">

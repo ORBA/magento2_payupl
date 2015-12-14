@@ -12,12 +12,12 @@ class Client
     /**
      * @var Client\OrderInterface
      */
-    protected $_orderHelper;
+    protected $orderHelper;
 
     /**
      * @var Client\RefundInterface
      */
-    protected $_refundHelper;
+    protected $refundHelper;
 
     /**
      * @param Client\ConfigInterface $configHelper
@@ -28,10 +28,9 @@ class Client
         Client\ConfigInterface $configHelper,
         Client\OrderInterface $orderHelper,
         Client\RefundInterface $refundHelper
-    )
-    {
-        $this->_orderHelper = $orderHelper;
-        $this->_refundHelper = $refundHelper;
+    ) {
+        $this->orderHelper = $orderHelper;
+        $this->refundHelper = $refundHelper;
         $configHelper->setConfig();
     }
 
@@ -42,11 +41,11 @@ class Client
      */
     public function orderCreate(array $data = [])
     {
-        if (!$this->_orderHelper->validateCreate($data)) {
+        if (!$this->orderHelper->validateCreate($data)) {
             throw new Exception('Order request data array is invalid.');
         }
-        $data = $this->_orderHelper->addSpecialDataToOrder($data);
-        $result = $this->_orderHelper->create($data);
+        $data = $this->orderHelper->addSpecialDataToOrder($data);
+        $result = $this->orderHelper->create($data);
         if (!$result) {
             throw new Exception('There was a problem while processing order create request.');
         }
@@ -60,10 +59,10 @@ class Client
      */
     public function orderRetrieve($payuplOrderId)
     {
-        if (!$this->_orderHelper->validateRetrieve($payuplOrderId)) {
+        if (!$this->orderHelper->validateRetrieve($payuplOrderId)) {
             throw new Exception('ID of order to retrieve is empty.');
         }
-        $result = $this->_orderHelper->retrieve($payuplOrderId);
+        $result = $this->orderHelper->retrieve($payuplOrderId);
         if (!$result) {
             throw new Exception('There was a problem while processing order retrieve request.');
         }
@@ -77,10 +76,10 @@ class Client
      */
     public function orderCancel($payuplOrderId)
     {
-        if (!$this->_orderHelper->validateCancel($payuplOrderId)) {
+        if (!$this->orderHelper->validateCancel($payuplOrderId)) {
             throw new Exception('ID of order to cancel is empty.');
         }
-        $result = $this->_orderHelper->cancel($payuplOrderId);
+        $result = $this->orderHelper->cancel($payuplOrderId);
         if (!$result) {
             throw new Exception('There was a problem while processing order cancel request.');
         }
@@ -94,10 +93,10 @@ class Client
      */
     public function orderStatusUpdate(array $data = [])
     {
-        if (!$this->_orderHelper->validateStatusUpdate($data)) {
+        if (!$this->orderHelper->validateStatusUpdate($data)) {
             throw new Exception('Order status update request data array is invalid.');
         }
-        $result = $this->_orderHelper->statusUpdate($data);
+        $result = $this->orderHelper->statusUpdate($data);
         if (!$result) {
             throw new Exception('There was a problem while processing order status update request.');
         }
@@ -111,7 +110,7 @@ class Client
      */
     public function orderConsumeNotification(\Magento\Framework\App\Request\Http $request)
     {
-        $result = $this->_orderHelper->consumeNotification($request);
+        $result = $this->orderHelper->consumeNotification($request);
         if (!$result) {
             throw new Exception('There was a problem while consuming order notification.');
         }
@@ -127,10 +126,10 @@ class Client
      */
     public function refundCreate($orderId = '', $description = '', $amount = null)
     {
-        if (!$this->_refundHelper->validateCreate($orderId, $description, $amount)) {
+        if (!$this->refundHelper->validateCreate($orderId, $description, $amount)) {
             throw new Exception('Refund create request data is invalid.');
         }
-        $result = $this->_refundHelper->create($orderId, $description, $amount);
+        $result = $this->refundHelper->create($orderId, $description, $amount);
         if (!$result) {
             throw new Exception('There was a problem while processing refund create request.');
         }
@@ -142,11 +141,14 @@ class Client
      */
     public function getOrderHelper()
     {
-        return $this->_orderHelper;
+        return $this->orderHelper;
     }
 
+    /**
+     * @return array|false
+     */
     public function getPaytypes()
     {
-        return $this->_orderHelper->getPaytypes();
+        return $this->orderHelper->getPaytypes();
     }
 }

@@ -12,42 +12,46 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     /**
      * @var DataGetter
      */
-    protected $_model;
+    protected $model;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_extOrderIdHelper;
+    protected $extOrderIdHelper;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_configHelper;
+    protected $configHelper;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_dateTime;
+    protected $dateTime;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $_session;
+    protected $session;
 
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
-        $this->_extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)->disableOriginalConstructor()->getMock();
-        $this->_configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Classic\Config::class)->disableOriginalConstructor()->getMock();
-        $this->_dateTime = $this->getMockBuilder(\Magento\Framework\Stdlib\DateTime\DateTime::class)->disableOriginalConstructor()->getMock();
-        $this->_session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->setMethods(['getPaytype', 'setPaytype'])->disableOriginalConstructor()->getMock();
-        $this->_model = $objectManagerHelper->getObject(
+        $this->extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Classic\Config::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->dateTime = $this->getMockBuilder(\Magento\Framework\Stdlib\DateTime\DateTime::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)
+            ->setMethods(['getPaytype', 'setPaytype'])->disableOriginalConstructor()->getMock();
+        $this->model = $objectManagerHelper->getObject(
             DataGetter::class,
             [
-                'extOrderIdHelper' => $this->_extOrderIdHelper,
-                'configHelper' => $this->_configHelper,
-                'dateTime' => $this->_dateTime,
-                'session' => $this->_session
+                'extOrderIdHelper' => $this->extOrderIdHelper,
+                'configHelper' => $this->configHelper,
+                'dateTime' => $this->dateTime,
+                'session' => $this->session
             ]
         );
     }
@@ -61,9 +65,10 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $lastName = 'Kowalski';
         $email = 'jan.kowalski@orba.pl';
         $sessionId = '0000000001-1';
-        $order = $this->_getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount);
-        $this->_extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))->willReturn($sessionId);
-        $this->_session->expects($this->once())->method('getPaytype')->willReturn(null);
+        $order = $this->getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount);
+        $this->extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))
+            ->willReturn($sessionId);
+        $this->session->expects($this->once())->method('getPaytype')->willReturn(null);
         $this->assertEquals([
             'amount' => $amount * 100,
             'desc' => $desc,
@@ -72,7 +77,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             'email' => $email,
             'session_id' => $sessionId,
             'order_id' => $incrementId
-        ], $this->_model->getBasicData($order));
+        ], $this->model->getBasicData($order));
     }
 
     public function testGetBasicDataWithPaytype()
@@ -85,10 +90,11 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $email = 'jan.kowalski@orba.pl';
         $sessionId = '0000000001-1';
         $paytype = 't';
-        $order = $this->_getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount);
-        $this->_extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))->willReturn($sessionId);
-        $this->_session->expects($this->once())->method('getPaytype')->willReturn($paytype);
-        $this->_session->expects($this->once())->method('setPaytype')->with($this->equalTo(null));
+        $order = $this->getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount);
+        $this->extOrderIdHelper->expects($this->once())->method('generate')->with($this->equalTo($order))
+            ->willReturn($sessionId);
+        $this->session->expects($this->once())->method('getPaytype')->willReturn($paytype);
+        $this->session->expects($this->once())->method('setPaytype')->with($this->equalTo(null));
         $this->assertEquals([
             'amount' => $amount * 100,
             'desc' => $desc,
@@ -98,42 +104,45 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             'session_id' => $sessionId,
             'order_id' => $incrementId,
             'pay_type' => $paytype
-        ], $this->_model->getBasicData($order));
+        ], $this->model->getBasicData($order));
     }
 
     public function testPosId()
     {
         $posId = '123456';
-        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('pos_id'))->willReturn($posId);
-        $this->assertEquals($posId, $this->_model->getPosId());
+        $this->configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('pos_id'))
+            ->willReturn($posId);
+        $this->assertEquals($posId, $this->model->getPosId());
     }
 
     public function testPosAuthKey()
     {
         $posAuthKey = 'ABC';
-        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('pos_auth_key'))->willReturn($posAuthKey);
-        $this->assertEquals($posAuthKey, $this->_model->getPosAuthKey());
+        $this->configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('pos_auth_key'))
+            ->willReturn($posAuthKey);
+        $this->assertEquals($posAuthKey, $this->model->getPosAuthKey());
     }
 
     public function testClientIp()
     {
         $ip = '127.0.0.1';
         $_SERVER['REMOTE_ADDR'] = $ip;
-        $this->assertEquals($ip, $this->_model->getClientIp());
+        $this->assertEquals($ip, $this->model->getClientIp());
     }
 
     public function testTs()
     {
         $ts = 12345678;
-        $this->_dateTime->expects($this->once())->method('timestamp')->willReturn($ts);
-        $this->assertEquals($ts, $this->_model->getTs());
+        $this->dateTime->expects($this->once())->method('timestamp')->willReturn($ts);
+        $this->assertEquals($ts, $this->model->getTs());
     }
 
     public function testSigForOrderCreateNoPaytype()
     {
-        $data = $this->_getExemplaryOrderCreateData();
+        $data = $this->getExemplaryOrderCreateData();
         $keyMd5 = 'GHI';
-        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))->willReturn($keyMd5);
+        $this->configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))
+            ->willReturn($keyMd5);
         $sig = md5(
             $data['pos_id'] .
             $data['session_id'] .
@@ -148,15 +157,16 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             $data['ts'] .
             $keyMd5
         );
-        $this->assertEquals($sig, $this->_model->getSigForOrderCreate($data));
+        $this->assertEquals($sig, $this->model->getSigForOrderCreate($data));
     }
 
     public function testSigForOrderCreatePaytype()
     {
-        $data = $this->_getExemplaryOrderCreateData();
+        $data = $this->getExemplaryOrderCreateData();
         $data['pay_type'] = 't';
         $keyMd5 = 'GHI';
-        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))->willReturn($keyMd5);
+        $this->configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))
+            ->willReturn($keyMd5);
         $sig = md5(
             $data['pos_id'] .
             $data['pay_type'] .
@@ -172,7 +182,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             $data['ts'] .
             $keyMd5
         );
-        $this->assertEquals($sig, $this->_model->getSigForOrderCreate($data));
+        $this->assertEquals($sig, $this->model->getSigForOrderCreate($data));
     }
 
     public function testSigForOrderRetrieve()
@@ -183,14 +193,15 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             'ts' => 12345678
         ];
         $keyMd5 = 'GHI';
-        $this->_configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))->willReturn($keyMd5);
+        $this->configHelper->expects($this->once())->method('getConfig')->with($this->equalTo('key_md5'))
+            ->willReturn($keyMd5);
         $sig = md5(
             $data['pos_id'] .
             $data['session_id'] .
             $data['ts'] .
             $keyMd5
         );
-        $this->assertEquals($sig, $this->_model->getSigForOrderRetrieve($data));
+        $this->assertEquals($sig, $this->model->getSigForOrderRetrieve($data));
     }
 
     /**
@@ -201,10 +212,11 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
      * @param $amount
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount)
+    protected function getOrderMockWithExpectationsForBasicData($incrementId, $firstName, $lastName, $email, $amount)
     {
         $order = $this->getMockBuilder(\Magento\Sales\Model\Order::class)->disableOriginalConstructor()->getMock();
-        $billingAddress = $this->getMockBuilder(\Magento\Sales\Model\Order\Address::class)->disableOriginalConstructor()->getMock();
+        $billingAddress = $this->getMockBuilder(\Magento\Sales\Model\Order\Address::class)->disableOriginalConstructor()
+            ->getMock();
         $billingAddress->expects($this->once())->method('getFirstname')->willReturn($firstName);
         $billingAddress->expects($this->once())->method('getLastname')->willReturn($lastName);
         $order->expects($this->once())->method('getBillingAddress')->willReturn($billingAddress);
@@ -217,7 +229,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    protected function _getExemplaryOrderCreateData()
+    protected function getExemplaryOrderCreateData()
     {
         return [
             'pos_id' => '123456',

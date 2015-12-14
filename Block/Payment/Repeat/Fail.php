@@ -10,12 +10,12 @@ class Fail extends \Magento\Framework\View\Element\Template
     /**
      * @var \Orba\Payupl\Helper\Payment
      */
-    protected $_paymentHelper;
+    protected $paymentHelper;
 
     /**
      * @var \Orba\Payupl\Model\Session
      */
-    protected $_session;
+    protected $session;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -27,8 +27,8 @@ class Fail extends \Magento\Framework\View\Element\Template
             $context,
             $data
         );
-        $this->_session = $session;
-        $this->_paymentHelper = $paymentHelper;
+        $this->session = $session;
+        $this->paymentHelper = $paymentHelper;
     }
 
     /**
@@ -36,11 +36,11 @@ class Fail extends \Magento\Framework\View\Element\Template
      */
     public function getPaymentUrl()
     {
-        $orderId = $this->_session->getLastOrderId();
+        $orderId = $this->session->getLastOrderId();
         if ($orderId) {
-            $repeatPaymentUrl = $this->_paymentHelper->getRepeatPaymentUrl($orderId);
+            $repeatPaymentUrl = $this->paymentHelper->getRepeatPaymentUrl($orderId);
             if (!$repeatPaymentUrl) {
-                return $this->_paymentHelper->getStartPaymentUrl($orderId);
+                return $this->paymentHelper->getStartPaymentUrl($orderId);
             }
             return $repeatPaymentUrl;
         }

@@ -10,7 +10,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     /**
      * @var array
      */
-    protected $_requiredBasicKeys = [
+    protected $requiredBasicKeys = [
         'amount',
         'desc',
         'first_name',
@@ -26,7 +26,7 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
      */
     public function validateBasicData(array $data = [])
     {
-        foreach ($this->_getRequiredBasicKeys() as $key) {
+        foreach ($this->getRequiredBasicKeys() as $key) {
             if (!isset($data[$key]) || empty($data[$key])) {
                 return false;
             }
@@ -37,9 +37,8 @@ class DataValidator extends \Orba\Payupl\Model\Client\DataValidator
     /**
      * @return array
      */
-    protected function _getRequiredBasicKeys()
+    protected function getRequiredBasicKeys()
     {
-        return $this->_requiredBasicKeys;
+        return $this->requiredBasicKeys;
     }
-
 }
