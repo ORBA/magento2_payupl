@@ -72,6 +72,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             'amount' => $amount * 100,
             'desc' => $desc,
+            'desc2' => 'Orba_Payupl_M2',
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $email,
@@ -98,6 +99,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             'amount' => $amount * 100,
             'desc' => $desc,
+            'desc2' => 'Orba_Payupl_M2',
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $email,
@@ -149,6 +151,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             $data['pos_auth_key'] .
             $data['amount'] .
             $data['desc'] .
+            $data['desc2'] .
             $data['order_id'] .
             $data['first_name'] .
             $data['last_name'] .
@@ -174,6 +177,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             $data['pos_auth_key'] .
             $data['amount'] .
             $data['desc'] .
+            $data['desc2'] .
             $data['order_id'] .
             $data['first_name'] .
             $data['last_name'] .
@@ -237,6 +241,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             'pos_auth_key' => 'DEF',
             'amount' => 101,
             'desc' => 'Desc',
+            'desc2' => 'Desc 2',
             'order_id' => '100000001',
             'first_name' => 'Jan',
             'last_name' => 'Kowalski',

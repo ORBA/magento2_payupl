@@ -10,7 +10,7 @@
         "magento/magento-composer-installer": "*"
     },
     "type": "magento2-module",
-    "version": "100.0.0-beta1",
+    "version": "1.0.0",
     "autoload": {
         "files": [
             "registration.php"
@@ -24,5 +24,9 @@
             "name": "Orba Sp. z o.o.",
             "homepage": "http://orba.pl/"
         }
+    ],
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
     ]
 }

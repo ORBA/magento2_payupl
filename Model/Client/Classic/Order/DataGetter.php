@@ -56,6 +56,7 @@ class DataGetter
         $data = [
             'amount' => $order->getGrandTotal() * 100,
             'desc' => __('Order # %1', [$incrementId]),
+            'desc2' => 'Orba_Payupl_M2',
             'first_name' => $billingAddress->getFirstname(),
             'last_name' => $billingAddress->getLastname(),
             'email' => $order->getCustomerEmail(),
@@ -115,6 +116,7 @@ class DataGetter
             $data['pos_auth_key'] .
             $data['amount'] .
             $data['desc'] .
+            $data['desc2'] .
             $data['order_id'] .
             $data['first_name'] .
             $data['last_name'] .
