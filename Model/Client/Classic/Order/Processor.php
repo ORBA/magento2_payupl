@@ -5,8 +5,9 @@
 
 namespace Orba\Payupl\Model\Client\Classic\Order;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use \Orba\Payupl\Model\Client\Classic\Order;
-use \Orba\Payupl\Model\Client\Exception;
 
 class Processor
 {
@@ -27,7 +28,7 @@ class Processor
      * @param float $amount
      * @param bool $newest
      * @return bool
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function processStatusChange($payuplOrderId, $status = '', $amount = null, $newest = true)
     {
@@ -42,7 +43,7 @@ class Processor
             Order::STATUS_ERROR
         ])
         ) {
-            throw new Exception('Invalid status.');
+            throw new LocalizedException(new Phrase('Invalid status.'));
         }
         if (!$newest) {
             $close = in_array($status, [

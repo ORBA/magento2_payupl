@@ -5,8 +5,9 @@
 
 namespace Orba\Payupl\Model\Client\Rest;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Orba\Payupl\Model\Client\ConfigInterface;
-use Orba\Payupl\Model\Client\Exception as Exception;
 use Orba\Payupl\Model\Payupl;
 
 class Config implements ConfigInterface
@@ -27,7 +28,7 @@ class Config implements ConfigInterface
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function setConfig()
     {
@@ -36,13 +37,13 @@ class Config implements ConfigInterface
         if ($merchantPosId) {
             \OpenPayU_Configuration::setMerchantPosId($merchantPosId);
         } else {
-            throw new Exception('Merchant POS ID is empty.');
+            throw new LocalizedException(new Phrase('Merchant POS ID is empty.'));
         }
         $signatureKey = $this->scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5, 'store');
         if ($signatureKey) {
             \OpenPayU_Configuration::setSignatureKey($signatureKey);
         } else {
-            throw new Exception('Signature key is empty.');
+            throw new LocalizedException(new Phrase('Signature key is empty.'));
         }
         return true;
     }

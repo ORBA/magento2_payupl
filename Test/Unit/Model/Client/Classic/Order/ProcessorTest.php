@@ -5,8 +5,8 @@
 
 namespace Orba\Payupl\Model\Client\Classic\Order;
 
+use Magento\Framework\Exception\LocalizedException;
 use Orba\Payupl\Model\Client\Classic\Order;
-use Orba\Payupl\Model\Client\Exception;
 
 class ProcessorTest extends \PHPUnit_Framework_TestCase
 {
@@ -32,7 +32,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessStatusChangeInvalid()
     {
-        $this->setExpectedException(Exception::class, 'Invalid status.');
+        $this->setExpectedException(LocalizedException::class, 'Invalid status.');
         $this->model->processStatusChange(1, 'INVALID STATUS');
     }
 

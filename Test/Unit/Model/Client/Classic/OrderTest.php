@@ -5,8 +5,9 @@
 
 namespace Orba\Payupl\Model\Client\Classic;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Orba\Payupl\Model\Client\Exception;
 
 class OrderTest extends \PHPUnit_Framework_TestCase
 {
@@ -265,8 +266,8 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $request = $this->getRequestMock();
         $message = 'Exception message';
         $this->notificationHelper->expects($this->once())->method('getPayuplOrderId')->with($this->equalTo($request))
-            ->willThrowException(new Exception($message));
-        $this->setExpectedException(Exception::class, $message);
+            ->willThrowException(new LocalizedException(new Phrase($message)));
+        $this->setExpectedException(LocalizedException::class, $message);
         $this->model->consumeNotification($request);
     }
 

@@ -5,7 +5,8 @@
 
 namespace Orba\Payupl\Model\Client\Classic\Order;
 
-use Orba\Payupl\Model\Client\Exception;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 
 class Notification
 {
@@ -26,7 +27,7 @@ class Notification
     public function getPayuplOrderId($request)
     {
         if (!$request->isPost()) {
-            throw new \Orba\Payupl\Model\Client\Exception('POST request is required.');
+            throw new LocalizedException(new Phrase('POST request is required.'));
         }
         $sig = $request->getParam('sig');
         $ts = $request->getParam('ts');
@@ -36,6 +37,6 @@ class Notification
         if (md5($posId . $sessionId . $ts . $secondKeyMd5) === $sig) {
             return $sessionId;
         }
-        throw new \Orba\Payupl\Model\Client\Exception('Invalid SIG.');
+        throw new LocalizedException(new Phrase('Invalid SIG.'));
     }
 }

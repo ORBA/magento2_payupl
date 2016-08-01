@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 class EndTest extends \PHPUnit_Framework_TestCase
@@ -184,7 +186,7 @@ class EndTest extends \PHPUnit_Framework_TestCase
      * @param bool $paymentSuccessCheck If payment was success (global check)
      * @param bool $clientPaymentSuccessCheck If payment was success (client-related check)
      * @param bool $isRepeat If it's repeat payment action
-     * @return void|\Orba\Payupl\Model\Client\Exception
+     * @return void|LocalizedException
      */
     protected function preTestRedirectAfterPayuplResponse(
         $clientException,
@@ -199,7 +201,7 @@ class EndTest extends \PHPUnit_Framework_TestCase
             $this->session->expects($this->once())->method('setLastOrderId')->with(null);
         }
         if ($clientException) {
-            $exception = new \Orba\Payupl\Model\Client\Exception();
+            $exception = new LocalizedException(new Phrase('Exception'));
             $this->clientFactory->expects($this->once())->method('create')->willThrowException($exception);
             return $exception;
         } else {

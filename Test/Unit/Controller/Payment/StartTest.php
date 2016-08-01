@@ -5,8 +5,9 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Orba\Payupl\Model\Client\Exception;
+use Magento\Framework\Phrase;
 
 class StartTest extends \PHPUnit_Framework_TestCase
 {
@@ -112,7 +113,7 @@ class StartTest extends \PHPUnit_Framework_TestCase
             ->willReturn(true);
         $clientOrderHelper->expects($this->once())->method('getDataForOrderCreate')->with($this->equalTo($order))
             ->willReturn($orderData);
-        $exception = new Exception('Message');
+        $exception = new LocalizedException(new Phrase('Exception'));
         $client->expects($this->once())->method('orderCreate')->with($this->equalTo($orderData))
             ->willThrowException($exception);
         $this->logger->expects($this->once())->method('critical')->with($exception);

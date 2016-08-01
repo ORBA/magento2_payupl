@@ -5,6 +5,9 @@
 
 namespace Orba\Payupl\Model\Order;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
+
 class Processor
 {
     /**
@@ -33,7 +36,7 @@ class Processor
      * @param string $payuplOrderId
      * @param string$status
      * @param bool $close
-     * @throws \Orba\Payupl\Model\Transaction\Exception
+     * @throws LocalizedException
      */
     public function processOld($payuplOrderId, $status, $close = false)
     {
@@ -43,7 +46,7 @@ class Processor
     /**
      * @param string $payuplOrderId
      * @param string $status
-     * @throws \Orba\Payupl\Model\Transaction\Exception
+     * @throws LocalizedException
      */
     public function processPending($payuplOrderId, $status)
     {
@@ -53,8 +56,7 @@ class Processor
     /**
      * @param string $payuplOrderId
      * @param string $status
-     * @throws Exception
-     * @throws \Orba\Payupl\Model\Transaction\Exception
+     * @throws LocalizedException
      */
     public function processHolded($payuplOrderId, $status)
     {
@@ -66,7 +68,7 @@ class Processor
     /**
      * @param string $payuplOrderId
      * @param string $status
-     * @throws \Orba\Payupl\Model\Transaction\Exception
+     * @throws LocalizedException
      * @todo Implement some additional logic for transaction confirmation by store owner.
      */
     public function processWaiting($payuplOrderId, $status)
@@ -78,8 +80,7 @@ class Processor
      * @param string $payuplOrderId
      * @param string $status
      * @param float $amount
-     * @throws Exception
-     * @throws \Orba\Payupl\Model\Transaction\Exception
+     * @throws LocalizedException
      */
     public function processCompleted($payuplOrderId, $status, $amount)
     {
@@ -91,13 +92,13 @@ class Processor
     /**
      * @param string $payuplOrderId
      * @return \Orba\Payupl\Model\Sales\Order
-     * @throws Exception
+     * @throws LocalizedException
      */
     protected function loadOrderByPayuplOrderId($payuplOrderId)
     {
         $order = $this->orderHelper->loadOrderByPayuplOrderId($payuplOrderId);
         if (!$order) {
-            throw new Exception('Order not found.');
+            throw new LocalizedException(new Phrase('Order not found.'));
         }
         return $order;
     }

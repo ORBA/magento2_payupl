@@ -6,7 +6,6 @@
 namespace Orba\Payupl\Model\Client;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Orba\Payupl\Model\Client\Exception;
 
 class MethodCallerTest extends \PHPUnit_Framework_TestCase
 {

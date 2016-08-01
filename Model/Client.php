@@ -5,7 +5,8 @@
 
 namespace Orba\Payupl\Model;
 
-use Orba\Payupl\Model\Client\Exception;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 
 class Client
 {
@@ -37,17 +38,17 @@ class Client
     /**
      * @param array $data
      * @return array (keys: orderId, redirectUri, extOrderId)
-     * @throws Client\Exception
+     * @throws LocalizedException
      */
     public function orderCreate(array $data = [])
     {
         if (!$this->orderHelper->validateCreate($data)) {
-            throw new Exception('Order request data array is invalid.');
+            throw new LocalizedException(new Phrase('Order request data array is invalid.'));
         }
         $data = $this->orderHelper->addSpecialDataToOrder($data);
         $result = $this->orderHelper->create($data);
         if (!$result) {
-            throw new Exception('There was a problem while processing order create request.');
+            throw new LocalizedException(new Phrase('There was a problem while processing order create request.'));
         }
         return $result;
     }
@@ -55,16 +56,16 @@ class Client
     /**
      * @param string $payuplOrderId
      * @return string Transaction status
-     * @throws Client\Exception
+     * @throws LocalizedException
      */
     public function orderRetrieve($payuplOrderId)
     {
         if (!$this->orderHelper->validateRetrieve($payuplOrderId)) {
-            throw new Exception('ID of order to retrieve is empty.');
+            throw new LocalizedException(new Phrase('ID of order to retrieve is empty.'));
         }
         $result = $this->orderHelper->retrieve($payuplOrderId);
         if (!$result) {
-            throw new Exception('There was a problem while processing order retrieve request.');
+            throw new LocalizedException(new Phrase('There was a problem while processing order retrieve request.'));
         }
         return $result;
     }
@@ -72,16 +73,16 @@ class Client
     /**
      * @param string $payuplOrderId
      * @return bool|\OpenPayU_Result
-     * @throws Client\Exception
+     * @throws LocalizedException
      */
     public function orderCancel($payuplOrderId)
     {
         if (!$this->orderHelper->validateCancel($payuplOrderId)) {
-            throw new Exception('ID of order to cancel is empty.');
+            throw new LocalizedException(new Phrase('ID of order to cancel is empty.'));
         }
         $result = $this->orderHelper->cancel($payuplOrderId);
         if (!$result) {
-            throw new Exception('There was a problem while processing order cancel request.');
+            throw new LocalizedException(new Phrase('There was a problem while processing order cancel request.'));
         }
         return $result;
     }
@@ -89,16 +90,18 @@ class Client
     /**
      * @param array $data
      * @return true
-     * @throws Client\Exception
+     * @throws LocalizedException
      */
     public function orderStatusUpdate(array $data = [])
     {
         if (!$this->orderHelper->validateStatusUpdate($data)) {
-            throw new Exception('Order status update request data array is invalid.');
+            throw new LocalizedException(new Phrase('Order status update request data array is invalid.'));
         }
         $result = $this->orderHelper->statusUpdate($data);
         if (!$result) {
-            throw new Exception('There was a problem while processing order status update request.');
+            throw new LocalizedException(
+                new Phrase('There was a problem while processing order status update request.')
+            );
         }
         return true;
     }
@@ -106,13 +109,13 @@ class Client
     /**
      * @param \Magento\Framework\App\Request\Http $request
      * @return array (keys: payuplOrderId, status, amount)
-     * @throws Client\Exception
+     * @throws LocalizedException
      */
     public function orderConsumeNotification(\Magento\Framework\App\Request\Http $request)
     {
         $result = $this->orderHelper->consumeNotification($request);
         if (!$result) {
-            throw new Exception('There was a problem while consuming order notification.');
+            throw new LocalizedException(new Phrase('There was a problem while consuming order notification.'));
         }
         return $result;
     }
@@ -122,16 +125,16 @@ class Client
      * @param string $description
      * @param int $amount
      * @return true
-     * @throws Client\Exception
+     * @throws LocalizedException
      */
     public function refundCreate($orderId = '', $description = '', $amount = null)
     {
         if (!$this->refundHelper->validateCreate($orderId, $description, $amount)) {
-            throw new Exception('Refund create request data is invalid.');
+            throw new LocalizedException(new Phrase('Refund create request data is invalid.'));
         }
         $result = $this->refundHelper->create($orderId, $description, $amount);
         if (!$result) {
-            throw new Exception('There was a problem while processing refund create request.');
+            throw new LocalizedException(new Phrase('There was a problem while processing refund create request.'));
         }
         return true;
     }

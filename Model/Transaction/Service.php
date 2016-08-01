@@ -5,6 +5,9 @@
 
 namespace Orba\Payupl\Model\Transaction;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
+
 class Service
 {
     /**
@@ -33,7 +36,7 @@ class Service
      * @param string $payuplOrderId
      * @param string $status
      * @param bool $close
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function updateStatus($payuplOrderId, $status, $close = false)
     {
@@ -42,7 +45,7 @@ class Service
          */
         $id = $this->transactionResource->getIdByPayuplOrderId($payuplOrderId);
         if (!$id) {
-            throw new Exception('Transaction ' . $payuplOrderId . ' not found.');
+            throw new LocalizedException(new Phrase('Transaction ' . $payuplOrderId . ' not found.'));
         }
         $transaction = $this->transactionRepository->get($id);
         if ($close) {

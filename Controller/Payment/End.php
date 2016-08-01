@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
-use Orba\Payupl\Model\Client\Exception;
+use Magento\Framework\Exception\LocalizedException;
 
 class End extends \Magento\Framework\App\Action\Action
 {
@@ -100,7 +100,7 @@ class End extends \Magento\Framework\App\Action\Action
                     }
                 }
             }
-        } catch (Exception $e) {
+        } catch (LocalizedException $e) {
             $this->logger->critical($e);
         }
         $resultRedirect->setPath($redirectUrl);

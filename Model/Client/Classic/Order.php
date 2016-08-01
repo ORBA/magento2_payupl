@@ -5,8 +5,6 @@
 
 namespace Orba\Payupl\Model\Client\Classic;
 
-use Orba\Payupl\Model\Client\Exception;
-
 class Order implements \Orba\Payupl\Model\Client\OrderInterface
 {
     const STATUS_PRE_NEW            = 0;

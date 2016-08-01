@@ -6,7 +6,6 @@
 namespace Orba\Payupl\Model\Client;
 
 use Orba\Payupl\Model\Client\MethodCallerInterface;
-use Orba\Payupl\Model\Client\Exception;
 
 class MethodCaller implements MethodCallerInterface
 {

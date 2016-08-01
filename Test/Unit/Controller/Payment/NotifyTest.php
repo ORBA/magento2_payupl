@@ -5,6 +5,9 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
+
 class NotifyTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -53,7 +56,7 @@ class NotifyTest extends \PHPUnit_Framework_TestCase
 
     public function testIgnoreNotificationClientException()
     {
-        $exception = new \Orba\Payupl\Model\Client\Exception();
+        $exception = new LocalizedException(new Phrase('Exception'));
         $this->clientFactory->expects($this->once())->method('create')->willThrowException($exception);
         $this->logger->expects($this->once())->method('critical')->with($exception);
         $resultForward = $this->getMockBuilder(\Magento\Framework\Controller\Result\Forward::class)

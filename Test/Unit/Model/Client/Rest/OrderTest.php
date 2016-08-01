@@ -5,8 +5,8 @@
 
 namespace Orba\Payupl\Model\Client\Rest;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Orba\Payupl\Model\Client\Exception;
 use Orba\Payupl\Model\Client\Rest\Order;
 
 class OrderTest extends \PHPUnit_Framework_TestCase
@@ -334,7 +334,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     {
         $request = $this->getRequestMock();
         $request->expects($this->once())->method('isPost')->willReturn(false);
-        $this->setExpectedException(Exception::class, 'POST request is required.');
+        $this->setExpectedException(LocalizedException::class, 'POST request is required.');
         $this->model->consumeNotification($request);
     }
 

@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
-use Orba\Payupl\Model\Client\Exception;
+use Magento\Framework\Exception\LocalizedException;
 
 class Start extends \Magento\Framework\App\Action\Action
 {
@@ -52,7 +52,6 @@ class Start extends \Magento\Framework\App\Action\Action
 
     /**
      * @return \Magento\Framework\Controller\Result\Redirect
-     * @throws \Orba\Payupl\Model\Client\Exception
      */
     public function execute()
     {
@@ -80,7 +79,7 @@ class Start extends \Magento\Framework\App\Action\Action
                     );
                     $this->orderHelper->setNewOrderStatus($order);
                     $redirectUrl = $result['redirectUri'];
-                } catch (Exception $e) {
+                } catch (LocalizedException $e) {
                     $this->logger->critical($e);
                     $redirectUrl = 'orba_payupl/payment/end';
                     $redirectParams = ['exception' => '1'];

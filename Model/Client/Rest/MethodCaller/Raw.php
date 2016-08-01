@@ -5,7 +5,8 @@
 
 namespace Orba\Payupl\Model\Client\Rest\MethodCaller;
 
-use Orba\Payupl\Model\Client\Exception;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Orba\Payupl\Model\Client\MethodCaller\RawInterface;
 
 class Raw implements RawInterface
@@ -14,7 +15,7 @@ class Raw implements RawInterface
      * @param string $methodName
      * @param array $args
      * @return \stdClass
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function call($methodName, array $args = [])
     {
@@ -87,7 +88,7 @@ class Raw implements RawInterface
     /**
      * @param \OpenPayU_Result $result
      * @return \stdClass
-     * @throws Exception
+     * @throws LocalizedException
      */
     protected function getResponse($result)
     {
@@ -95,7 +96,7 @@ class Raw implements RawInterface
         if (isset($response->status)) {
             $status = $response->status;
             if ((string)$status->statusCode !== 'SUCCESS') {
-                throw new Exception(\Zend_Json::encode($status));
+                throw new LocalizedException(new Phrase(\Zend_Json::encode($status)));
             }
         }
         return $response;

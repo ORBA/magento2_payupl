@@ -5,9 +5,10 @@
 
 namespace Orba\Payupl\Model\Client\Rest;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Orba\Payupl\Model\Client\OrderInterface;
 use Orba\Payupl\Model\Client\Rest\MethodCaller;
-use Orba\Payupl\Model\Client\Exception;
 
 class Order implements OrderInterface
 {
@@ -199,7 +200,7 @@ class Order implements OrderInterface
     public function consumeNotification(\Magento\Framework\App\Request\Http $request)
     {
         if (!$request->isPost()) {
-            throw new \Orba\Payupl\Model\Client\Exception('POST request is required.');
+            throw new LocalizedException(new Phrase('POST request is required.'));
         }
         $response = $this->methodCaller->call('orderConsumeNotification', [$request->getContent()]);
         if ($response) {

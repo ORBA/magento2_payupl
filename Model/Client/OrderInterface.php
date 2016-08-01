@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Model\Client;
 
+use Magento\Framework\Exception\LocalizedException;
+
 interface OrderInterface
 {
     /**
@@ -108,7 +110,7 @@ interface OrderInterface
      * @param string $status
      * @param float $amount
      * @return \Magento\Framework\Controller\Result\Raw
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function processNotification($payuplOrderId, $status, $amount);
 

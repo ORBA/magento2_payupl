@@ -5,6 +5,7 @@
 
 namespace Orba\Payupl\Model\Client\Rest;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Orba\Payupl\Model\Payupl;
 
@@ -66,7 +67,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->_scopeConfig->expects($this->at(0))->method('getValue')
             ->with($this->equalTo(Payupl::XML_PATH_POS_ID), $this->equalTo('store'))->willReturn('');
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Merchant POS ID is empty.');
+        $this->setExpectedException(LocalizedException::class, 'Merchant POS ID is empty.');
         $this->model->setConfig();
     }
 
@@ -77,7 +78,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             ->willReturn(self::EXEMPLARY_MERCHANT_POS_ID);
         $this->_scopeConfig->expects($this->at(1))->method('getValue')
             ->with($this->equalTo(Payupl::XML_PATH_SECOND_KEY_MD5), $this->equalTo('store'))->willReturn('');
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Signature key is empty.');
+        $this->setExpectedException(LocalizedException::class, 'Signature key is empty.');
         $this->model->setConfig();
     }
 }

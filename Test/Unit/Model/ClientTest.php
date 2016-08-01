@@ -5,6 +5,7 @@
 
 namespace Orba\Payupl\Model;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
@@ -55,7 +56,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testOrderCreateInvalidData()
     {
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'Order request data array is invalid.');
+        $this->setExpectedException(LocalizedException::class, 'Order request data array is invalid.');
         $this->orderHelper->expects($this->once())->method('validateCreate')->willReturn(false);
         $this->model->orderCreate();
     }
@@ -65,7 +66,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $data = ['data'];
         $dataExtended = ['data_extended'];
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'There was a problem while processing order create request.'
         );
         $this->orderHelper->expects($this->once())->method('validateCreate')->willReturn(true);
@@ -92,7 +93,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     
     public function testOrderRetrieveEmptyId()
     {
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'ID of order to retrieve is empty.');
+        $this->setExpectedException(LocalizedException::class, 'ID of order to retrieve is empty.');
         $this->orderHelper->expects($this->once())->method('validateRetrieve')->willReturn(false);
         $this->model->orderRetrieve('');
     }
@@ -101,7 +102,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $id = '123456';
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'There was a problem while processing order retrieve request.'
         );
         $this->orderHelper->expects($this->once())->method('validateRetrieve')->willReturn(true);
@@ -121,7 +122,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testOrderCancelEmptyId()
     {
-        $this->setExpectedException(\Orba\Payupl\Model\Client\Exception::class, 'ID of order to cancel is empty.');
+        $this->setExpectedException(LocalizedException::class, 'ID of order to cancel is empty.');
         $this->orderHelper->expects($this->once())->method('validateCancel')->willReturn(false);
         $this->model->orderCancel('');
     }
@@ -130,7 +131,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $id = '123456';
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'There was a problem while processing order cancel request.'
         );
         $this->orderHelper->expects($this->once())->method('validateCancel')->willReturn(true);
@@ -151,7 +152,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderStatusUpdateInvalidData()
     {
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'Order status update request data array is invalid.'
         );
         $this->orderHelper->expects($this->once())->method('validateStatusUpdate')->willReturn(false);
@@ -162,7 +163,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $data = ['data'];
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'There was a problem while processing order status update request.'
         );
         $this->orderHelper->expects($this->once())->method('validateStatusUpdate')->willReturn(true);
@@ -187,7 +188,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->disableOriginalConstructor()
             ->getMock();
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'There was a problem while consuming order notification.'
         );
         $this->orderHelper->expects($this->once())->method('consumeNotification')->with($this->equalTo($request))
@@ -208,7 +209,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testRefundCreateInvalidData()
     {
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'Refund create request data is invalid.'
         );
         $this->refundHelper->expects($this->once())->method('validateCreate')->willReturn(false);
@@ -218,7 +219,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testRefundCreateFail()
     {
         $this->setExpectedException(
-            \Orba\Payupl\Model\Client\Exception::class,
+            LocalizedException::class,
             'There was a problem while processing refund create request.'
         );
         $this->refundHelper->expects($this->once())->method('validateCreate')->willReturn(true);

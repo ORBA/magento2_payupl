@@ -5,7 +5,6 @@
 
 namespace Orba\Payupl\Model\Client\Classic\MethodCaller;
 
-use Orba\Payupl\Model\Client\Exception;
 use Orba\Payupl\Model\Client\MethodCaller\RawInterface;
 
 class Raw implements RawInterface

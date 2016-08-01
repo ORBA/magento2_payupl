@@ -5,8 +5,9 @@
 
 namespace Orba\Payupl\Model\Client\Classic;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Orba\Payupl\Model\Client\ConfigInterface;
-use Orba\Payupl\Model\Client\Exception;
 use Orba\Payupl\Model\Payupl;
 
 class Config implements ConfigInterface
@@ -47,7 +48,7 @@ class Config implements ConfigInterface
 
     /**
      * @return true
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function setConfig()
     {
@@ -55,25 +56,25 @@ class Config implements ConfigInterface
         if ($posId) {
             $this->posId = $posId;
         } else {
-            throw new Exception('POS ID is empty.');
+            throw new LocalizedException(new Phrase('POS ID is empty.'));
         }
         $keyMd5 = $this->scopeConfig->getValue(Payupl::XML_PATH_KEY_MD5, 'store');
         if ($keyMd5) {
             $this->keyMd5 = $keyMd5;
         } else {
-            throw new Exception('Key MD5 is empty.');
+            throw new LocalizedException(new Phrase('Key MD5 is empty.'));
         }
         $secondKeyMd5 = $this->scopeConfig->getValue(Payupl::XML_PATH_SECOND_KEY_MD5, 'store');
         if ($secondKeyMd5) {
             $this->secondKeyMd5 = $secondKeyMd5;
         } else {
-            throw new Exception('Second key MD5 is empty.');
+            throw new LocalizedException(new Phrase('Second key MD5 is empty.'));
         }
         $posAuthKey = $this->scopeConfig->getValue(Payupl::XML_PATH_POS_AUTH_KEY, 'store');
         if ($posAuthKey) {
             $this->posAuthKey = $posAuthKey;
         } else {
-            throw new Exception('POS auth key is empty.');
+            throw new LocalizedException(new Phrase('POS auth key is empty.'));
         }
         return true;
     }

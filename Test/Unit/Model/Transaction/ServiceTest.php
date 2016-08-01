@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Model\Transaction;
 
+use Magento\Framework\Exception\LocalizedException;
+
 class ServiceTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -40,7 +42,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $payuplOrderId = 'ABC';
         $this->transactionResource->expects($this->once())->method('getIdByPayuplOrderId')
             ->with($this->equalTo($payuplOrderId))->willReturn(false);
-        $this->setExpectedException(Exception::class, 'Transaction ' . $payuplOrderId . ' not found.');
+        $this->setExpectedException(LocalizedException::class, 'Transaction ' . $payuplOrderId . ' not found.');
         $this->model->updateStatus($payuplOrderId, 'COMPLETED');
     }
 
