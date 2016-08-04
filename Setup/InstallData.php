@@ -14,20 +14,29 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
  */
 class InstallData implements InstallDataInterface
 {
+    /**
+     * @var \Magento\Sales\Model\Order\StatusFactory
+     */
+    protected $statusFactory;
+
+    /**
+     * @param \Magento\Sales\Model\Order\StatusFactory $statusFactory
+     */
+    public function __construct(\Magento\Sales\Model\Order\StatusFactory $statusFactory)
+    {
+        $this->statusFactory = $statusFactory;
+    }
+
     public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        $connection = $setup->getConnection();
-
         // add Pending Payu.pl status to Pending Payment state
-        $connection->insert($setup->getTable('sales_order_status'), [
+        
+        /** @var \Magento\Sales\Model\Order\Status $status */
+        $status = $this->statusFactory->create();
+        $status->setData([
             'status' => 'pending_payupl',
             'label' => 'Pending Payu.pl'
-        ]);
-        $connection->insert($setup->getTable('sales_order_status_state'), [
-            'status' =>  'pending_payupl',
-            'state' => 'pending_payment',
-            'is_default' => 0,
-            'visible_on_front' => 1
-        ]);
+        ])->save();
+        $status->assignState('pending_payment', false, true);
     }
 }
