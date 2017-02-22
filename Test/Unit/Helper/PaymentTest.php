@@ -115,9 +115,9 @@ class PaymentTest extends \PHPUnit_Framework_TestCase
         $this->transactionResource->expects($this->once())->method('getLastPayuplOrderIdByOrderId')
             ->with($this->equalTo($orderId))->willReturn($payuplOrderId);
         $path = 'orba_payupl/payment/repeat';
-        $params = ['id' => $payuplOrderId];
+        $params = ['id' => base64_encode($payuplOrderId)];
         $baseUrl = 'http://example.com/';
-        $url = $baseUrl . $path . '/id/' . $payuplOrderId;
+        $url = $baseUrl . $path . '/id/' . base64_encode($payuplOrderId);
         $this->urlBuilder->expects($this->once())->method('getUrl')->with(
             $this->equalTo($path),
             $this->equalTo($params)

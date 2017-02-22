@@ -36,7 +36,7 @@ class Repeat extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
-        $payuplOrderId = $this->context->getRequest()->getParam('id');
+        $payuplOrderId = base64_decode($this->context->getRequest()->getParam('id'));
         $orderId = $this->paymentHelper->getOrderIdIfCanRepeat($payuplOrderId);
         if ($orderId) {
             $resultRedirect->setPath('orba_payupl/payment/repeat_start');

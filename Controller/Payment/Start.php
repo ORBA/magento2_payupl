@@ -71,12 +71,9 @@ class Start extends \Magento\Framework\App\Action\Action
                     $clientOrderHelper = $client->getOrderHelper();
                     $orderData = $clientOrderHelper->getDataForOrderCreate($order);
                     $result = $client->orderCreate($orderData);
-                    $this->orderHelper->addNewOrderTransaction(
-                        $order,
-                        $result['orderId'],
-                        $result['extOrderId'],
-                        $clientOrderHelper->getNewStatus()
-                    );
+                    $status = $clientOrderHelper->getNewStatus();
+                    $tnxId = $result['orderId'];
+                    $this->orderHelper->addNewOrderTransaction($order, $tnxId, $client, $status);
                     $this->orderHelper->setNewOrderStatus($order);
                     $redirectUrl = $result['redirectUri'];
                 } catch (LocalizedException $e) {

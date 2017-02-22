@@ -253,6 +253,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($paytypes, $this->model->getPaytypes());
     }
 
+    public function testGetType()
+    {
+        $this->assertEmpty($this->model->getType());
+    }
+
     public function testGetOrderHelper()
     {
         $this->assertInstanceOf(Client\OrderInterface::class, $this->model->getOrderHelper());

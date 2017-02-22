@@ -122,10 +122,10 @@ class StartTest extends \PHPUnit_Framework_TestCase
         $status = 'status';
         $clientOrderHelper->expects($this->once())->method('getNewStatus')->willReturn($status);
         $this->orderHelper->expects($this->once())->method('addNewOrderTransaction')->with(
-            $this->equalTo($order),
-            $this->equalTo($response['orderId']),
-            $this->equalTo($response['extOrderId']),
-            $this->equalTo($status)
+            $order,
+            $response['orderId'],
+            $client,
+            $status
         );
         $this->orderHelper->expects($this->once())->method('setNewOrderStatus')->with($this->equalTo($order));
         $resultRedirect = $this->getMockBuilder(\Magento\Framework\Controller\Result\Redirect::class)

@@ -76,12 +76,13 @@ class RepeatTest extends \PHPUnit_Framework_TestCase
 
     public function testSuccess()
     {
+        $id = 'QUJD'; // base64_decode('ABC');
         $payuplOrderId = 'ABC';
         $orderId = 1;
         $resultRedirect = $this->getRedirectMock('orba_payupl/payment/repeat_start');
         $this->resultRedirectFactory->expects($this->once())->method('create')->willReturn($resultRedirect);
         $request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)->getMockForAbstractClass();
-        $request->expects($this->once())->method('getParam')->with('id')->willReturn($payuplOrderId);
+        $request->expects($this->once())->method('getParam')->with('id')->willReturn($id);
         $this->context->expects($this->once())->method('getRequest')->willReturn($request);
         $this->paymentHelper->expects($this->once())->method('getOrderIdIfCanRepeat')->with($payuplOrderId)
             ->willReturn($orderId);

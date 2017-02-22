@@ -56,7 +56,7 @@ class Payment extends AbstractHelper
         if ($order && $this->orderHelper->canRepeatPayment($order)) {
             return $this->_urlBuilder->getUrl(
                 'orba_payupl/payment/repeat',
-                ['id' => $this->transactionResource->getLastPayuplOrderIdByOrderId($orderId)]
+                ['id' => base64_encode($this->transactionResource->getLastPayuplOrderIdByOrderId($orderId))]
             );
         }
         return false;

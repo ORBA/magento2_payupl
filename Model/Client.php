@@ -11,6 +11,19 @@ use Magento\Framework\Phrase;
 class Client
 {
     /**
+     * PayU.pl have REST and CLASSIC API
+     */
+    const TYPE_CLASSIC = 'classic';
+    const TYPE_REST    = 'rest';
+
+    /**
+     * Define type of this client
+     *
+     * @var string
+     */
+    protected $clientType;
+
+    /**
      * @var Client\OrderInterface
      */
     protected $orderHelper;
@@ -153,5 +166,16 @@ class Client
     public function getPaytypes()
     {
         return $this->orderHelper->getPaytypes();
+    }
+
+    /**
+     * Retrieve info about client type
+     * return can by 'classic' or 'rest'
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->clientType;
     }
 }

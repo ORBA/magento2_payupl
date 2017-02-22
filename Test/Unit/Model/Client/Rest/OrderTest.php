@@ -407,6 +407,14 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->model->canProcessNotification($payuplOrderId));
     }
 
+    public function testCanProcessNotificationFailStatusEqualFalse()
+    {
+        $payuplOrderId = 'ABC';
+        $this->transactionResource->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)
+            ->willReturn(false);
+        $this->assertFalse($this->model->canProcessNotification($payuplOrderId));
+    }
+
     public function testCanProcessNotificationSuccess()
     {
         $payuplOrderId = 'ABC';
@@ -447,6 +455,12 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $statusDescription = $this->model->getStatusDescription(Order::STATUS_NEW);
         $this->assertInternalType('string', $statusDescription);
         $this->assertNotEmpty($statusDescription);
+    }
+
+    public function testGetAllStatuses()
+    {
+        $this->assertInternalType('array', $this->model->getAllStatuses());
+        $this->assertNotEmpty($this->model->getAllStatuses());
     }
 
     /**

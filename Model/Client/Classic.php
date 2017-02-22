@@ -8,6 +8,11 @@ namespace Orba\Payupl\Model\Client;
 class Classic extends \Orba\Payupl\Model\Client
 {
     /**
+     * @inheritdoc
+     */
+    protected $clientType = self::TYPE_CLASSIC;
+
+    /**
      * @param Classic\Config $configHelper
      * @param Classic\Order $orderHelper
      * @param Classic\Refund $refundHelper

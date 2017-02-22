@@ -43,7 +43,7 @@ class Transaction extends AbstractDb
                 ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
                 ['txn_id']
             )->where('order_id = ?', $orderId)
-            ->where('txn_type = ?', 'order')
+            ->where('txn_type = ?', \Magento\Sales\Model\Order\Payment\Transaction::TYPE_ORDER)
             ->order('transaction_id ' . \Zend_Db_Select::SQL_DESC)
             ->limit(1);
         $row = $adapter->fetchRow($select);
@@ -192,7 +192,7 @@ class Transaction extends AbstractDb
                 ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
                 ['additional_information']
             )->where('order_id = ?', $orderId)
-            ->where('txn_type = ?', 'order')
+            ->where('txn_type = ?', \Magento\Sales\Model\Order\Payment\Transaction::TYPE_ORDER)
             ->order('transaction_id ' . \Zend_Db_Select::SQL_DESC)
             ->limit(1);
         $row = $adapter->fetchRow($select);
@@ -201,5 +201,35 @@ class Transaction extends AbstractDb
             return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
         }
         return $valueIfNotFound;
+    }
+
+    /**
+     * Get all PayU order IDs for given magento order ID
+     *
+     * @param $orderId
+     * @return array
+     */
+    public function getAllPayuplOrderIdsByOrderId($orderId)
+    {
+        $adapter = $this->getConnection();
+        $select = $adapter->select();
+        $select->from(
+                ['main_table' => $this->_resources->getTableName('sales_payment_transaction')],
+                ['txn_id']
+        );
+        $joinExpression = $adapter->quoteInto(
+            'sop.entity_id = main_table.payment_id AND sop.method = ?', \Orba\Payupl\Model\Payupl::CODE
+        );
+        $select->join(
+            ['sop' => $this->_resources->getTableName('sales_order_payment')],
+            $joinExpression,
+            null
+        );
+        $select->where('order_id = ?', $orderId);
+        $select->where('txn_type = ?', \Magento\Sales\Model\Order\Payment\Transaction::TYPE_ORDER);
+        $select->order('transaction_id ' . \Zend_Db_Select::SQL_DESC);
+
+        $txnIds = $adapter->fetchCol($select);
+        return $txnIds;
     }
 }

@@ -43,4 +43,12 @@
     <type name="Magento\Checkout\Model\PaymentInformationManagement">
         <plugin name="orba_payupl_checkout_model_paymentinformationmanagement" type="Orba\Payupl\Model\Checkout\PaymentInformationManagement\Plugin" sortOrder="1" />
     </type>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="retrieve" xsi:type="object">Orba\Payupl\Console\Command\RetrieveCommand</item>
+                <item name="emulateNotification" xsi:type="object">Orba\Payupl\Console\Command\EmulateNotificationCommand</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

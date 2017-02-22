@@ -91,14 +91,11 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->orderProcessor = $this->getMockBuilder(Order\Processor::class)->disableOriginalConstructor()->getMock();
         $this->rawResultFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RawFactory::class)
             ->setMethods(['create'])->disableOriginalConstructor()->getMock();
-        $context = $objectManagerHelper->getObject(
-            \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
-        );
+
         $this->model = $objectManagerHelper->getObject(
             Order::class,
             [
-                'context' => $context,
+                'urlInterface' => $this->urlBuilder,
                 'dataValidator' => $this->dataValidator,
                 'dataGetter' => $this->dataGetter,
                 'session' => $this->session,
@@ -205,14 +202,15 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     public function testCreate()
     {
         $data = [
-            'session_id' => 'ABC'
+            'session_id' => 'ABC',
+            'order_id' => '000000012'
         ];
         $path = 'orba_payupl/classic/form';
         $baseUrl = 'http://example.com/';
         $url = $baseUrl . $path;
         $result = [
-            'orderId' => md5($data['session_id']),
-            'extOrderId' => $data['session_id'],
+            'orderId' => $data['session_id'],
+            'extOrderId' => $data['order_id'],
             'redirectUri' => $url
         ];
         $this->urlBuilder->expects($this->once())->method('getUrl')->with($path)->will($this->returnValue($url));
@@ -293,7 +291,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
             ->willReturn($payuplOrderId);
         $this->setExpectationsForOrderRetrieve(123456, 345678, $payuplOrderId, 'DEF', $response);
         $result = [
-            'payuplOrderId' => md5($payuplOrderId),
+            'payuplOrderId' => $payuplOrderId,
             'status' => $response->transStatus,
             'amount' => $response->transAmount / 100
         ];
@@ -313,6 +311,14 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $payuplOrderId = 'ABC';
         $this->transactionResource->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)
             ->willReturn(Order::STATUS_CANCELLED);
+        $this->assertFalse($this->model->canProcessNotification($payuplOrderId));
+    }
+
+    public function testCanProcessNotificationFailStatusEqualFalse()
+    {
+        $payuplOrderId = 'ABC';
+        $this->transactionResource->expects($this->once())->method('getStatusByPayuplOrderId')->with($payuplOrderId)
+            ->willReturn(false);
         $this->assertFalse($this->model->canProcessNotification($payuplOrderId));
     }
 

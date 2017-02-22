@@ -8,6 +8,11 @@ namespace Orba\Payupl\Model\Client;
 class Rest extends \Orba\Payupl\Model\Client
 {
     /**
+     * @inheritdoc
+     */
+    protected $clientType = self::TYPE_REST;
+
+    /**
      * @param Rest\Config $configHelper
      * @param Rest\Order $orderHelper
      * @param Rest\Refund $refundHelper

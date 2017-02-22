@@ -65,22 +65,22 @@ class Order
      * Saves new order transaction incrementing "try".
      *
      * @param \Magento\Sales\Model\Order $order
-     * @param string $payuplOrderId
-     * @param string $payuplExternalOrderId
+     * @param string $tnxId
+     * @param \Orba\Payupl\Model\Client $client
      * @param string $status
      */
     public function addNewOrderTransaction(
         \Magento\Sales\Model\Order $order,
-        $payuplOrderId,
-        $payuplExternalOrderId,
+        $tnxId,
+        $client,
         $status
     ) {
         $orderId = $order->getId();
         $payment = $order->getPayment();
-        $payment->setTransactionId($payuplOrderId);
+        $payment->setTransactionId($tnxId);
         $payment->setTransactionAdditionalInfo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, [
-            'order_id' => $payuplExternalOrderId,
             'try' => $this->transactionResource->getLastTryByOrderId($orderId) + 1,
+            'client' => $client->getType(),
             'status' => $status
         ]);
         $payment->setIsTransactionClosed(0);

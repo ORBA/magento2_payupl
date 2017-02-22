@@ -76,11 +76,23 @@ class DataGetter
      */
     public function getBasicData(\Magento\Sales\Model\Order $order)
     {
+        /**
+         * Note for REST client:
+         *
+         * 'orderId' field is PayU unique ID - this data we can get after PayU response us
+         *     (in CLASSIC client we can send it (session_id), in REST (orderId) we can not)
+         * 'extOrderId' theoretically should be Magento order ID
+         *     but because we can have multiple attempt for pay
+         *     we send more unique string
+         *     (which is that same as 'session_id' in CLASSIC client
+         *     including Magento increment ID + unique part of data
+         *     so we can identity single payment attempt)
+         */
         $incrementId = $order->getIncrementId();
         return [
             'currencyCode' => $order->getOrderCurrencyCode(),
             'totalAmount' => $order->getGrandTotal() * 100,
-            'extOrderId' => $this->extOrderIdHelper->generate($order),
+            'extOrderId' => $this->extOrderIdHelper->generate($order), // For REST Api must be unique in range of POS
             'description' => __('Order # %1', [$incrementId]),
         ];
     }

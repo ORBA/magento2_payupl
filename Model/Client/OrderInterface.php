@@ -126,4 +126,12 @@ interface OrderInterface
      * @return string
      */
     public function getStatusDescription($status);
+
+    /**
+     * Return array of all available statuses for proper client instance
+     * Structure: status_code => description
+     *
+     * @return array
+     */
+    public function getAllStatuses();
 }

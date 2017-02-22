@@ -30,7 +30,7 @@ class ClientFactory
 
     /**
      * @param array $data
-     * @return object
+     * @return \Orba\Payupl\Model\Client
      */
     public function create(array $data = [])
     {
@@ -39,6 +39,6 @@ class ClientFactory
         } else {
             $class = Client\Rest::class;
         }
-        return $this->objectManager->create($class, []);
+        return $this->objectManager->create($class, $data);
     }
 }
