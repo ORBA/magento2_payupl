@@ -276,6 +276,6 @@ class Command extends AbstractHelper
                 throw new \InvalidArgumentException($errorMsg);
             }
         }
-        return intval($amount);
+        return $amount / 100;
     }
 }
