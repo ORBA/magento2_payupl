@@ -25,15 +25,15 @@ class DataGetter
     protected $extOrderIdHelper;
 
     /**
-     * @param \Magento\Framework\View\Context $context
+     * @param \Magento\Framework\UrlInterface $context
      * @param Config $configHelper
      */
     public function __construct(
-        \Magento\Framework\View\Context $context,
+        \Magento\Framework\UrlInterface $context,
         Config $configHelper,
         \Orba\Payupl\Model\Order\ExtOrderId $extOrderIdHelper
     ) {
-        $this->urlBuilder = $context->getUrlBuilder();
+        $this->urlBuilder = $context;
         $this->configHelper = $configHelper;
         $this->extOrderIdHelper = $extOrderIdHelper;
     }
