@@ -32,7 +32,11 @@ class Config implements ConfigInterface
      */
     public function setConfig()
     {
-        \OpenPayU_Configuration::setEnvironment('secure');
+        $environment = 'secure';
+        if ($this->scopeConfig->isSetFlag(Payupl::XML_PATH_REST_API_SANDBOX)) {
+            $environment = 'sandbox';
+        }
+        \OpenPayU_Configuration::setEnvironment($environment);
         $merchantPosId = $this->scopeConfig->getValue(Payupl::XML_PATH_POS_ID, 'store');
         if ($merchantPosId) {
             \OpenPayU_Configuration::setMerchantPosId($merchantPosId);

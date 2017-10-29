@@ -27,6 +27,14 @@
                         <field id="active">1</field>
                     </depends>
                 </field>
+                <field id="sandbox" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>REST API Sandbox</label>
+                    <comment>Set to Yes if you are using PayU Sandbox for testing purpose</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="classic_api">0</field>
+                    </depends>
+                </field>
                 <field id="pos_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>POS ID (pos_id)</label>
                     <comment>Copy from your POS configuration in Payu.pl panel</comment>
