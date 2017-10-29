@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Sales;
 
-class OrderTest extends \PHPUnit_Framework_TestCase
+class OrderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Order

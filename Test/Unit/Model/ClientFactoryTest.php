@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model;
 
-class ClientFactoryTest extends \PHPUnit_Framework_TestCase
+class ClientFactoryTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var ClientFactory

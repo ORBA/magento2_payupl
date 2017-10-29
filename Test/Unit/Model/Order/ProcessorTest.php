@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Order;
 
 use Magento\Framework\Exception\LocalizedException;
 
-class ProcessorTest extends \PHPUnit_Framework_TestCase
+class ProcessorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Processor
@@ -126,7 +126,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
     protected function expectOrderNotFoundException()
     {
         $this->orderHelper->expects($this->once())->method('loadOrderByPayuplOrderId')->willReturn(false);
-        $this->setExpectedException(LocalizedException::class, 'Order not found.');
+        $this->expectException(LocalizedException::class, 'Order not found.');
     }
 
     /**

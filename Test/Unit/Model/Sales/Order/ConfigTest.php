@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Sales\Order;
 
 use Orba\Payupl\Model\Sales\Order;
 
-class ConfigTest extends \PHPUnit_Framework_TestCase
+class ConfigTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Config

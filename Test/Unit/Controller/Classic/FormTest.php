@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Controller\Classic;
 
-class FormTest extends \PHPUnit_Framework_TestCase
+class FormTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Form

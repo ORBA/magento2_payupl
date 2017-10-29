@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Client\Classic\MethodCaller;
 
-class RawTest extends \PHPUnit_Framework_TestCase
+class RawTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Raw
@@ -57,7 +57,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
                 'sig' => $sig
             ])
         )->willThrowException($exception);
-        $this->setExpectedException(\Exception::class, $exceptionMessage);
+        $this->expectException(\Exception::class, $exceptionMessage);
         $this->model->orderRetrieve($posId, $sessionId, $ts, $sig);
     }
 
@@ -111,7 +111,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
             $this->equalTo('getRefunds'),
             $this->equalTo(['RefundAuth' => $authData])
         )->willThrowException($exception);
-        $this->setExpectedException(\Exception::class, $exceptionMessage);
+        $this->expectException(\Exception::class, $exceptionMessage);
         $this->model->refundGet($authData);
     }
 

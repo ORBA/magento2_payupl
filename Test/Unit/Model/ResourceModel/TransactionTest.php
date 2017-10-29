@@ -8,7 +8,7 @@ namespace Orba\Payupl\Model\ResourceModel;
 use Magento\Framework\DB\Select;
 use Orba\Payupl\Test\Util;
 
-class TransactionTest extends \PHPUnit_Framework_TestCase
+class TransactionTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Transaction

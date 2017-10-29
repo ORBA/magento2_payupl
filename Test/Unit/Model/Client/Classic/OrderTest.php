@@ -9,7 +9,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class OrderTest extends \PHPUnit_Framework_TestCase
+class OrderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Order
@@ -30,6 +30,11 @@ class OrderTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     protected $urlBuilder;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $translator;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -77,6 +82,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->dataValidator = $this->getMockBuilder(Order\DataValidator::class)->getMock();
         $this->dataGetter = $this->getMockBuilder(Order\DataGetter::class)->disableOriginalConstructor()->getMock();
         $this->urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
+        $this->translator = $this->getMockForAbstractClass(\Magento\Framework\TranslateInterface::class);
         $this->session = $this->getMockBuilder(\Orba\Payupl\Model\Session::class)->setMethods(['setOrderCreateData'])
             ->disableOriginalConstructor()->getMock();
         $this->request = $this->getMockBuilder(\Magento\Framework\App\RequestInterface::class)
@@ -93,7 +99,10 @@ class OrderTest extends \PHPUnit_Framework_TestCase
             ->setMethods(['create'])->disableOriginalConstructor()->getMock();
         $context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
+            [
+                'urlBuilder' => $this->urlBuilder,
+                'translator' => $this->translator
+            ]
         );
         $this->model = $objectManagerHelper->getObject(
             Order::class,
@@ -267,7 +276,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $message = 'Exception message';
         $this->notificationHelper->expects($this->once())->method('getPayuplOrderId')->with($this->equalTo($request))
             ->willThrowException(new LocalizedException(new Phrase($message)));
-        $this->setExpectedException(LocalizedException::class, $message);
+        $this->expectException(LocalizedException::class, $message);
         $this->model->consumeNotification($request);
     }
 

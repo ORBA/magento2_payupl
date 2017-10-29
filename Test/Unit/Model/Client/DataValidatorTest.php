@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Client;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class DataValidatorTest extends \PHPUnit_Framework_TestCase
+class DataValidatorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Orba\Payupl\Model\Client\DataValidator

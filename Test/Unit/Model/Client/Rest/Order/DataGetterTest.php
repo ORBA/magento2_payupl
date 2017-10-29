@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Client\Rest\Order;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class DataGetterTest extends \PHPUnit_Framework_TestCase
+class DataGetterTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var DataGetter
@@ -18,6 +18,11 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     protected $urlBuilder;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $translator;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -38,13 +43,17 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
     {
         $objectManagerHelper = new ObjectManager($this);
         $this->urlBuilder = $this->getMockForAbstractClass(\Magento\Framework\UrlInterface::class);
+        $this->translator = $this->getMockForAbstractClass(\Magento\Framework\TranslateInterface::class);
         $this->configHelper = $this->getMockBuilder(\Orba\Payupl\Model\Client\Rest\Config::class)
             ->disableOriginalConstructor()->getMock();
         $this->extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)
             ->disableOriginalConstructor()->getMock();
         $this->context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
+            [
+                'urlBuilder' => $this->urlBuilder,
+                'translator' => $this->translator
+            ]
         );
         $this->model = $objectManagerHelper->getObject(
             DataGetter::class,
