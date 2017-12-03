@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Client\Classic\MethodCaller;
 
-class PaytypesClientTest extends \PHPUnit_Framework_TestCase
+class PaytypesClientTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var PaytypesClient

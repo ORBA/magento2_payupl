@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class PayuplTest extends \PHPUnit_Framework_TestCase
+class PayuplTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Payupl

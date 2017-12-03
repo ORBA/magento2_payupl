@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Controller\Payment\Repeat;
 
-class ErrorTest extends \PHPUnit_Framework_TestCase
+class ErrorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Error

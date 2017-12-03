@@ -8,7 +8,7 @@ namespace Orba\Payupl\Controller\Payment;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 
-class NotifyTest extends \PHPUnit_Framework_TestCase
+class NotifyTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Notify

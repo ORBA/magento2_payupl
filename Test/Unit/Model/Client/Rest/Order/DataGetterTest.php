@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Client\Rest\Order;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class DataGetterTest extends \PHPUnit_Framework_TestCase
+class DataGetterTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var DataGetter

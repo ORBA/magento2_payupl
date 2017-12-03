@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Checkout\PaymentInformationManagement;
 
-class PluginTest extends \PHPUnit_Framework_TestCase
+class PluginTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Plugin

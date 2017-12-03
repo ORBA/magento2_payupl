@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Helper;
 
-class PaymentTest extends \PHPUnit_Framework_TestCase
+class PaymentTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Payment

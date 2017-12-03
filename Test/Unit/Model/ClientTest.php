@@ -8,7 +8,7 @@ namespace Orba\Payupl\Model;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class ClientTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Client
@@ -56,7 +56,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testOrderCreateInvalidData()
     {
-        $this->setExpectedException(LocalizedException::class, 'Order request data array is invalid.');
+        $this->expectException(LocalizedException::class, 'Order request data array is invalid.');
         $this->orderHelper->expects($this->once())->method('validateCreate')->willReturn(false);
         $this->model->orderCreate();
     }
@@ -65,7 +65,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $data = ['data'];
         $dataExtended = ['data_extended'];
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'There was a problem while processing order create request.'
         );
@@ -93,7 +93,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     
     public function testOrderRetrieveEmptyId()
     {
-        $this->setExpectedException(LocalizedException::class, 'ID of order to retrieve is empty.');
+        $this->expectException(LocalizedException::class, 'ID of order to retrieve is empty.');
         $this->orderHelper->expects($this->once())->method('validateRetrieve')->willReturn(false);
         $this->model->orderRetrieve('');
     }
@@ -101,7 +101,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderRetrieveFail()
     {
         $id = '123456';
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'There was a problem while processing order retrieve request.'
         );
@@ -122,7 +122,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testOrderCancelEmptyId()
     {
-        $this->setExpectedException(LocalizedException::class, 'ID of order to cancel is empty.');
+        $this->expectException(LocalizedException::class, 'ID of order to cancel is empty.');
         $this->orderHelper->expects($this->once())->method('validateCancel')->willReturn(false);
         $this->model->orderCancel('');
     }
@@ -130,7 +130,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderCancelFail()
     {
         $id = '123456';
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'There was a problem while processing order cancel request.'
         );
@@ -151,7 +151,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testOrderStatusUpdateInvalidData()
     {
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'Order status update request data array is invalid.'
         );
@@ -162,7 +162,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testOrderStatusUpdateFail()
     {
         $data = ['data'];
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'There was a problem while processing order status update request.'
         );
@@ -187,7 +187,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $request = $this->getMockBuilder(\Magento\Framework\App\Request\Http::class)->disableOriginalConstructor()
             ->getMock();
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'There was a problem while consuming order notification.'
         );
@@ -208,7 +208,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testRefundCreateInvalidData()
     {
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'Refund create request data is invalid.'
         );
@@ -218,7 +218,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testRefundCreateFail()
     {
-        $this->setExpectedException(
+        $this->expectException(
             LocalizedException::class,
             'There was a problem while processing refund create request.'
         );

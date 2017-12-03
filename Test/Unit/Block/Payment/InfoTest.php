@@ -7,7 +7,7 @@ namespace Orba\Payupl\Block\Payment;
 
 use Orba\Payupl\Test\Util;
 
-class InfoTest extends \PHPUnit_Framework_TestCase
+class InfoTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager

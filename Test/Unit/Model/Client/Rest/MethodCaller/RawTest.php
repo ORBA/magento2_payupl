@@ -8,7 +8,7 @@ namespace Orba\Payupl\Model\Client\Rest\MethodCaller;
 use Magento\Framework\Exception\LocalizedException;
 use Orba\Payupl\Test\Util;
 
-class RawTest extends \PHPUnit_Framework_TestCase
+class RawTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Raw
@@ -50,7 +50,7 @@ class RawTest extends \PHPUnit_Framework_TestCase
             ]
         ];
         $result->expects($this->once())->method('getResponse')->willReturn($response);
-        $this->setExpectedException(LocalizedException::class, \Zend_Json::encode($response->status));
+        $this->expectException(LocalizedException::class, \Zend_Json::encode($response->status));
         Util::callMethod($this->model, 'getResponse', [$result]);
     }
 
