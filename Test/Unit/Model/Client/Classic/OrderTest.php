@@ -71,6 +71,11 @@ class OrderTest extends \PHPUnit\Framework\TestCase
      */
     protected $rawResultFactory;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $translator;
+
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
@@ -91,14 +96,18 @@ class OrderTest extends \PHPUnit\Framework\TestCase
         $this->orderProcessor = $this->getMockBuilder(Order\Processor::class)->disableOriginalConstructor()->getMock();
         $this->rawResultFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RawFactory::class)
             ->setMethods(['create'])->disableOriginalConstructor()->getMock();
-        $context = $objectManagerHelper->getObject(
+        $this->translator = $this->getMockBuilder(\Magento\Framework\TranslateInterface::class)->getMock();
+        $this->context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
+            [
+                'urlBuilder' => $this->urlBuilder,
+                'translator' => $this->translator
+            ]
         );
         $this->model = $objectManagerHelper->getObject(
             Order::class,
             [
-                'context' => $context,
+                'context' => $this->context,
                 'dataValidator' => $this->dataValidator,
                 'dataGetter' => $this->dataGetter,
                 'session' => $this->session,

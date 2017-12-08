@@ -34,6 +34,12 @@ class DataGetterTest extends \PHPUnit\Framework\TestCase
      */
     protected $context;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $translator;
+
+
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
@@ -42,9 +48,14 @@ class DataGetterTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()->getMock();
         $this->extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)
             ->disableOriginalConstructor()->getMock();
+        $this->translator = $this->getMockBuilder(\Magento\Framework\TranslateInterface::class)->getMock();
+
         $this->context = $objectManagerHelper->getObject(
             \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
+            [
+                'urlBuilder' => $this->urlBuilder,
+                'translator' => $this->translator
+            ]
         );
         $this->model = $objectManagerHelper->getObject(
             DataGetter::class,
