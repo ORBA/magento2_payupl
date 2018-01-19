@@ -35,12 +35,9 @@ class PaymentTest extends \PHPUnit\Framework\TestCase
         $this->urlBuilder = $this->getMockBuilder(\Magento\Framework\UrlInterface::class)->getMockForAbstractClass();
         $this->orderHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order::class)->disableOriginalConstructor()
             ->getMock();
-        $context = $objectManager->getObject(
-            \Magento\Framework\App\Helper\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
-        );
+
         $this->helper = $objectManager->getObject(Payment::class, [
-            'context' => $context,
+            'urlBuilder' => $this->urlBuilder,
             'transactionResource' => $this->transactionResource,
             'orderHelper' => $this->orderHelper
         ]);
