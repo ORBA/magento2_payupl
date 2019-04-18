@@ -6,6 +6,7 @@
 namespace Orba\Payupl\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class Transaction extends AbstractDb
 {
@@ -15,6 +16,11 @@ class Transaction extends AbstractDb
     protected $date;
 
     /**
+     * @var SerializerInterface
+     */
+    protected $serializer;
+
+    /**
      * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
      * @param \Magento\Framework\Stdlib\DateTime $date
      * @param string|null $resourcePrefix
@@ -22,6 +28,7 @@ class Transaction extends AbstractDb
     public function __construct(
         \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Magento\Framework\Stdlib\DateTime $date,
+        SerializerInterface $serializer,
         $resourcePrefix = null
     ) {
         parent::__construct(
@@ -29,6 +36,7 @@ class Transaction extends AbstractDb
             $resourcePrefix
         );
         $this->date = $date;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -172,7 +180,7 @@ class Transaction extends AbstractDb
             $payuplOrderId
         );
         if ($serializedAdditionalInformation) {
-            $additionalInformation = unserialize($serializedAdditionalInformation);
+            $additionalInformation = $this->serializer->unserialize($serializedAdditionalInformation);
             return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
         }
         return false;
@@ -197,7 +205,7 @@ class Transaction extends AbstractDb
             ->limit(1);
         $row = $adapter->fetchRow($select);
         if ($row) {
-            $additionalInformation = unserialize($row['additional_information']);
+            $additionalInformation = $this->serializer->unserialize($row['additional_information']);
             return $additionalInformation[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS][$field];
         }
         return $valueIfNotFound;

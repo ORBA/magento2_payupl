@@ -36,9 +36,9 @@ class Config extends \Magento\Sales\Model\Order\Config
      * Gets Payu.pl-specific default status for state.
      *
      * @param string $state
-     * @return string
+     * @return string|null
      */
-    public function getStateDefaultStatus($state)
+    public function getStateDefaultStatus($state): ?string
     {
         switch ($state) {
             case Order::STATE_PENDING_PAYMENT:

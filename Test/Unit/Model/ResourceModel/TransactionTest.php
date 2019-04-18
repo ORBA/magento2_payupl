@@ -6,6 +6,7 @@
 namespace Orba\Payupl\Model\ResourceModel;
 
 use Magento\Framework\DB\Select;
+use Magento\Framework\Serialize\SerializerInterface;
 use Orba\Payupl\Test\Util;
 
 class TransactionTest extends \PHPUnit\Framework\TestCase
@@ -13,22 +14,27 @@ class TransactionTest extends \PHPUnit\Framework\TestCase
     /**
      * @var Transaction
      */
-    protected $model;
+    private $model;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $date;
+    private $date;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $adapter;
+    private $adapter;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    protected $resource;
+    private $resource;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $serializer;
 
     public function setUp()
     {
@@ -43,9 +49,11 @@ class TransactionTest extends \PHPUnit\Framework\TestCase
         $context = $this->getMockBuilder(\Magento\Framework\Model\ResourceModel\Db\Context::class)
             ->disableOriginalConstructor()->getMock();
         $context->expects($this->once())->method('getResources')->willReturn($this->resource);
+        $this->serializer = $this->getMockBuilder(SerializerInterface::class)->getMockForAbstractClass();
         $this->model = $objectManager->getObject(Transaction::class, [
             'context' => $context,
-            'date' => $this->date
+            'date' => $this->date,
+            'serializer' => $this->serializer
         ]);
     }
     
@@ -125,13 +133,13 @@ class TransactionTest extends \PHPUnit\Framework\TestCase
     {
         $payuplOrderId = 'ABC';
         $status = 'PENDING';
-        $resultTableRow = [
-            'additional_information' => serialize([
+        $resultTableRow = ['additional_information' => 'serialized data'];
+        $this->serializer->expects($this->once())->method('unserialize')->with('serialized data')
+            ->willReturn([
                 \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
                     'status' => $status
                 ]
-            ])
-        ];
+            ]);
         $this->internalTestGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow);
         $this->assertEquals($status, $this->model->getStatusByPayuplOrderId($payuplOrderId));
     }
@@ -148,13 +156,13 @@ class TransactionTest extends \PHPUnit\Framework\TestCase
     {
         $orderId = 1;
         $try = 2;
-        $resultTableRow = [
-            'additional_information' => serialize([
+        $resultTableRow = ['additional_information' => 'serialized data'];
+        $this->serializer->expects($this->once())->method('unserialize')->with('serialized data')
+            ->willReturn([
                 \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
                     'try' => $try
                 ]
-            ])
-        ];
+            ]);
         $this->internalTestGetLastByOrderId($orderId, $resultTableRow);
         $this->assertEquals($try, $this->model->getLastTryByOrderId($orderId));
     }
@@ -171,13 +179,13 @@ class TransactionTest extends \PHPUnit\Framework\TestCase
     {
         $payuplOrderId = 'ABC';
         $extOrderId = '123';
-        $resultTableRow = [
-            'additional_information' => serialize([
+        $resultTableRow = ['additional_information' => 'serialized data'];
+        $this->serializer->expects($this->once())->method('unserialize')->with('serialized data')
+            ->willReturn([
                 \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
                     'order_id' => $extOrderId
                 ]
-            ])
-        ];
+            ]);
         $this->internalTestGetAdditionalDataByPayuplOrderId($payuplOrderId, $resultTableRow);
         $this->assertEquals($extOrderId, $this->model->getExtOrderIdByPayuplOrderId($payuplOrderId));
     }
@@ -212,13 +220,13 @@ class TransactionTest extends \PHPUnit\Framework\TestCase
     {
         $orderId = 1;
         $status = 'status';
-        $resultTableRow = [
-            'additional_information' => serialize([
+        $resultTableRow = ['additional_information' => 'serialized data'];
+        $this->serializer->expects($this->once())->method('unserialize')->with('serialized data')
+            ->willReturn([
                 \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => [
                     'status' => $status
                 ]
-            ])
-        ];
+            ]);
         $this->internalTestGetLastByOrderId($orderId, $resultTableRow);
         $this->assertEquals($status, $this->model->getLastStatusByOrderId($orderId));
     }
