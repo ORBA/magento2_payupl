@@ -65,10 +65,4 @@ steps:
     displayName: 'Magento installation testing'
 
   - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento deploy:mode:set production
-    displayName: 'Magento Production Mode setting'
-
-  - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:di:compile
-    displayName: 'Magento DI Compilation testing'
-
-  - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:static-content:deploy
-    displayName: 'Magento Static Content Deployment testing'
+    displayName: 'Magento production mode testing'
