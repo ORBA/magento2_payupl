@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Order;
 
-class ExtOrderIdTest extends \PHPUnit_Framework_TestCase
+class ExtOrderIdTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var ExtOrderId

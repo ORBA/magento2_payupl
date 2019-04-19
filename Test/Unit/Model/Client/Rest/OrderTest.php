@@ -9,7 +9,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Orba\Payupl\Model\Client\Rest\Order;
 
-class OrderTest extends \PHPUnit_Framework_TestCase
+class OrderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Order
@@ -334,7 +334,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
     {
         $request = $this->getRequestMock();
         $request->expects($this->once())->method('isPost')->willReturn(false);
-        $this->setExpectedException(LocalizedException::class, 'POST request is required.');
+        $this->expectException(LocalizedException::class, 'POST request is required.');
         $this->model->consumeNotification($request);
     }
 

@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Model\Order;
 
-class PaytypeTest extends \PHPUnit_Framework_TestCase
+class PaytypeTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Paytype

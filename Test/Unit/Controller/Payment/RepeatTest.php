@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Controller\Payment;
 
-class RepeatTest extends \PHPUnit_Framework_TestCase
+class RepeatTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject

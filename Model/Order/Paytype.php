@@ -57,6 +57,6 @@ class Paytype
                 $paytypes[$key]['id'] = 'orba-payupl-paytype-' . $paytype['type'];
             }
         }
-        return $paytypes;
+        return array_values($paytypes);
     }
 }

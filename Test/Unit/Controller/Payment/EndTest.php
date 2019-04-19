@@ -9,7 +9,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class EndTest extends \PHPUnit_Framework_TestCase
+class EndTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var ObjectManager

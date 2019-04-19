@@ -5,7 +5,7 @@
 
 namespace Orba\Payupl\Controller\Payment\Repeat;
 
-class ErrorTest extends \PHPUnit_Framework_TestCase
+class ErrorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Error
@@ -32,11 +32,11 @@ class ErrorTest extends \PHPUnit_Framework_TestCase
 
     public function testExecute()
     {
-        $title = $this->getMockBuilder('Magento\Framework\View\Page\Title')->disableOriginalConstructor()->getMock();
+        $title = $this->getMockBuilder(\Magento\Framework\View\Page\Title::class)->disableOriginalConstructor()->getMock();
         $title->expects($this->once())->method('set')->with(__('Payment Error'));
-        $config = $this->getMockBuilder('Magento\Framework\View\Page\Config')->disableOriginalConstructor()->getMock();
+        $config = $this->getMockBuilder(\Magento\Framework\View\Page\Config::class)->disableOriginalConstructor()->getMock();
         $config->expects($this->once())->method('getTitle')->willReturn($title);
-        $page = $this->getMockBuilder('Magento\Framework\View\Result\Page')->disableOriginalConstructor()->getMock();
+        $page = $this->getMockBuilder(\Magento\Framework\View\Result\Page::class)->disableOriginalConstructor()->getMock();
         $page->expects($this->once())->method('getConfig')->willReturn($config);
         $this->resultPageFactory->expects($this->once())->method('create')->willReturn($page);
         $this->assertEquals($page, $this->controller->execute());

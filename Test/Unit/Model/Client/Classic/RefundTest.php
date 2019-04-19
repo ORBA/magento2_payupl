@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Client\Classic;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class RefundTest extends \PHPUnit_Framework_TestCase
+class RefundTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Refund

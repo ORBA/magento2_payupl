@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Client\Rest\Order;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class DataGetterTest extends \PHPUnit_Framework_TestCase
+class DataGetterTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var DataGetter
@@ -34,6 +34,7 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
      */
     protected $context;
 
+
     public function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
@@ -42,14 +43,12 @@ class DataGetterTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()->getMock();
         $this->extOrderIdHelper = $this->getMockBuilder(\Orba\Payupl\Model\Order\ExtOrderId::class)
             ->disableOriginalConstructor()->getMock();
-        $this->context = $objectManagerHelper->getObject(
-            \Magento\Framework\View\Context::class,
-            ['urlBuilder' => $this->urlBuilder]
-        );
+        $this->context = $this->getMockBuilder(\Magento\Framework\View\Context::class)->disableOriginalConstructor()->getMock();
+
         $this->model = $objectManagerHelper->getObject(
             DataGetter::class,
             [
-                'context' => $this->context,
+                'urlBuilder' => $this->urlBuilder,
                 'configHelper' => $this->configHelper,
                 'extOrderIdHelper' => $this->extOrderIdHelper
             ]

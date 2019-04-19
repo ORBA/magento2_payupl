@@ -7,7 +7,7 @@ namespace Orba\Payupl\Model\Client;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class MethodCallerTest extends \PHPUnit_Framework_TestCase
+class MethodCallerTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject

@@ -9,7 +9,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
-class OrderTest extends \PHPUnit_Framework_TestCase
+class OrderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Order
@@ -95,7 +95,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $this->model = $objectManagerHelper->getObject(
             Order::class,
             [
-                'urlInterface' => $this->urlBuilder,
+                'urlBuilder' => $this->urlBuilder,
                 'dataValidator' => $this->dataValidator,
                 'dataGetter' => $this->dataGetter,
                 'session' => $this->session,
@@ -265,7 +265,7 @@ class OrderTest extends \PHPUnit_Framework_TestCase
         $message = 'Exception message';
         $this->notificationHelper->expects($this->once())->method('getPayuplOrderId')->with($this->equalTo($request))
             ->willThrowException(new LocalizedException(new Phrase($message)));
-        $this->setExpectedException(LocalizedException::class, $message);
+        $this->expectException(LocalizedException::class, $message);
         $this->model->consumeNotification($request);
     }
 
