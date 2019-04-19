@@ -36,7 +36,7 @@ class Info extends \Magento\Payment\Block\Info
 
     protected function _prepareLayout()
     {
-        $this->addChild('buttons', Info\Buttons::class);
+        //$this->addChild('buttons', Info\Buttons::class);
         parent::_prepareLayout();
     }
 

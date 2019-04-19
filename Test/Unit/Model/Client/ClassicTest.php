@@ -6,8 +6,9 @@
 namespace Orba\Payupl\Model\Client;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
 
-class ClassicTest extends \PHPUnit_Framework_TestCase
+class ClassicTest extends TestCase
 {
     /**
      * @var \Orba\Payupl\Model\Client\Classic

@@ -2,6 +2,7 @@
 
 namespace Orba\Payupl\Console\Command;
 
+use Magento\Framework\Exception\LocalizedException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -55,10 +56,10 @@ class RetrieveCommand extends Command
      * @param \Orba\Payupl\Helper\Command $commandHelper
      */
     public function __construct(
-        AppState $appState
-        , \Magento\Store\Model\App\Emulation $emulation
-        , \Orba\Payupl\Model\ResourceModel\Transaction $resourceTransaction
-        , \Orba\Payupl\Helper\Command $commandHelper
+        AppState $appState,
+        \Magento\Store\Model\App\Emulation $emulation,
+        \Orba\Payupl\Model\ResourceModel\Transaction $resourceTransaction,
+        \Orba\Payupl\Helper\Command $commandHelper
     )
     {
         $this->appState = $appState;
@@ -111,11 +112,15 @@ class RetrieveCommand extends Command
             $output->writeln(sprintf('Order increment ID: %s (entity ID: %s)', $orderIncrementId, $order->getId()));
             $allPayuplOrderIds = $this->resourceTransaction->getAllPayuplOrderIdsByOrderId($order->getId());
             foreach ($allPayuplOrderIds as $payuplOrderId) {
-                // Get data from PayU.pl API
-                $result = $client->orderRetrieve($payuplOrderId);
-                $output->writeln(sprintf('PayU order ID: %s', $payuplOrderId));
-                $output->writeln(sprintf('       Status: %s (%s)', $result['status'], $orderHelper->getStatusDescription($result['status'])));
-                $output->writeln(sprintf('       Amount: %s', $result['amount']));
+                try {
+                    $output->writeln(sprintf('PayU order ID: %s', $payuplOrderId));
+                    // Get data from PayU.pl API
+                    $result = $client->orderRetrieve($payuplOrderId);
+                    $output->writeln(sprintf('       Status: %s (%s)', $result['status'], $orderHelper->getStatusDescription($result['status'])));
+                    $output->writeln(sprintf('       Amount: %s', $result['amount']));
+                } catch (LocalizedException $e) {
+                    $output->writeln($e->getMessage());
+                }
             }
         } catch (\Exception $e) {
             $output->writeln($e->getMessage());

@@ -166,10 +166,10 @@ class Command extends AbstractHelper
      */
     public function isInvalidAmount($amount)
     {
-        if (false === filter_var($amount, FILTER_VALIDATE_INT) ||
-            !$this->dataValidator->validatePositiveInt(intval($amount))
+        if (false === filter_var($amount, FILTER_VALIDATE_FLOAT) ||
+            !$this->dataValidator->validatePositiveFloat(intval($amount))
         ) {
-            return "Amount must be integer value and bigger than 0";
+            return "Amount must be decimal and bigger than 0";
         }
         return false;
     }
@@ -251,9 +251,9 @@ class Command extends AbstractHelper
     }
 
     /**
-     * @param $amount
+     * @param string $amount
      * @param \Orba\Payupl\Model\Sales\Order|null $order
-     * @return int
+     * @return float
      * @throws NotFoundException When for 'auto' amount given order object is invalid
      * @throws \InvalidArgumentException When amount value is invalid
      */
@@ -262,20 +262,16 @@ class Command extends AbstractHelper
         $amount = trim($amount);
         if ('auto' == $amount) {
             // If 'auto' take amount from order
-            /**
-             * magic number 100 => for now we do not support other currencies
-             * @see http://developers.payu.com/pl/restapi.html#creating_new_order_api
-             */
             if ($errorMsg = $this->isInvalidOrder($order)) {
                 throw new NotFoundException(new Phrase($errorMsg));
             }
             /** @var \Orba\Payupl\Model\Sales\Order $order */
-            $amount = (int)(round($order->getGrandTotal(), 2) * 100);
+            $amount = $order->getGrandTotal();
         } else {
             if ($errorMsg = $this->isInvalidAmount($amount)) {
                 throw new \InvalidArgumentException($errorMsg);
             }
         }
-        return $amount / 100;
+        return (float) $amount;
     }
 }

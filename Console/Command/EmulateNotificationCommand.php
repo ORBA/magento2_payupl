@@ -94,7 +94,7 @@ class EmulateNotificationCommand extends Command
                 new InputArgument(
                     self::ARG_NAME_AMOUNT,
                     InputArgument::OPTIONAL,
-                    'Amount of order. Note: all amounts should be given in the smallest unit for a given currency. In Example 10 PLN => 1000',
+                    'Transaction amount',
                     'auto'
                 ),
             ]);
@@ -136,9 +136,9 @@ class EmulateNotificationCommand extends Command
             // Emulate notification process
             if ($orderHelper->canProcessNotification($payuplOrderId)) {
                 $orderHelper->processNotification($payuplOrderId, $status, $amount);
-                $output->writeln('Notification process go through successfully');
+                $output->writeln('Notification processed successfully');
             } else {
-                $output->writeln('Can not process notification');
+                $output->writeln('Cannot process notification');
                 return \Magento\Framework\Console\Cli::RETURN_FAILURE;
             }
         } catch (\Exception $e) {

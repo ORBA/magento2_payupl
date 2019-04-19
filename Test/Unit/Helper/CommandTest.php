@@ -148,15 +148,16 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
 
     public function testIsInvalidAmount()
     {
-        $this->assertEquals(false, $this->command->isInvalidAmount(10));
-        $this->assertEquals(false, $this->command->isInvalidAmount('10'));
+        $this->assertFalse($this->command->isInvalidAmount(10));
+        $this->assertFalse($this->command->isInvalidAmount('10'));
+        $this->assertFalse($this->command->isInvalidAmount(1.10));
+        $this->assertFalse($this->command->isInvalidAmount('1.10'));
         $errorMsg = "Amount must be"; // Amount must be integer value and bigger than 0
-        $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount(1.10));
-        $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount('1.10'));
         $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount(0));
         $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount('0'));
         $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount(-1));
         $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount('-1'));
+        $this->assertStringStartsWith($errorMsg, $this->command->isInvalidAmount('foo'));
     }
 
     public function testGetOrderIncrementIdSuccess()
@@ -176,7 +177,7 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
      */
     public function testGetOrderIncrementIdFail($orderIncrementId)
     {
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->command->getOrderIncrementId($orderIncrementId);
     }
 
@@ -193,7 +194,7 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
         $orderIncrementId = '';
         $this->salesOrder->expects($this->once())->method("loadByIncrementId")->with($orderIncrementId)->willReturnSelf();
         $this->salesOrder->expects($this->once())->method("getId")->willReturn(null);
-        $this->setExpectedException(\Magento\Framework\Exception\NotFoundException::class);
+        $this->expectException(\Magento\Framework\Exception\NotFoundException::class);
         $this->command->getOrderByOrderIncrementId($orderIncrementId);
     }
 
@@ -206,7 +207,7 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
     public function testGetPayuplOrderIdFail()
     {
         $this->orderHelper->method("validateRetrieve")->with($payuplOrderId = 'cde')->willReturn(false);
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->command->getPayuplOrderId($payuplOrderId);
     }
 
@@ -222,7 +223,7 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
     {
         $payuplOrderId = 'cde';
         $this->order->expects($this->once())->method("loadOrderByPayuplOrderId")->with($payuplOrderId)->willReturn(false);
-        $this->setExpectedException(\Magento\Framework\Exception\NotFoundException::class);
+        $this->expectException(\Magento\Framework\Exception\NotFoundException::class);
         $this->command->getOrderByPayuplOrderId($payuplOrderId);
     }
 
@@ -238,7 +239,7 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
         $status = 'not existing status';
         $this->orderHelper->expects($this->once())->method("getStatusDescription")->with($status)->willReturn(false);
         $this->orderHelper->expects($this->once())->method("getAllStatuses")->willReturn([0 => "aaa", 10 => "bbb"]);
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->command->getStatus($status);
     }
 
@@ -247,27 +248,27 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
         $amount = 'auto';
         $this->salesOrder->expects($this->once())->method("getId")->willReturn('1');
         $this->salesOrder->expects($this->once())->method("getGrandTotal")->willReturn(59.99);
-        $this->assertSame(5999, $this->command->getAmount($amount, $this->salesOrder));
+        $this->assertSame(59.99, $this->command->getAmount($amount, $this->salesOrder));
     }
 
     public function testGetAmountByAutoFail()
     {
         $amount = 'auto';
         $this->salesOrder->expects($this->once())->method("getId")->willReturn(null);
-        $this->setExpectedException(\Magento\Framework\Exception\NotFoundException::class);
+        $this->expectException(\Magento\Framework\Exception\NotFoundException::class);
         $this->command->getAmount($amount, $this->salesOrder);
     }
 
     public function testGetAmountByValueSuccess()
     {
-        $amount = '5999';
-        $this->assertSame(5999, $this->command->getAmount($amount, $this->salesOrder));
+        $amount = '59.99';
+        $this->assertSame(59.99, $this->command->getAmount($amount, $this->salesOrder));
     }
 
     public function testGetAmountByValueFail()
     {
         $amount = '-1.05';
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->command->getAmount($amount, $this->salesOrder);
     }
 }
