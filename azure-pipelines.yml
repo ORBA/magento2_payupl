@@ -61,7 +61,7 @@ steps:
   - script: mysql -u root -proot -e "CREATE DATABASE $(databaseName)"
     displayName: 'Magento database creation'
 
-  - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:install --base-url=https://magento_$(magentoVersion)_$(phpVersion).local/ --backend-frontname=admin --db-host=localhost --db-name=$(databaseName) --db-user=root --db-password=root --admin-firstname=John --admin-lastname=Doe --admin-email=john.doe@orba.co --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1
+  - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:install --base-url=http://magento.$(magentoVersion).$(phpVersion).local/ --backend-frontname=admin --db-host=localhost --db-name=$(databaseName) --db-user=root --db-password=root --admin-firstname=John --admin-lastname=Doe --admin-email=john.doe@orba.co --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1
     displayName: 'Magento installation testing'
 
   - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:di:compile
