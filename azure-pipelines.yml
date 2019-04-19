@@ -5,7 +5,7 @@ pool:
   vmImage: 'Ubuntu-16.04'
 
 variables:
-  composerName: 'orba/test-module'
+  composerName: 'orba/magento2-payupl'
   composerVersion: '2.0.0-dev'
 
 strategy:
