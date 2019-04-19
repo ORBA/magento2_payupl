@@ -15,7 +15,7 @@ strategy:
       magentoVersion: '2.3.1'
       phpunitVersion: '6.2.0'
       databaseName: 'magento_2_3_1_7_2'
-      composerOverride: '{\"autoload\": {\"psr-4\": {\"Zend\\\\Mvc\\\\Controller\\\\\": \"setup/src/Zend/Mvc/Controller/\"}}}'
+      composerOverride: '{\"require-dev\": {\"allure-framework/allure-phpunit\": \"~1.2.0\"}, \"autoload\": {\"psr-4\": {\"Zend\\\\Mvc\\\\Controller\\\\\": \"setup/src/Zend/Mvc/Controller/\"}}}'
     magento_2_2_8_php_7_1:
       phpVersion: '7.1'
       magentoVersion: '2.2.8'
@@ -63,6 +63,9 @@ steps:
 
   - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:install --base-url=http://magento.$(magentoVersion).$(phpVersion).local/ --backend-frontname=admin --db-host=localhost --db-name=$(databaseName) --db-user=root --db-password=root --admin-firstname=John --admin-lastname=Doe --admin-email=john.doe@orba.co --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1
     displayName: 'Magento installation testing'
+
+  - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento deploy:mode:set production
+    displayName: 'Magento Production Mode setting'
 
   - script: ../magento_$(magentoVersion)_$(phpVersion)/bin/magento setup:di:compile
     displayName: 'Magento DI Compilation testing'

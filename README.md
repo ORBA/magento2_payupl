@@ -2,6 +2,15 @@
 
 Payu.pl integration for Magento 2
 
+## Build status
+
+[![Build Status](https://dev.azure.com/michalbiarda/Orba%20Magento%202%20extensions/_apis/build/status/ORBA.magento2_payupl?branchName=dev)](https://dev.azure.com/michalbiarda/Orba%20Magento%202%20extensions/_build/latest?definitionId=2&branchName=dev)
+
+## Supported Magento versions
+
+- Open Source 2.2
+- Open Source 2.3
+
 ## Key features
 
 - both POS types support (classic and checkout),
