@@ -70,37 +70,34 @@ class Refund implements RefundInterface
      */
     public function create($orderId = '', $description = '', $amount = null)
     {
-        $realPayuplOrderId = $this->transactionResource->getExtOrderIdByPayuplOrderId($orderId);
-        if ($realPayuplOrderId) {
-            $posId = $this->orderDataGetter->getPosId();
-            $ts = $this->orderDataGetter->getTs();
-            $sig = $this->orderDataGetter->getSigForOrderRetrieve([
-                'pos_id' => $posId,
-                'session_id' => $realPayuplOrderId,
-                'ts' => $ts
+        $posId = $this->orderDataGetter->getPosId();
+        $ts = $this->orderDataGetter->getTs();
+        $sig = $this->orderDataGetter->getSigForOrderRetrieve([
+            'pos_id' => $posId,
+            'session_id' => $orderId,
+            'ts' => $ts
+        ]);
+        $authData = [
+            'posId' => $posId,
+            'sessionId' => $orderId,
+            'ts' => $ts,
+            'sig' => $sig
+        ];
+        $getResult = $this->methodCaller->call('refundGet', [$authData]);
+        if ($getResult) {
+            $createResult = $this->methodCaller->call('refundAdd', [
+                $authData,
+                [
+                    'refundsHash' => $getResult->refsHash,
+                    'amount' => $amount,
+                    'desc' => $description,
+                    'autoData' => true
+                ]
             ]);
-            $authData = [
-                'posId' => $posId,
-                'sessionId' => $realPayuplOrderId,
-                'ts' => $ts,
-                'sig' => $sig
-            ];
-            $getResult = $this->methodCaller->call('refundGet', [$authData]);
-            if ($getResult) {
-                $createResult = $this->methodCaller->call('refundAdd', [
-                    $authData,
-                    [
-                        'refundsHash' => $getResult->refsHash,
-                        'amount' => $amount,
-                        'desc' => $description,
-                        'autoData' => true
-                    ]
-                ]);
-                if ($createResult < 0) {
-                    $this->logger->error('Refund error ' . $createResult . ' for transaction ' . $orderId);
-                }
-                return $createResult === 0;
+            if ($createResult < 0) {
+                $this->logger->error('Refund error ' . $createResult . ' for transaction ' . $orderId);
             }
+            return $createResult === 0;
         }
         return false;
     }

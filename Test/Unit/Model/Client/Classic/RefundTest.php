@@ -104,49 +104,36 @@ class RefundTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->model->validateCreate($orderId, $description, $amount));
     }
 
-    public function testCreateFailExtOrderIdNotFound()
-    {
-        $payuplOrderId = '123456';
-        $description = 'Description';
-        $amount = 100;
-        $this->transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')
-            ->with($this->equalTo($payuplOrderId))->willReturn(false);
-        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
-    }
-
     public function testCreateFailGet()
     {
-        $payuplOrderId = '123456';
         $description = 'Description';
         $amount = 100;
-        $realPayuplOrderId = '345678';
+        $orderId = '345678';
         $posId = '987654';
         $ts = 123;
         $sig = 'abc123';
-        $authData = $this->getAuthData($posId, $realPayuplOrderId, $ts, $sig);
-        $this->transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')
-            ->with($this->equalTo($payuplOrderId))->willReturn($realPayuplOrderId);
+        $authData = $this->getAuthData($posId, $orderId, $ts, $sig);
         $this->orderDataGetter->expects($this->once())->method('getPosId')->willReturn($posId);
         $this->orderDataGetter->expects($this->once())->method('getTs')->willReturn($ts);
         $this->orderDataGetter->expects($this->once())->method('getSigForOrderRetrieve')->with($this->equalTo([
             'pos_id' => $posId,
-            'session_id' => $realPayuplOrderId,
+            'session_id' => $orderId,
             'ts' => $ts
         ]))->willReturn($sig);
         $this->methodCaller->expects($this->once())->method('call')->with(
             $this->equalTo('refundGet'),
             $this->equalTo([$authData])
         )->willReturn(false);
-        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
+        $this->assertFalse($this->model->create($orderId, $description, $amount));
     }
 
     public function testCreateFailAdd()
     {
-        $payuplOrderId = '123456';
+        $orderId = '123456';
         $description = 'Description';
         $amount = 100;
-        $this->expectRefundAddResult($amount, $description, $payuplOrderId, false);
-        $this->assertFalse($this->model->create($payuplOrderId, $description, $amount));
+        $this->expectRefundAddResult($amount, $description, $orderId, false);
+        $this->assertFalse($this->model->create($orderId, $description, $amount));
     }
 
     public function testCreateFailStatus()
@@ -229,26 +216,23 @@ class RefundTest extends \PHPUnit\Framework\TestCase
     /**
      * @param $amount
      * @param $description
-     * @param $payuplOrderId
+     * @param $orderId
      * @param $value
      */
-    protected function expectRefundAddResult($amount, $description, $payuplOrderId, $value)
+    protected function expectRefundAddResult($amount, $description, $orderId, $value)
     {
-        $realPayuplOrderId = '345678';
         $posId = '987654';
         $ts = 123;
         $sig = 'abc123';
-        $authData = $this->getAuthData($posId, $realPayuplOrderId, $ts, $sig);
+        $authData = $this->getAuthData($posId, $orderId, $ts, $sig);
         $refsHash = 'abc';
         $getResult = $this->getGetResult($refsHash);
         $addData = $this->getAddData($refsHash, $amount, $description);
-        $this->transactionResource->expects($this->once())->method('getExtOrderIdByPayuplOrderId')
-            ->with($this->equalTo($payuplOrderId))->willReturn($realPayuplOrderId);
         $this->orderDataGetter->expects($this->once())->method('getPosId')->willReturn($posId);
         $this->orderDataGetter->expects($this->once())->method('getTs')->willReturn($ts);
         $this->orderDataGetter->expects($this->once())->method('getSigForOrderRetrieve')->with($this->equalTo([
             'pos_id' => $posId,
-            'session_id' => $realPayuplOrderId,
+            'session_id' => $orderId,
             'ts' => $ts
         ]))->willReturn($sig);
         $this->methodCaller->expects($this->at(0))->method('call')->with(
