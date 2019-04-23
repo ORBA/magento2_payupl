@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Block\Payment;
 
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
 use Orba\Payupl\Test\Util;
 
 class InfoTest extends \PHPUnit\Framework\TestCase
@@ -39,6 +41,11 @@ class InfoTest extends \PHPUnit\Framework\TestCase
      */
     protected $clientFactory;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $appState;
+
     public function setUp()
     {
         $this->objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
@@ -52,16 +59,26 @@ class InfoTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()->getMock();
         $this->clientFactory = $this->getMockBuilder(\Orba\Payupl\Model\ClientFactory::class)
             ->disableOriginalConstructor()->getMock();
+        $this->appState = $this->getMockBuilder(State::class)->disableOriginalConstructor()->getMock();
         $this->block = $this->objectManager->getObject(Info::class, [
             'context' => $this->context,
             'transactionResource' => $this->transactionResource,
-            'clientFactory' => $this->clientFactory
+            'clientFactory' => $this->clientFactory,
+            'appState' => $this->appState
         ]);
     }
 
-    public function testSetChild()
+    public function testButtonsBlockWillBeAddedOnFrontendArea()
     {
+        $this->appState->expects($this->once())->method('getAreaCode')->willReturn(Area::AREA_FRONTEND);
         $this->layout->expects($this->once())->method('createBlock')->with($this->equalTo(Info\Buttons::class));
+        Util::callMethod($this->block, '_prepareLayout');
+    }
+
+    public function testButtonsBlockWillNotBeAddedOnNotFrontendArea()
+    {
+        $this->appState->expects($this->once())->method('getAreaCode')->willReturn('not_frontend');
+        $this->layout->expects($this->never())->method('createBlock');
         Util::callMethod($this->block, '_prepareLayout');
     }
     
