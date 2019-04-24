@@ -2,6 +2,7 @@
 
 namespace Orba\Payupl\Console\Command;
 
+use Magento\Framework\Console\Cli;
 use Magento\Framework\Exception\LocalizedException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,7 +17,7 @@ use Magento\Framework\Exception\NotFoundException;
 use Magento\Framework\Phrase;
 
 /**
- * Retrieve information about PayU.pl transaction for given PayU order ID
+ * Retrieve information about Payu.pl transaction for given Payu.pl order ID
  *
  * @package Orba\Payupl\Console\Command
  */
@@ -24,7 +25,7 @@ class RetrieveCommand extends Command
 {
 
     /**
-     * Magento order incremented ID
+     * Magento order increment ID
      */
     const ARG_NAME_ORDER_ID = 'order';
 
@@ -70,51 +71,44 @@ class RetrieveCommand extends Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function configure()
     {
         $this->setName('payupl:retrieve')
-            ->setDescription('Retrieve information about PayU.pl transaction for given order')
+            ->setDescription('Retrieve information about Payu.pl transaction for given order')
             ->setDefinition([
                 new InputArgument(
                     self::ARG_NAME_ORDER_ID,
                     InputArgument::REQUIRED,
-                    'Magento order incremented ID'
+                    'Magento order increment ID'
                 )
             ]);
         parent::configure();
     }
 
     /**
-     * Retrieve data from PayU for given <order_increment_id>
+     * Retrieve data from Payu.pl for given <order_increment_id>
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return mixed
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $result = Cli::RETURN_FAILURE;
         try {
             $this->appState->setAreaCode(AppArea::AREA_FRONTEND);
-            // Get magento order increment ID
             $orderIncrementId = $this->commandHelper->getOrderIncrementId($input->getArgument(self::ARG_NAME_ORDER_ID));
-            // Load by this ID the order object
             $order = $this->commandHelper->getOrderByOrderIncrementId($orderIncrementId);
-            // Emulate store for proper work
             $this->emulation->startEnvironmentEmulation($order->getStoreId());
-
-            // Get PayU.pl order numbers from order and check if is valid
             $client = $this->commandHelper->getClient();
-            // order object for api client
             $orderHelper = $client->getOrderHelper();
-
             $output->writeln(sprintf('Order increment ID: %s (entity ID: %s)', $orderIncrementId, $order->getId()));
             $allPayuplOrderIds = $this->resourceTransaction->getAllPayuplOrderIdsByOrderId($order->getId());
             foreach ($allPayuplOrderIds as $payuplOrderId) {
                 try {
-                    $output->writeln(sprintf('PayU order ID: %s', $payuplOrderId));
-                    // Get data from PayU.pl API
+                    $output->writeln(sprintf('Payu order ID: %s', $payuplOrderId));
                     $result = $client->orderRetrieve($payuplOrderId);
                     $output->writeln(sprintf('       Status: %s (%s)', $result['status'], $orderHelper->getStatusDescription($result['status'])));
                     $output->writeln(sprintf('       Amount: %s', $result['amount']));
@@ -122,11 +116,11 @@ class RetrieveCommand extends Command
                     $output->writeln($e->getMessage());
                 }
             }
+            $result = Cli::RETURN_SUCCESS;
         } catch (\Exception $e) {
             $output->writeln($e->getMessage());
-            return \Magento\Framework\Console\Cli::RETURN_FAILURE;
         }
         $this->emulation->stopEnvironmentEmulation();
-        return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
+        return $result;
     }
 }

@@ -5,6 +5,7 @@
 
 namespace Orba\Payupl\Console\Command;
 
+use Magento\Framework\Console\Cli as Cli;
 use Magento\Framework\Phrase;
 
 use Magento\Store\Model\App\Emulation;
@@ -55,8 +56,8 @@ class EmulateNotificationCommandTest extends \Magento\Framework\TestFramework\Un
 
     public function testConfiguration()
     {
-        $this->assertSame($this->command->getName(), 'payupl:emulate:notification');
-        $this->assertSame($this->command->getDescription(), 'Emulate notification process for given PayU.pl order ID');
+        $this->assertSame($this->command->getName(), 'payupl:emulate-notification');
+        $this->assertSame($this->command->getDescription(), 'Emulate notification process for given Payu.pl order ID');
     }
 
     public function testExecuteSuccess()
@@ -91,14 +92,12 @@ class EmulateNotificationCommandTest extends \Magento\Framework\TestFramework\Un
 
         $commandTester = new CommandTester($this->command);
         $input = [
-            EmulateNotificationCommand::ARG_NAME_PAYUPL_ORDER_ID => $payuplOrderId
-            , EmulateNotificationCommand::ARG_NAME_STATUS => $status
-            , EmulateNotificationCommand::ARG_NAME_AMOUNT => $amount
+            EmulateNotificationCommand::ARG_NAME_PAYUPL_ORDER_ID => $payuplOrderId,
+            EmulateNotificationCommand::ARG_NAME_STATUS => $status,
+            EmulateNotificationCommand::ARG_NAME_AMOUNT => $amount
         ];
         $commandTester->execute($input);
-        $this->assertEquals(\Magento\Framework\Console\Cli::RETURN_SUCCESS, $commandTester->getStatusCode());
-        $commandTester->execute($input);
-        $this->assertEquals(\Magento\Framework\Console\Cli::RETURN_FAILURE, $commandTester->getStatusCode());
+        $this->assertEquals(Cli::RETURN_SUCCESS, $commandTester->getStatusCode());
 
         return $commandTester;
     }
@@ -109,6 +108,6 @@ class EmulateNotificationCommandTest extends \Magento\Framework\TestFramework\Un
         $input = $commandTester->getInput();
         $this->commandHelper->method('getOrderByPayuplOrderId')->willThrowException(new \Magento\Framework\Exception\NotFoundException(new Phrase('')));
         $commandTester->execute($input->getArguments());
-        $this->assertEquals(\Magento\Framework\Console\Cli::RETURN_FAILURE, $commandTester->getStatusCode());
+        $this->assertEquals(Cli::RETURN_FAILURE, $commandTester->getStatusCode());
     }
 }

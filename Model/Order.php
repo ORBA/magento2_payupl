@@ -5,6 +5,8 @@
 
 namespace Orba\Payupl\Model;
 
+use Magento\Sales\Model\Order\Payment\Transaction as Transaction;
+
 class Order
 {
     /**
@@ -65,22 +67,19 @@ class Order
      * Saves new order transaction incrementing "try".
      *
      * @param \Magento\Sales\Model\Order $order
-     * @param string $tnxId
-     * @param \Orba\Payupl\Model\Client $client
+     * @param string $txnId
      * @param string $status
      */
     public function addNewOrderTransaction(
         \Magento\Sales\Model\Order $order,
-        $tnxId,
-        $client,
+        $txnId,
         $status
     ) {
         $orderId = $order->getId();
         $payment = $order->getPayment();
-        $payment->setTransactionId($tnxId);
-        $payment->setTransactionAdditionalInfo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, [
+        $payment->setTransactionId($txnId);
+        $payment->setTransactionAdditionalInfo(Transaction::RAW_DETAILS, [
             'try' => $this->transactionResource->getLastTryByOrderId($orderId) + 1,
-            'client' => $client->getType(),
             'status' => $status
         ]);
         $payment->setIsTransactionClosed(0);

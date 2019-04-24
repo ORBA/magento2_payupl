@@ -63,7 +63,7 @@ class RetrieveCommandTest extends \Magento\Framework\TestFramework\Unit\BaseTest
     public function testConfiguration()
     {
         $this->assertSame($this->command->getName(), 'payupl:retrieve');
-        $this->assertSame($this->command->getDescription(), 'Retrieve information about PayU.pl transaction for given order');
+        $this->assertSame($this->command->getDescription(), 'Retrieve information about Payu.pl transaction for given order');
     }
 
     public function testExecute()

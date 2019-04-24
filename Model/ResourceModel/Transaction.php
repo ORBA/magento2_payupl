@@ -212,7 +212,7 @@ class Transaction extends AbstractDb
     }
 
     /**
-     * Get all PayU order IDs for given magento order ID
+     * Get all Payu.pl order IDs for given Magento order ID
      *
      * @param $orderId
      * @return array

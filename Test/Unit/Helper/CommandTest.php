@@ -134,7 +134,7 @@ class CommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
     {
         $payuplOrderId = 'ABC';
         $this->orderHelper->expects($this->exactly(2))->method("validateRetrieve")->willReturnOnConsecutiveCalls(false, true);
-        $this->assertStringStartsWith("PayU.pl order ID", $this->command->isInvalidPayuplOrderId($payuplOrderId));
+        $this->assertStringStartsWith("Payu.pl order ID", $this->command->isInvalidPayuplOrderId($payuplOrderId));
         $this->assertFalse($this->command->isInvalidPayuplOrderId($payuplOrderId));
     }
 

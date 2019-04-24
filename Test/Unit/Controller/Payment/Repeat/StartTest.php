@@ -124,7 +124,6 @@ class StartTest extends \PHPUnit\Framework\TestCase
         $this->orderHelper->expects($this->once())->method('addNewOrderTransaction')->with(
             $order,
             $response['orderId'],
-            $client,
             $status
         );
         $this->orderHelper->expects($this->once())->method('setNewOrderStatus')->with($this->equalTo($order));

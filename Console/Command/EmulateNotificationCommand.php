@@ -5,6 +5,10 @@
 
 namespace Orba\Payupl\Console\Command;
 
+use Magento\Framework\Console\Cli as Cli;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\App\Emulation as Emulation;
+use Orba\Payupl\Helper\Command as CommandHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,14 +19,14 @@ use Magento\Framework\App\State as AppState;
 use Magento\Framework\App\Area as AppArea;
 
 /**
- * Class created to simulate/emulate the response from PayU
+ * Class created to emulate the response from Payu.pl
  *
  * @package Orba\Payupl\Console\Command
  */
 class EmulateNotificationCommand extends Command
 {
     /**
-     * PayU.pl order number (param: session_id)
+     * Payu.pl order number (param: session_id)
      */
     const ARG_NAME_PAYUPL_ORDER_ID = 'payupl_order_id';
 
@@ -32,7 +36,7 @@ class EmulateNotificationCommand extends Command
     const ARG_NAME_AMOUNT = 'amount';
 
     /**
-     * Integer number representing transaction status from PayU.pl
+     * Integer number representing transaction status from Payu.pl
      * For available Api status codes
      * @see \Orba\Payupl\Model\Client\Classic\Order
      * @see \Orba\Payupl\Model\Client\Rest\Order
@@ -42,28 +46,28 @@ class EmulateNotificationCommand extends Command
     /**
      * @var \Magento\Framework\App\State
      */
-    protected $appState;
+    private $appState;
 
     /**
-     * @var \Magento\Store\Model\App\Emulation
+     * @var Emulation
      */
-    protected $emulation;
+    private $emulation;
 
     /**
-     * @var \Orba\Payupl\Helper\Command
+     * @var CommandHelper
      */
-    protected $commandHelper;
+    private $commandHelper;
 
     /**
      * EmulateNotificationCommand constructor.
      * @param AppState $appState
-     * @param \Magento\Store\Model\App\Emulation $emulation
-     * @param \Orba\Payupl\Helper\Command $commandHelper
+     * @param Emulation $emulation
+     * @param CommandHelper $commandHelper
      */
     public function __construct(
         AppState $appState,
-        \Magento\Store\Model\App\Emulation $emulation,
-        \Orba\Payupl\Helper\Command $commandHelper
+        Emulation $emulation,
+        CommandHelper $commandHelper
     )
     {
         $this->appState = $appState;
@@ -74,22 +78,22 @@ class EmulateNotificationCommand extends Command
 
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function configure()
     {
-        $this->setName('payupl:emulate:notification')
-            ->setDescription('Emulate notification process for given PayU.pl order ID')
+        $this->setName('payupl:emulate-notification')
+            ->setDescription('Emulate notification process for given Payu.pl order ID')
             ->setDefinition([
                 new InputArgument(
                     self::ARG_NAME_PAYUPL_ORDER_ID,
                     InputArgument::REQUIRED,
-                    'PayU.pl order ID'
+                    'Payu.pl order ID'
                 ),
                 new InputArgument(
                     self::ARG_NAME_STATUS,
                     InputArgument::REQUIRED,
-                    'PayU.pl status value'
+                    'Payu.pl status value'
                 ),
                 new InputArgument(
                     self::ARG_NAME_AMOUNT,
@@ -102,50 +106,42 @@ class EmulateNotificationCommand extends Command
     }
 
     /**
-     * Emulate response from PayU - notification process will go
+     * Emulate response from Payu.pl
      *
-     * Usage: bin/magento payupl:emulate:notification <payu_order_id> <status_code> <amount>
+     * Usage: bin/magento payupl:emulate-notification <payupl_order_id> <status_code> <amount>
      * <payu_order_id>      => like 000000012:1487247404:1
      * <status_code>        =>
      * @see \Orba\Payupl\Model\Client\Classic\Order
      * @see \Orba\Payupl\Model\Client\Rest\Order
-     * <amount>             => 'auto' (amount taken from order, leave empty for auto) or specific value
+     * <amount>             => 'auto' (amount taken from order, this is a default value) or specific value (float)
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return mixed
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $result = Cli::RETURN_FAILURE;
         try {
             $this->appState->setAreaCode(AppArea::AREA_FRONTEND);
-            // By PayU order ID
             $payuplOrderId = $this->commandHelper->getPayuplOrderId($input->getArgument(self::ARG_NAME_PAYUPL_ORDER_ID));
-            // load order
             $order = $this->commandHelper->getOrderByPayuplOrderId($payuplOrderId);
-            // Emulate store for proper work
             $this->emulation->startEnvironmentEmulation($order->getStoreId());
-            // Get status
             $status = $this->commandHelper->getStatus($input->getArgument(self::ARG_NAME_STATUS));
-            // And amount
             $amount = $this->commandHelper->getAmount($input->getArgument(self::ARG_NAME_AMOUNT), $order);
-            // order object for api client
             $orderHelper = $this->commandHelper->getClient()->getOrderHelper();
-
             $output->writeln(sprintf('Order increment ID: %s (entity ID: %s)', $order->getIncrementId(), $order->getId()));
-            // Emulate notification process
             if ($orderHelper->canProcessNotification($payuplOrderId)) {
                 $orderHelper->processNotification($payuplOrderId, $status, $amount);
                 $output->writeln('Notification processed successfully');
+                $result = Cli::RETURN_SUCCESS;
             } else {
                 $output->writeln('Cannot process notification');
-                return \Magento\Framework\Console\Cli::RETURN_FAILURE;
             }
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             $output->writeln($e->getMessage());
-            return \Magento\Framework\Console\Cli::RETURN_FAILURE;
         }
         $this->emulation->stopEnvironmentEmulation();
-        return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
+        return $result;
     }
 }

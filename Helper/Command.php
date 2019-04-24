@@ -122,8 +122,8 @@ class Command extends AbstractHelper
     }
 
     /**
-     * Check PayU order ID validity
-     * If not valid string error message returned
+     * Check Payu.pl order ID validity
+     * If not valid, string error message returned
      *
      * @param string $payuplOrderId
      * @return bool|string
@@ -133,14 +133,14 @@ class Command extends AbstractHelper
         $client = $this->getClient();
         $orderHelper = $client->getOrderHelper();
         if (!$orderHelper->validateRetrieve($payuplOrderId)) {
-            return "PayU.pl order ID '{$payuplOrderId}' is invalid";
+            return "Payu.pl order ID '{$payuplOrderId}' is invalid";
         }
         return false;
     }
 
     /**
-     * Check PayU status validity
-     * If not valid string error message returned
+     * Check Payu.pl status validity
+     * If not valid, string error message returned
      *
      * @param $status
      * @return bool
@@ -204,7 +204,7 @@ class Command extends AbstractHelper
     /**
      * @param string $payuplOrderId
      * @return string
-     * @throws \InvalidArgumentException When PayU order ID is invalid
+     * @throws \InvalidArgumentException When Payu.pl order ID is invalid
      */
     public function getPayuplOrderId($payuplOrderId)
     {
@@ -218,7 +218,7 @@ class Command extends AbstractHelper
     /**
      * @param $payuplOrderId
      * @return \Orba\Payupl\Model\Sales\Order
-     * @throws NotFoundException When there is no corresponding order for PayU order ID
+     * @throws NotFoundException When there is no corresponding order for Payu.pl order ID
      */
     public function getOrderByPayuplOrderId($payuplOrderId)
     {
@@ -230,11 +230,11 @@ class Command extends AbstractHelper
     }
 
     /**
-     * Get PayU status corresponding to Api client type
+     * Get Payu.pl status corresponding to API client type
      *
      * @param $status
      * @return string|int
-     * @throws \InvalidArgumentException When PayU status invalid
+     * @throws \InvalidArgumentException When Payu.pl status invalid
      */
     public function getStatus($status)
     {

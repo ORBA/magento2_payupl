@@ -365,11 +365,8 @@ class OrderTest extends \PHPUnit\Framework\TestCase
         $status = 'NEW';
         $orderId = 1;
         $try = 2;
-        $clientType = 'client-short-name';
         $order = $this->getOrderMock();
         $order->expects($this->once())->method('getId')->willReturn($orderId);
-        $client = $this->getMockBuilder(\Orba\Payupl\Model\Client::class)->disableOriginalConstructor()->getMock();
-        $client->expects($this->once())->method('getType')->willReturn($clientType);
         $this->transactionResource->expects($this->once())->method('getLastTryByOrderId')->willReturn($try);
         $payment = $this->getMockBuilder(\Magento\Sales\Model\Order\Payment::class)->disableOriginalConstructor()
             ->getMock();
@@ -378,7 +375,6 @@ class OrderTest extends \PHPUnit\Framework\TestCase
             $this->equalTo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS),
             $this->equalTo([
                 'try' => $try + 1,
-                'client' => $clientType,
                 'status' => $status
             ])
         );
@@ -390,7 +386,7 @@ class OrderTest extends \PHPUnit\Framework\TestCase
             ->willReturn($transaction);
         $payment->expects($this->once())->method('save');
         $order->expects($this->once())->method('getPayment')->willReturn($payment);
-        $this->model->addNewOrderTransaction($order, $payuplOrderId, $client, $status);
+        $this->model->addNewOrderTransaction($order, $payuplOrderId, $status);
     }
 
     /**
