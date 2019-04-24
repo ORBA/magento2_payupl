@@ -5,6 +5,9 @@
 
 namespace Orba\Payupl\Block\Payment;
 
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+
 class Info extends \Magento\Payment\Block\Info
 {
     /**
@@ -18,6 +21,11 @@ class Info extends \Magento\Payment\Block\Info
     protected $clientFactory;
 
     /**
+     * @var State
+     */
+    private $appState;
+
+    /**
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource
      * @param \Orba\Payupl\Model\ClientFactory $clientFactory
@@ -27,16 +35,20 @@ class Info extends \Magento\Payment\Block\Info
         \Magento\Framework\View\Element\Template\Context $context,
         \Orba\Payupl\Model\ResourceModel\Transaction $transactionResource,
         \Orba\Payupl\Model\ClientFactory $clientFactory,
+        State $appState,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->transactionResource = $transactionResource;
         $this->clientFactory = $clientFactory;
+        $this->appState = $appState;
     }
 
     protected function _prepareLayout()
     {
-        //$this->addChild('buttons', Info\Buttons::class);
+        if ($this->appState->getAreaCode() === Area::AREA_FRONTEND) {
+            $this->addChild('buttons', Info\Buttons::class);
+        }
         parent::_prepareLayout();
     }
 

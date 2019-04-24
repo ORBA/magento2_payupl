@@ -148,13 +148,16 @@ class Order
     }
 
     /**
-     * Registers payment, creates invoice and changes order statatus.
+     * Registers payment, creates invoice and changes order status.
      *
      * @param Sales\Order $order
      * @param float $amount
+     * @param string $payuplOrderId
+     * @throws \Exception
      */
     public function completePayment(Sales\Order $order, $amount, $payuplOrderId)
     {
+        $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
         $payment = $order->getPayment();
         $payment
             ->setParentTransactionId($payuplOrderId)
