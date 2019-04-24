@@ -5,14 +5,11 @@
 
 namespace Orba\Payupl\Console\Command;
 
-use Magento\Framework\Console\Cli as Cli;
-use Magento\Framework\Phrase;
-
-use Magento\Store\Model\App\Emulation;
-
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\App\Area as AppArea;
-
+use Magento\Framework\Console\Cli as Cli;
+use Magento\Framework\Phrase;
+use Magento\Store\Model\App\Emulation\Proxy as Emulation;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class EmulateNotificationCommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
@@ -23,7 +20,7 @@ class EmulateNotificationCommandTest extends \Magento\Framework\TestFramework\Un
     protected $appState;
 
     /**
-     * @var \Magento\Store\Model\App\Emulation|\PHPUnit_Framework_MockObject_MockObject
+     * @var Emulation|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $emulation;
 
@@ -44,7 +41,8 @@ class EmulateNotificationCommandTest extends \Magento\Framework\TestFramework\Un
     {
         parent::setUp();
         $this->appState  = $this->basicMock(AppState::class);
-        $this->emulation = $this->basicMock(Emulation::class);
+        $this->emulation = $this->getMockBuilder(Emulation::class)->disableOriginalConstructor()
+            ->setMethods(['startEnvironmentEmulation', 'stopEnvironmentEmulation'])->getMock();
         $this->commandHelper = $this->basicMock(\Orba\Payupl\Helper\Command::class);
 
         $this->command = $this->objectManager->getObject(EmulateNotificationCommand::class, [

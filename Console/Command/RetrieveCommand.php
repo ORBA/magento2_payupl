@@ -2,19 +2,15 @@
 
 namespace Orba\Payupl\Console\Command;
 
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\State as AppState;
 use Magento\Framework\Console\Cli;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\App\Emulation\Proxy as Emulation;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
-
-use Magento\Framework\App\State as AppState;
-use Magento\Framework\App\Area as AppArea;
-
-use Magento\Framework\Exception\NotFoundException;
-use Magento\Framework\Phrase;
 
 /**
  * Retrieve information about Payu.pl transaction for given Payu.pl order ID
@@ -35,7 +31,7 @@ class RetrieveCommand extends Command
     protected $appState;
 
     /**
-     * @var \Magento\Store\Model\App\Emulation
+     * @var Emulation
      */
     protected $emulation;
 
@@ -52,13 +48,13 @@ class RetrieveCommand extends Command
     /**
      * RetrieveCommand constructor.
      * @param AppState $appState
-     * @param \Magento\Store\Model\App\Emulation $emulation
+     * @param Emulation $emulation
      * @param \Orba\Payupl\Model\ResourceModel\Transaction $resourceTransaction
      * @param \Orba\Payupl\Helper\Command $commandHelper
      */
     public function __construct(
         AppState $appState,
-        \Magento\Store\Model\App\Emulation $emulation,
+        Emulation $emulation,
         \Orba\Payupl\Model\ResourceModel\Transaction $resourceTransaction,
         \Orba\Payupl\Helper\Command $commandHelper
     )

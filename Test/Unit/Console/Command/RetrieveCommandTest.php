@@ -5,13 +5,9 @@
 
 namespace Orba\Payupl\Console\Command;
 
-use Magento\Framework\Phrase;
-
-use Magento\Store\Model\App\Emulation;
-
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\App\Area as AppArea;
-
+use Magento\Store\Model\App\Emulation\Proxy as Emulation;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class RetrieveCommandTest extends \Magento\Framework\TestFramework\Unit\BaseTestCase
@@ -22,7 +18,7 @@ class RetrieveCommandTest extends \Magento\Framework\TestFramework\Unit\BaseTest
     protected $appState;
 
     /**
-     * @var \Magento\Store\Model\App\Emulation | \PHPUnit_Framework_MockObject_MockObject
+     * @var Emulation | \PHPUnit_Framework_MockObject_MockObject
      */
     protected $emulation;
 
@@ -48,7 +44,8 @@ class RetrieveCommandTest extends \Magento\Framework\TestFramework\Unit\BaseTest
     {
         parent::setUp();
         $this->appState = $this->basicMock(AppState::class);
-        $this->emulation = $this->basicMock(Emulation::class);
+        $this->emulation = $this->getMockBuilder(Emulation::class)->disableOriginalConstructor()
+            ->setMethods(['startEnvironmentEmulation', 'stopEnvironmentEmulation'])->getMock();
         $this->resourceTransaction = $this->basicMock(\Orba\Payupl\Model\ResourceModel\Transaction::class);
         $this->commandHelper = $this->basicMock(\Orba\Payupl\Helper\Command::class);
 
@@ -112,9 +109,6 @@ class RetrieveCommandTest extends \Magento\Framework\TestFramework\Unit\BaseTest
         $this->commandHelper->method('getOrderIncrementId')->withAnyParameters()->willThrowException(new \InvalidArgumentException());
         $commandTester->execute($input);
         $this->assertEquals(\Magento\Framework\Console\Cli::RETURN_FAILURE, $commandTester->getStatusCode());
-
-        $this->setExpectedException(\RuntimeException::class, 'Not enough arguments.');
-        $commandTester->execute([]);
 
         return $commandTester;
     }

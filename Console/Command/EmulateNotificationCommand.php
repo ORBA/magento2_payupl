@@ -7,13 +7,12 @@ namespace Orba\Payupl\Console\Command;
 
 use Magento\Framework\Console\Cli as Cli;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Store\Model\App\Emulation as Emulation;
+use Magento\Store\Model\App\Emulation\Proxy as Emulation;
 use Orba\Payupl\Helper\Command as CommandHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\App\Area as AppArea;
