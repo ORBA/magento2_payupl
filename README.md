@@ -1,3 +1,5 @@
+This project is ABANDONNED
+
 # Orba Magento 2 Payu.pl Module
 
 Payu.pl integration for Magento 2
